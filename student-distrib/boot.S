@@ -24,8 +24,8 @@ _start:
     jmp     continue
 
 continue:
-    # Load the GDT
-
+    # Load the GDT to GDT register by using "lgdt" opcode
+    lgdt gdt_desc_ptr
     # Load CS with the new descriptor value
     ljmp    $KERNEL_CS, $keep_going
 

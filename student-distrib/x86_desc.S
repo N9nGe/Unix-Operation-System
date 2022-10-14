@@ -35,6 +35,14 @@ _tss:
 tss_bottom:
 
     .align  16
+
+# Storing the 32-bit base address and 16-bit table limit to the pointer
+gdt_desc_ptr:
+    # table length
+    .word gdt_bottom - gdt - 1
+    # base address
+    .long gdt
+
 gdt:
 _gdt:
 
@@ -72,7 +80,7 @@ gdt_ptr:
     .quad 0x00CFFA000000FFFF
 
     # Set up an entry for user DS
-    .quad 0x00CFF2000000FFFF
+    .quad 0x00CFF2000000FFFF 
 
     # Set up an entry for TSS
 tss_desc_ptr:
