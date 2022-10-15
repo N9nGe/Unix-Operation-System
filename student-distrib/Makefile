@@ -1,4 +1,4 @@
-# Makefile for OS project
+# Makefile for MentOS project
 # To build, first `make dep`, them `make`. Everything should be automatic.
 # Will compile all *.c and *.S files in the current directory.
 
@@ -33,6 +33,8 @@ Makefile.dep: $(SRC)
 .PHONY: clean
 clean:
 	rm -f *.o */*.o Makefile.dep
+go:
+	make clean && make dep && make
 
 ifneq ($(MAKECMDGOALS),dep)
 ifneq ($(MAKECMDGOALS),clean)
