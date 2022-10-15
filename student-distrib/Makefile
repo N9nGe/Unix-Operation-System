@@ -33,8 +33,16 @@ Makefile.dep: $(SRC)
 .PHONY: clean
 clean:
 	rm -f *.o */*.o Makefile.dep
+
 go:
 	make clean && make dep && make
+
+submit:
+	git status
+	git add -u 
+	git commit -m "Update using Makefile"
+	git push
+	git status
 
 ifneq ($(MAKECMDGOALS),dep)
 ifneq ($(MAKECMDGOALS),clean)
