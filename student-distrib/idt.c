@@ -4,7 +4,6 @@
 #include "lib.h"
 #include "idt.h"
 
-
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
 char * exception_output[32] = {
@@ -42,10 +41,13 @@ char * exception_output[32] = {
     "Reserved 8"
 };
 
-int exception_handler (unsigned int n) {
-    printf (exception_output[n]);
-    printf ("\n");
-    return n;
+
+void exception_handler_n (unsigned int n) {
+    printf ("%s\n",exception_output[n]);
+}
+
+void divide_by_zero_exception_handler () {
+    exception_handler_n (0);
 }
 
 void idt_init () {
@@ -59,10 +61,13 @@ void idt_init () {
         idt[i].offset_31_16 = 0;
     }
 
+    SET_IDT_ENTRY(idt[0], divide_by_zero_exception_handler);
     // 32 slots for exception handler
+    /*
     for (i = 0; i < 32; i++) {
         SET_IDT_ENTRY(idt[i], exception_handler(i));
     }
+    */
 
     return;
 }
