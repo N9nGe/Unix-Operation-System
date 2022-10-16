@@ -9,11 +9,36 @@
 #include "types.h"
 
 /* Ports that each PIC sits on */
+#define KEYBOARD_IRQ 1
+#define KEYBOARD_PORT 0x60
 
-
-
-#define EOI                 0x60
 #define KEY_BUF_SIZE        1
+#define KEY_NULL           '\0'
+
+#define KEYBOARD_IRQ_NUM 0x01
+#define MAX_SCAN_SIZE 58
+
+// Used for CP2
+#define LEFT_SHIFT_PRESSED 0x2A
+#define RIGHT_SHIFT_PRESSED 0x36
+#define LEFT_SHIFT_RELEASED 0xAA
+#define RIGHT_SHIFT_RELEASED 0xB6
+#define LEFT_CTRL_PRESSED 0x1D
+#define LEFT_CTRL_RELEASED 0x9D
+#define CAPSLOCK_PRESSED 0x3A
+#define CAPSLOCK_RELEASED 0xBA
+#define ALT_PRESSED 0x38
+#define ALT_RELEASED 0xB8
+#define F1  0x3B
+#define F2  0x3C
+#define F3  0x3D
+#define F4  0x3E
+#define F5  0x3F
+#define ESC 0x01
+#define TAB_PRESSED 0x0F
+#define UP_PRESSED 0x48
+#define DOWN_PRESSED 0X50
+
 /* Externally-visible functions */
 
 /* Initialize keyboard input device */

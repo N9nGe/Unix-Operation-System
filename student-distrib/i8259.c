@@ -10,8 +10,7 @@
 uint8_t master_mask; /* IRQs 0-7  */
 uint8_t slave_mask;  /* IRQs 8-15 */
 
-#define MASTER_8259_DATA MASTER_8259_PORT + 1
-#define SLAVE_8259_DATA  SLAVE_8259_PORT + 1
+
 /* 
  * i8259_init
  *  DESCRIPTION: Initialize the 8259 PIC
