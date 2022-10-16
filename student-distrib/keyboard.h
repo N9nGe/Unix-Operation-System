@@ -11,24 +11,36 @@
 /* Ports that each PIC sits on */
 
 
-/* Initialization control words to init each PIC.
- * See the Intel manuals for details on the meaning
- * of each word */
 
-/* End-of-interrupt byte.  This gets OR'd with
- * the interrupt number and sent out to the PIC
- * to declare the interrupt finished */
 #define EOI                 0x60
-
+#define KEY_BUF_SIZE        1
 /* Externally-visible functions */
 
 /* Initialize keyboard input device */
 void keyboard_init(void);
-/* Enable (unmask) the specified IRQ */
-void enable_key_irq(uint32_t irq_num);
-/* Disable (mask) the specified IRQ */
-void disable__key_irq(uint32_t irq_num);
 
+
+/* Keyboard Handler */
+void keyboard_interrupt_handler(void);
+
+/* Called when enter key needs to be handled */
+void handle_enter();
+
+/* Called when backspace key needs to be handled*/
+void handle_backspace();
+
+/* Called when tab key needs to be handled*/
+void handle_tab();
+
+int process_char(int scode);
+
+void clear_keyboard_buffer(void);
+
+void clear_keyboard_backup(uint32_t term_id);
+
+void read_buffer();
+void show_keyboard_buffer();
+void show_last_command();
 
 
 #endif /* _KEYBOARD_H */
