@@ -1,21 +1,16 @@
 #include "paging.h"
 #include "types.h"
-#include "paging.S"
+#include "lib.h"
 
-// define the page directory and page table
-page_directory_t page_directory[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
-page_table_entry_t page_table[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
-extern void loadPageDirectory(uint32_t addr);
-extern void enablePaging();
 
-/* void paging_init();
+/* paging_init()
  * Description: initialize the paging
  * Inputs: none
  * Return Value: none
  * Function: initialize the page firectory and page table, enable the paging
  */
 
-void paging_init(){
+void paging_init() {
     uint32_t index;     // use for initialization index
     // clean all page directory and page table
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
@@ -35,19 +30,30 @@ void paging_init(){
     page_directory[1].pd_mb.read_write = 1;
     page_directory[1].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[1].pd_mb.base_addr = KERNEL_POSITION; // give the address of the kernel
-    
-    // initialize the page table
-    for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
-        // find the video memory
-        if (index == VIDEO_MEMORY >> PT_SHIFT) {
-            page_table[index].present = 1;
-            page_table[index].read_write = 1;
-            page_table[index].base_addr = VIDEO_MEMORY >> PT_SHIFT;
-        } 
-    }
+    // find the video memory and initialize it
+    page_table[VIDEO_MEMORY >> PT_SHIFT].present = 1;
+    page_table[VIDEO_MEMORY >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_MEMORY >> PT_SHIFT].base_addr = (VIDEO_MEMORY >> PT_SHIFT);
 
-    // enable the paging
-    loadPageDirectory((uint32_t) page_directory);
-    enablePaging();
+    // enable the paging 
+    asm volatile(
+        /* load the page directory into the CR3 */
+        "movl %0, %%eax;" 
+        "movl %%eax, %%cr3;"
+
+        /* allow the 4mb page */
+        "movl %%cr4, %%eax;"
+        "orl $0x00000010, %%eax;"
+        "movl %%eax, %%cr4;"
+
+        /* enable Paging */
+        "movl %%cr0, %%eax;"
+        "orl $0x80000000, %%eax;"
+        "movl %%eax, %%cr0;"
+        :                            /* output */
+        :"r"(page_directory)         /* input */
+        :"%eax"                      /* clobbered register */
+    );
+
 }
 
