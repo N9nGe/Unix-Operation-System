@@ -1,0 +1,36 @@
+<=========================================================>
+<=================>    BUG LOG HEADER   <=================>
+<=========================================================>
+Assignment:
+    MP3
+CheckPoint:
+    CP1
+CreateTime:
+    2022.10.15
+
+<--------------------------------------------------------->
+                          BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    Gabriel Gao.
+Description:
+    After we finish GTD and IDT, when we try to boot our kernel, there is a infinite loop in the start page. We cannot 
+    boot successfully. We do not initiliza and load IDT inside the boot.S.
+Solution:
+    Just call the idt_init function in idt.c to initialize the idt and lidt the idt_desc_ptr
+
+<--------------------------------------------------------->
+                          BUG 2                          
+<--------------------------------------------------------->
+Time:
+    2022.??.??.
+Creator:
+    First Last.
+Description:
+    ....
+Solution:
+    ....
+
+
