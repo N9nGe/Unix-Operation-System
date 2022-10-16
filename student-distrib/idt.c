@@ -185,12 +185,18 @@ void idt_init () {
     int i;
 
     // reset the entire idt
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < NUM_VEC; i++) {
         idt[i].offset_15_00 = 0;
-        idt[i].seg_selector = 0;
+        idt[i].seg_selector = KERNEL_CS;
         idt[i].reserved4 = 0;
-        idt[i].offset_31_16 = 0;
+        idt[i].reserved3 = 1;
+        idt[i].reserved2 = 1;
+        idt[i].reserved1 = 1;
+        idt[i].size      = 1;
+        idt[i].reserved0 = 1;
         idt[i].dpl = 0;
+        idt[i].present = 1;
+        idt[i].offset_31_16 = 0;
     }
 
     SET_IDT_ENTRY(idt[0], divide_by_zero_exception);

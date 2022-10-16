@@ -26,6 +26,17 @@ _start:
 continue:
     # Load the GDT to GDT register by using "lgdt" opcode
     lgdt gdt_desc_ptr
+
+    pushl %eax
+    pushl %edx
+    pushl %ecx
+    call idt_init
+    popl %ecx
+    popl %edx
+    popl %eax
+
+    lidt idt_desc_ptr
+
     # Load CS with the new descriptor value
     ljmp    $KERNEL_CS, $keep_going
 
