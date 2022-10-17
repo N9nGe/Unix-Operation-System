@@ -237,7 +237,7 @@ void add_intr_handler_setup (unsigned int n) {
     idt[n].present = 1;
     idt[n].dpl = 0;
     // change reserved3 to 0 to prevent general protection error
-    idt[n].reserved3 = 0;
+    //idt[n].reserved3 = 0;
 }
 
 /*
@@ -259,7 +259,7 @@ void idt_init () {
         idt[i].offset_15_00 = 0;
         idt[i].seg_selector = KERNEL_CS;
         idt[i].reserved4 = 0;
-        idt[i].reserved3 = 1;
+        idt[i].reserved3 = 0;
         idt[i].reserved2 = 1;
         idt[i].reserved1 = 1;
         idt[i].size      = 1;
@@ -277,7 +277,7 @@ void idt_init () {
         idt[i].dpl = 0;
         idt[i].present = 1;
         // change reserved3 to 0 to prevent general protection error
-        idt[i].reserved3 = 0;
+        //idt[i].reserved3 = 0;
     }
 
     // use SET_IDT_ENTRY function provided by x86_desc.h
@@ -330,6 +330,6 @@ void idt_init () {
     SET_IDT_ENTRY(idt[0X80], system_call_handler);
     idt[0X80].dpl = 3;
     idt[0X80].present = 1;
-    idt[0X80].reserved3 = 0;
+    //idt[0X80].reserved3 = 0;
     return;
 }
