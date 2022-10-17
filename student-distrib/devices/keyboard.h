@@ -18,27 +18,16 @@
 #define KEYBOARD_IRQ_NUM 0x01
 #define MAX_SCAN_SIZE 58
 #define MAX_SET_SIZE 100
-// Used for CP2
+
+#define VALID_RET 0
+#define INVALID_RET 1 // For checkpoint one 
+
 #define LEFT_SHIFT_PRESSED 0x2A
-#define RIGHT_SHIFT_PRESSED 0x36
 #define LEFT_SHIFT_RELEASED 0xAA
+#define RIGHT_SHIFT_PRESSED 0x36
 #define RIGHT_SHIFT_RELEASED 0xB6
 #define LEFT_CTRL_PRESSED 0x1D
 #define LEFT_CTRL_RELEASED 0x9D
-#define CAPSLOCK_PRESSED 0x3A
-#define CAPSLOCK_RELEASED 0xBA
-#define ALT_PRESSED 0x38
-#define ALT_RELEASED 0xB8
-#define F1  0x3B
-#define F2  0x3C
-#define F3  0x3D
-#define F4  0x3E
-#define F5  0x3F
-#define ESC 0x01
-#define TAB_PRESSED 0x0F
-#define UP_PRESSED 0x48
-#define DOWN_PRESSED 0X50
-
 /* Externally-visible functions */
 
 /* Initialize keyboard input device */
@@ -47,10 +36,9 @@ void keyboard_init(void);
 
 /* Keyboard Handler */
 void keyboard_interrupt_handler(void);
-
+/* Function key handler*/
 int function_key_handle(char scan_button);
-
-
+/*set the key buffer to initial state*/
 void clear_keyboard_buffer(void);
 
 

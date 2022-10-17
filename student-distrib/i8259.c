@@ -129,8 +129,8 @@ void send_eoi(uint32_t irq_num) {
         outb(irq_num,MASTER_8259_PORT);
 
     }else{// then it's slave
-        irq_num -= PORTS_LIMIT;
-        irq_num |= EOI;
+        irq_num -= PORTS_LIMIT; // Here we must minus the irqnum with 8
+        irq_num |= EOI;         // So slave can find right ports
         outb(irq_num,SLAVE_8259_PORT);
         outb(EOI | SLAVE_IRQ,MASTER_8259_PORT);
         // Here we acknowledge the master pic 
