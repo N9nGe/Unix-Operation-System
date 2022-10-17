@@ -31,12 +31,23 @@ char * exception_output[20] = {
     "SIMD Floating-Point Exception"
 };
 
-/*
- * exception_handler_n () is a helper function for every
- * exception handler because most of them have similar
- * functionality. Therefore, instead of modifying parts
+/* 
+ * exception_handler_n ()
+ * DESCRIPTION: a helper function for every exception 
+ * handler because most of them have similar
+ * functionality for cp1. Therefore, instead of modifying parts
  * in all exception handler, modifying exception_handler_n
- * is more efficient.
+ * is faster. The function prints the corresponding
+ * exception output and freeze the computer using while(1)
+ * 
+ * INPUTS: unsigned int n -- the IDT number of exception
+ *                           used to access the output string
+ *                           for different exceptions
+ * OUTPUTS: exception_output[n] -- string containing the exception
+ *                                 message that will be printed to
+ *                                 users.
+ * RETURN VALUE: none
+ * SIDE EFFECTS: none
  */
 
 void exception_handler_n (unsigned int n) {
@@ -45,6 +56,19 @@ void exception_handler_n (unsigned int n) {
     while (1);
     
 }
+
+/*__________________________________________________________________*/
+
+/*
+ * xxx_exception ()
+ * DESCRIPTION: Function definitions for a set of exception handlers called
+ * xxx_exception (). They don't have other functionalities yet except calling
+ * exception_handler_n (n) and passing the IDT number of the exception as argument
+ * INPUT: none
+ * OUTPUT: none
+ * RETURN VALUE: none
+ * SIDE EFFECTS: call exception_handler_n ()
+ */
 
 void divide_by_zero_exception () {
     exception_handler_n (0);
@@ -125,6 +149,8 @@ void machine_check_exception () {
 void simd_floating_point_exception () {
     exception_handler_n (19);
 }
+
+/*__________________________________________________________________*/
 
 /*
 void virtualization_exception () {

@@ -2,6 +2,10 @@
 
 void exception_handler_n (unsigned int n);
 
+/*__________________________________________________________________*/
+// define a set of exception handler. The functionality of each exception
+// handler is written in the name of the function
+
 void divide_by_zero_exception (void);
 
 void debug_exception (void);
@@ -41,6 +45,8 @@ void alignment_check_exception (void);
 void machine_check_exception (void);
 
 void simd_floating_point_exception (void);
+
+/*__________________________________________________________________*/
 
 /*
 void virtualization_exception ();
