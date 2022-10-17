@@ -5,7 +5,7 @@
 
 #ifndef _KEYBOARD_H
 #define _KEYBOARD_H
-//todo
+
 #include "../types.h"
 
 /* Ports that each PIC sits on */
@@ -21,8 +21,8 @@
 #define MAX_INPUT_COUNT 100000
 
 #define VALID_RET 0
-#define INVALID_RET 1 // For checkpoint one 
-
+#define INVALID_RET 1 
+// For checkpoint 2
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_PRESSED 0x36

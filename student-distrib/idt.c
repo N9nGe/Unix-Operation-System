@@ -52,7 +52,7 @@ char * exception_output[EXCEPTION_19 + 1] = {
 
 void exception_handler_n (unsigned int n) {
     clear();
-    printf ("\n\n\n\n\n\n===============   %s    ===============\n  ",exception_output[n]);
+    printf ("===============   %s    ===============\n  ",exception_output[n]);
     while (1);
     
 }
@@ -185,7 +185,6 @@ void add_intr_handler_setup (unsigned int n) {
     idt[n].present = 1;
     idt[n].dpl = 0;
     // change reserved3 to 0 to prevent general protection error
-    //idt[n].reserved3 = 0;
 }
 
 /*
@@ -225,7 +224,6 @@ void idt_init () {
         idt[i].dpl = 0;
         idt[i].present = 1;
         // change reserved3 to 0 to prevent general protection error
-        //idt[i].reserved3 = 0;
     }
 
     // use SET_IDT_ENTRY function provided by x86_desc.h
@@ -264,6 +262,5 @@ void idt_init () {
     SET_IDT_ENTRY(idt[SYS_CALL_NUM], system_call_handler);
     idt[SYS_CALL_NUM].dpl = 3;
     idt[SYS_CALL_NUM].present = 1;
-    //idt[0X80].reserved3 = 0;
     return;
 }

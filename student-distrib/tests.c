@@ -161,6 +161,7 @@ int test_system_call (){
 void i8259_disable_irq_garbege_test(){
 	//send two invalid irq_num to the i8259
 	// It shouldn't affect other device
+	printf(" ENTERING\n");
 	disable_irq(0x10);
 	disable_irq(666);
 
@@ -333,7 +334,7 @@ void rtc_set_freq_test() {
 // launch your tests here
 void launch_tests(){
 	printf("---------------TEST CP1 START--------------\n");	
-	// TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
 	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
@@ -349,7 +350,7 @@ void launch_tests(){
 	// rtc_set_freq_test();
 
 	/*Test for Paging */
-	TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
+	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
 	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());

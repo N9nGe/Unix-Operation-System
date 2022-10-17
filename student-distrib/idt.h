@@ -79,32 +79,6 @@ void simd_floating_point_exception (void);
 
 /*__________________________________________________________________*/
 
-/*
-void virtualization_exception ();
-
-void control_protection_exception ();
-
-void reserved2_exception ();
-
-void reserved3_exception ();
-
-void reserved4_exception ();
-
-void reserved5_exception ();
-
-void reserved6_exception ();
-
-void reserved7_exception ();
-
-void hypervisor_injection_exception ();
-
-void vmm_communication_exception ();
-
-void security_exception ();
-
-void reserved8_exception ();
-*/
-
 // system call handler only prints "system call"
 void system_call_handler (void);
 

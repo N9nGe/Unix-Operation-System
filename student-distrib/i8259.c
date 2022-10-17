@@ -44,7 +44,7 @@ void i8259_init(void) {
     outb(master_mask, MASTER_8259_DATA);
     outb(slave_mask, SLAVE_8259_DATA);
     
-    // TODO 
+    
     enable_irq( SLAVE_IRQ ); // Cascade to slave
     sti(); // why we should call it here
     restore_flags(flags);
@@ -65,7 +65,7 @@ void i8259_init(void) {
 void enable_irq(uint32_t irq_num) {
     // printf("Enabling the irq #%d\n",irq_num);
     if (irq_num < IRQ_NUM_MIN || irq_num > IRQ_NUM_MAX){    
-        printf("Failed to find corrsponding port");
+        printf("Failed to find corrsponding port\n");
         return ;
     }
     if (irq_num <PORTS_LIMIT)
@@ -95,7 +95,7 @@ void enable_irq(uint32_t irq_num) {
 void disable_irq(uint32_t irq_num) {
     // printf("Disabling the irq #%d\n",irq_num);
     if (irq_num < IRQ_NUM_MIN || irq_num > IRQ_NUM_MAX){   
-        printf("Failed to find corrsponding port");
+        printf("Failed to find corrsponding port\n");
         return;
     }
     if (irq_num < PORTS_LIMIT)
@@ -121,7 +121,7 @@ void disable_irq(uint32_t irq_num) {
 // about 5
 void send_eoi(uint32_t irq_num) {
     if (irq_num < IRQ_NUM_MIN || irq_num > IRQ_NUM_MAX){   
-        printf("Failed to find corrsponding port");
+        printf("\nFailed to find corrsponding port\n");
         return ;
     }
     if (irq_num < PORTS_LIMIT)
