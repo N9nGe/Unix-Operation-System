@@ -55,6 +55,54 @@ int idt_test(){
 }
 
 // add more tests here
+
+int div_by_zero_test (){
+	TEST_HEADER;
+
+	int i = 10;
+	int n = 0;
+	int result = PASS;
+	i = i / n;
+	result = FAIL;
+	return result;
+}
+
+int deref_null_pointer_test (){
+	TEST_HEADER;
+	//int i;
+	//int a[3] = {0,0,0};
+	int result = PASS;
+	/*for (i = 0; i < 11; i++) {
+		printf("%d", a[i]);
+	}*/
+	int *p = NULL;
+	*p = 1;
+	result = FAIL;
+	//asm volatile ("INT $12");  
+	return result;
+}
+
+int seg_not_present_test (){
+	TEST_HEADER;
+	int result = FAIL;
+	asm volatile ("INT $45");  
+	return result;
+}
+
+int test_other_exceptions (){
+	TEST_HEADER;
+	int result = FAIL;
+	asm volatile ("INT $10");  
+	return result;
+}
+
+int test_system_call (){
+	TEST_HEADER;
+	int result = PASS;
+	asm volatile ("INT $0x80");  
+	return result;
+}
+
 void i8259_disable_irq_garbege_test(){
 	//send two invalid irq_num to the i8259
 	// It shouldn't affect other device
@@ -255,7 +303,11 @@ void launch_tests(){
 
 	
 	// TEST_OUTPUT("idt_test", idt_test());
+	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
 	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
+	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
+	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
+	// TEST_OUTPUT("test_system_call", test_system_call());
 	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
