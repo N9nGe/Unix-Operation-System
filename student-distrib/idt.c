@@ -236,6 +236,17 @@ void add_intr_handler_setup (unsigned int n) {
     idt[n].reserved3 = 0;
 }
 
+/*
+ * idt_init ()
+ * DESCRIPTION: initialize IDT when the system is booted
+ * by adding all exception and interrupt handlers to IDT
+ * using (SET_IDT_ENTRY)
+ * INPUT: none
+ * OUTPUT: none
+ * RETURN VALUE: none
+ * SIDE EFFECTS: SET_IDT_ENTRY() from x86_desc.h
+ */
+
 void idt_init () {
     int i;
 
@@ -244,7 +255,7 @@ void idt_init () {
         idt[i].offset_15_00 = 0;
         idt[i].seg_selector = KERNEL_CS;
         idt[i].reserved4 = 0;
-        idt[i].reserved3 = 0;
+        idt[i].reserved3 = 1;
         idt[i].reserved2 = 1;
         idt[i].reserved1 = 1;
         idt[i].size      = 1;
@@ -254,11 +265,12 @@ void idt_init () {
         idt[i].offset_31_16 = 0;
     }
 
-    // 20 slots for exception handler
+    // 20 slots in IDT for exception handler
 
     for (i = 0; i < 20; i++) {
         idt[i].dpl = 0;
         idt[i].present = 1;
+        idt[i].reserved3 = 0;
     }
 
     SET_IDT_ENTRY(idt[0], divide_by_zero_exception);
@@ -305,6 +317,6 @@ void idt_init () {
     SET_IDT_ENTRY(idt[0X80], system_call_handler);
     idt[0X80].dpl = 3;
     idt[0X80].present = 1;
-    
+    idt[0X80].reserved3 = 0;
     return;
 }
