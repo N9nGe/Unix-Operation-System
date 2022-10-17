@@ -56,16 +56,40 @@ int idt_test(){
 
 // add more tests here
 
+/* div_by_zero_test()
+ * Inputs: none
+ * Outputs: divide_by_0 excpetions
+ * Return Value: FAIL
+ * Function: test divide by 0 exception
+ * if exception works, the function prints
+ * the exception output and freezes
+ * otherwise, the function completes without
+ * exception and the test is failed
+ */
+
 int div_by_zero_test (){
 	TEST_HEADER;
 
 	int i = 10;
 	int n = 0;
-	int result = PASS;
+	int result;
+	// divide by 0 exception invoked here
 	i = i / n;
+	// the test is failed at this stage
 	result = FAIL;
 	return result;
 }
+
+/* deref_null_pointer_test()
+ * Inputs: none
+ * Outputs: page fault excpetions
+ * Return Value: FAIL
+ * Function: the function dereferences
+ * a null pointer, which will cause a 
+ * page fault. If the function can 
+ * successfully complete, it will return
+ * a test FAIL
+ */
 
 int deref_null_pointer_test (){
 	TEST_HEADER;
@@ -75,31 +99,62 @@ int deref_null_pointer_test (){
 	/*for (i = 0; i < 11; i++) {
 		printf("%d", a[i]);
 	}*/
+	// dereferencing a null pointer
+	// will cause a page fault
 	int *p = NULL;
 	*p = 1;
+
+	// the test is failed at this stage
 	result = FAIL;
-	//asm volatile ("INT $12");  
 	return result;
 }
+
+/* seg_not_present_test()
+ * Inputs: none
+ * Outputs: segmentation not presented excpetions
+ * Return Value: FAIL
+ * Function: the function will int a function
+ * at idt 45, which supposed to be empty for now
+ * If the function successfully returns, the test
+ * fails.
+ */
 
 int seg_not_present_test (){
 	TEST_HEADER;
 	int result = FAIL;
+	// call IDT[45], which is not presented
 	asm volatile ("INT $45");  
 	return result;
 }
 
+
+/* test_other_exceptions()
+ * Inputs: none
+ * Outputs: invalid TSS excpetions
+ * Return Value: FAIL
+ * Function: the function calls any exception
+ * in the IDT just to see if anything shows up.
+ * Returns fail if no exception
+ */
 int test_other_exceptions (){
 	TEST_HEADER;
 	int result = FAIL;
+	// call IDT[10], which is not TSS invalid
 	asm volatile ("INT $10");  
 	return result;
 }
 
+/* test_system_call()
+ * Inputs: none
+ * Outputs: system call
+ * Return Value: FAIL
+ * Function: the function calls system calls
+ */
+
 int test_system_call (){
 	TEST_HEADER;
 	int result = PASS;
-	asm volatile ("INT $0x80");  
+	asm volatile ("INT $0x80");  // system call at 0x80
 	return result;
 }
 
