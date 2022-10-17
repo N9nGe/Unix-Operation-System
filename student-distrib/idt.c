@@ -202,9 +202,33 @@ void reserved8_exception () {
 }
 */
 
+
+
+/*
+ * system_call_handler ()
+ * DESCRIPTION: Doesn't have other functionality yet.
+ * Only prints system call. Located at 0x80 in the IDT
+ * INPUT: none
+ * OUTPUT: none
+ * RETURN VALUE: none
+ * SIDE EFFECTS: none
+ */
+
 void system_call_handler () {
     printf("system call");
 }
+
+/*
+ * add_intr_handler_setup (unsigned int n)
+ * DESCRIPTION: Change the struct of the corresponding
+ * idt descriptor entry [n] when a new interrupt handler
+ * is added in
+ * INPUT: unsigned int n -- the IDT number where the new
+ *                          interrupt handler is added.
+ * OUTPUT: none
+ * RETURN VALUE: none
+ * SIDE EFFECTS: changed reserved3 to 0 in idt[] in x86_desc.h
+ */
 
 void add_intr_handler_setup (unsigned int n) {
     idt[n].present = 1;
