@@ -112,3 +112,30 @@ Solution:
     I specify the key-value field first.
     And I ignore the release key interrupt
     so it works fine
+
+<--------------------------------------------------------->
+                          BUG 7                         
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    YIMING ZHAO.
+Description:
+    Keyboard interrupt invoked exception due to incorrect
+    IDT mapping and mix use hex and decimal for idt index
+Solution:
+    change the idt index of keyboard interrupt to hexadecimal
+
+<--------------------------------------------------------->
+                          BUG 8                         
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    YIMING ZHAO.
+Description:
+    Interrupts from keyboard and RTC cause general protection fault
+    exception
+Solution:
+    I have to set the corresponding interrupt handler's reserved3
+    to 0 when initializing the IDT
