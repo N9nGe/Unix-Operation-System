@@ -52,6 +52,32 @@ int idt_test(){
 
 // add more tests here
 
+int div_by_zero_test (){
+	TEST_HEADER;
+
+	int i = 10;
+	int result = PASS;
+	i = i / 0;
+
+	return result;
+}
+
+int deref_null_pointer_test (){
+	TEST_HEADER;
+	//int i;
+	//int a[3] = {0,0,0};
+	int result = PASS;
+	/*for (i = 0; i < 11; i++) {
+		printf("%d", a[i]);
+	}*/
+	int *p = NULL;
+	*p = 1;
+	//asm volatile ("INT $3");  
+
+
+	return result;
+}
+
 /****** PAGING TESTS ******/
 
 int page_dir_struct_test() {
@@ -188,6 +214,7 @@ int page_test_kernal_invalid_bottom() {
 /* Test suite entry point */
 void launch_tests(){
 	// TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
