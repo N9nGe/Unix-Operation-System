@@ -35,7 +35,7 @@ clean:
 	rm -f *.o */*.o Makefile.dep
 
 go:
-	make clean && make
+	make clean 
 	make dep
 	sudo make
 

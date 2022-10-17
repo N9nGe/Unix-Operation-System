@@ -1,0 +1,71 @@
+<=========================================================>
+<=================>    BUG LOG HEADER   <=================>
+<=========================================================>
+Assignment:
+    MP3
+CheckPoint:
+    CP1
+SCOPE:
+    keyboard and PIC
+CreateTime:
+    2022.10.15
+
+<--------------------------------------------------------->
+                          BUG 0                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    JIE WANG.
+Description:
+    Keyboard can't connect to the PIC.
+Solution:
+    1. call keyboard_init() in kernel.c
+    2. construct handler_linkage in x86
+    3. SET_IDT_ENTRY at idt.c
+
+<--------------------------------------------------------->
+                          BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    JIE WANG.
+Description:
+    PIC can't connect to the RTC, only 1 times interrupt
+Solution:
+    The send_eoi function of PIC has a bug:
+    I forget to minus 8 for slave irq_num.
+    After finishing it, it's fine
+
+<--------------------------------------------------------->
+                          BUG 2                          
+<--------------------------------------------------------->
+Time:
+    2022.10.17.
+Creator:
+    JIE WANG.
+Description:
+    The keyboard has already connect to the PIC, but can't
+    output value.
+Solution:
+    The scancode set is wrong, with some shifting problem.
+    I asked TA, and construct a new scancode set refering to
+    the Intel X30 mannul
+
+<--------------------------------------------------------->
+                          BUG 3                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    JIE WANG.
+Description:
+    Sometimes, I can't boot my OS,it says: .
+Solution:
+    Most likely it's an issue with windows messing around 
+    with the line endings of debug.sh
+    1. dos2unix debug.sh
+    2. chmod +x debug.sh
+
+

@@ -12,7 +12,7 @@
 
 /* File Scope Variable*/
 
-/**/
+/* Set to avoid release repetition*/
 int i = 0;            // #input counter 
 unsigned int pre = 0; // buffer to record last input key
 
@@ -48,19 +48,32 @@ void keyboard_interrupt_handler(){
     value = scancode[key];
     
     if (function_key_handle(key) == 1){
-        putc('\0');
+        putc('\0'); // Default input for function key in CP1
     }else{
         if( (i%2 !=1) || pre == value){
             putc(value);
         }
     }
-    send_eoi(KEYBOARD_IRQ_NUM);
+    send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
     i++;
     pre = value;
-
+    if (i> MAX_INPUT_COUNT)
+    {
+        reset_keyboard_buffer();
+    }
+    
     return;
 };
-
+/* 
+ * function_key_handle
+ *  DESCRIPTION: a function port for further CP usage 
+ *  INPUTS: key -- the input key value
+ *  OUTPUTS: none
+ *  RETURN VALUE: 
+ *      VALID_RET   -- 0, if there is no function key pressed
+ *      INVALID_RET -- 1, if there is function key pressed
+ *  SIDE EFFECTS: none
+ */
 int function_key_handle(unsigned int key){
     int ret = VALID_RET; 
     switch (key)
@@ -89,4 +102,17 @@ int function_key_handle(unsigned int key){
         break;
     }
     return ret;
+};
+/* 
+ * reset_keyboard_buffer
+ *  DESCRIPTION: a helper function to reset the 
+ *  keyboard buffer 
+ *  INPUTS: none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: reset two global variable i and pre
+ */
+void reset_keyboard_buffer(){
+    i = 0;
+    pre = 0;
 }

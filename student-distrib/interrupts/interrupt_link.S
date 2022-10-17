@@ -1,3 +1,5 @@
+# interrupt_link.h - Assambly linkage for device and idt
+ 
 #define INTR_LINK(name, func)       \
     .GLOBL name                    ;\
     name:                          ;\

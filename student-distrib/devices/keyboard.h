@@ -18,6 +18,7 @@
 #define KEYBOARD_IRQ_NUM 0x01
 #define MAX_SCAN_SIZE 58
 #define MAX_SET_SIZE 100
+#define MAX_INPUT_COUNT 100000
 
 #define VALID_RET 0
 #define INVALID_RET 1 // For checkpoint one 
@@ -37,9 +38,9 @@ void keyboard_init(void);
 /* Keyboard Handler */
 void keyboard_interrupt_handler(void);
 /* Function key handler*/
-int function_key_handle(char scan_button);
+int function_key_handle(unsigned int key);
 /*set the key buffer to initial state*/
-void clear_keyboard_buffer(void);
+void reset_keyboard_buffer(void);
 
 
 
