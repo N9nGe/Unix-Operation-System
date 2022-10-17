@@ -2,6 +2,10 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "paging.h"
+#include "idt.h"
+#include "i8259.h"
+#include "devices/keyboard.h"
+#include "devices/RTC.h"
 
 #define PASS 1
 #define FAIL 0
@@ -51,13 +55,40 @@ int idt_test(){
 }
 
 // add more tests here
+void i8259_disable_irq_garbege_test(){
+	//send two invalid irq_num to the i8259
+	// It shouldn't affect other device
+	disable_irq(0x10);
+	disable_irq(666);
 
+	
+}
+void i8259_enable_irq_garbege_test(){
+	//send two invalid irq_num to the i8259
+	// It shouldn't affect other device
+	enable_irq(0x10);
+	enable_irq(666);
+	
+}
+void i8259_disable_irq_test(){
+	// Simply close the devices
+	disable_irq(KEYBOARD_IRQ);
+	disable_irq(RTC_IRQ);
+}
+
+void i8259_enable_irq_test(){
+	// Simply open the devices
+	enable_irq(KEYBOARD_IRQ);
+	enable_irq(RTC_IRQ);
+}
+
+// Notice : to test it, you need uncomment here first
 int div_by_zero_test (){
 	TEST_HEADER;
 
 	int i = 10;
 	int result = PASS;
-	i = i / 0;
+	// i = i / 0;
 
 	return result;
 }
@@ -212,9 +243,19 @@ int page_test_kernal_invalid_bottom() {
 
 
 /* Test suite entry point */
+// launch your tests here
 void launch_tests(){
+	printf("---------------TEST CP1 START--------------\n");
+	/*Test for i8259*/
+	i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
+	i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
+	i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
+	i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
+
+
+	
 	// TEST_OUTPUT("idt_test", idt_test());
-	TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
+	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
@@ -223,5 +264,6 @@ void launch_tests(){
 	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
 	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
-	// launch your tests here
+	printf("---------------TEST CP1 END--------------\n");
+	
 }

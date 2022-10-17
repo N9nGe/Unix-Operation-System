@@ -98,3 +98,17 @@ Solution:
     Old:     outb(RTC_C_OFFSET | NMI_MASK, RTC_PORT_INDEX);
     Correct: outb(RTC_C_OFFSET, RTC_PORT_INDEX);
 
+<--------------------------------------------------------->
+                          BUG 6                          
+<--------------------------------------------------------->
+Time:
+    2022.10.17.
+Creator:
+    JIE WANG.
+Description:
+    The keyboard can't continuously enter the interrupt,
+    when it release, it will bring an empty space.
+Solution:
+    I specify the key-value field first.
+    And I ignore the release key interrupt
+    so it works fine

@@ -14,7 +14,7 @@
 
 #define KEY_BUF_SIZE        1
 #define KEY_NULL           '\0'
-
+#define INITIAL_KEY         0x01
 #define KEYBOARD_IRQ_NUM 0x01
 #define MAX_SCAN_SIZE 58
 #define MAX_SET_SIZE 100

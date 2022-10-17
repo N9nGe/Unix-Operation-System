@@ -15,12 +15,12 @@
 /* Set to avoid release repetition*/
 int i = 0;            // #input counter 
 unsigned int pre = 0; // buffer to record last input key
-
+int ctrl_buf = 0;     // Ctrl buf
 /*The CP1 edition scancode list*/
 // CP1 : we only use a limited set 1
 // No cap no shift
 
-unsigned char scancode[58] = 
+unsigned char scancode[MAX_SCAN_SIZE] = 
 {   0,0,'1','2','3','4','5','6','7','8','9','0','-','=',0,
     0,'q','w','e','r','t','y','u','i','o','p','[',']','\n',
     0,'a','s','d','f','g','h','j','k','l',';',39, '`',0,'\\',
@@ -29,39 +29,56 @@ unsigned char scancode[58] =
 };
 
 
-
-
-/* Initialize keyboard input device */
+/* 
+ * keyboard_interrupt_handler
+ *  DESCRIPTION: Initialize keyboard input device 
+ *  INPUTS: none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: none
+ */
 void keyboard_init(void){
     // printf("initialize keyboard...");
     enable_irq( KEYBOARD_IRQ_NUM );
     return;
 };
-
+/* 
+ * keyboard_interrupt_handler
+ *  DESCRIPTION: the interrupt handler to deal with keyboard input 
+ *  INPUTS: none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: none
+ */
 void keyboard_interrupt_handler(){
     // printf("key pressed ");
     // cli(); // Clear all the interrupt first
+    send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
+    // NOTICE: it must be here! 
     unsigned int key;
     unsigned int value;
-    printf("KEY pressed [");
     key = inb(KEYBOARD_PORT) & 0xff;
     value = scancode[key];
-    
-    if (function_key_handle(key) == 1){
-        putc('\0'); // Default input for function key in CP1
-    }else{
-        if( (i%2 !=1) || pre == value){
-            putc(value);
+    // Ignore the key out of the scope of scan size
+    if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
+        if( 1){// Used for later structure
+            // printf("KEY pressed [");
+            if (function_key_handle(key) == 1){
+                putc('\0'); // Default input for function key in CP1
+            }else{
+                // Clear the screen when necessary
+                putc(value);
+            }
+            // printf("] ");
+        }
+        i++;
+        pre = value;
+        if (i > MAX_INPUT_COUNT)
+        {
+            reset_keyboard_buffer();
         }
     }
-    send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
-    i++;
-    pre = value;
-    if (i> MAX_INPUT_COUNT)
-    {
-        reset_keyboard_buffer();
-    }
-    printf("] ");
+    // sti();
     return;
 };
 /* 
@@ -77,7 +94,7 @@ void keyboard_interrupt_handler(){
 int function_key_handle(unsigned int key){
     int ret = VALID_RET; 
     switch (key)
-    {
+    {// NOTICE: These function keys are left for cp2
     case LEFT_SHIFT_PRESSED:
         ret = INVALID_RET;
         break;
@@ -93,6 +110,7 @@ int function_key_handle(unsigned int key){
         break;
     case LEFT_CTRL_PRESSED:
         ret = INVALID_RET;
+        ctrl_buf = 1;
         break;
     case LEFT_CTRL_RELEASED:
         ret = INVALID_RET;

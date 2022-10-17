@@ -18,4 +18,13 @@
 #define UP_PRESSED 0x48
 #define DOWN_PRESSED 0X50
 
-2. 
+2. clear the screen function
+                if (ctrl_buf == 1 && value == 'l'){
+                    clear();
+                    printf("\n\n\n clear the screen\n");
+                    // sti();
+                    return;
+                }
+
+    it's cool but hard to realize?
+    I need to clearify the knowledge of screen buf in our OS
