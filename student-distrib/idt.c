@@ -8,7 +8,7 @@
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
-char * exception_output[20] = {
+char * exception_output[EXCEPTION_19 + 1] = {
     "Divide-by-zero Error",
     "Debug",
     "Non-maskable Interrupt",
@@ -72,83 +72,83 @@ void exception_handler_n (unsigned int n) {
  */
 
 void divide_by_zero_exception () {
-    exception_handler_n (0);
+    exception_handler_n (EXCEPTION_0);
 }
 
 void debug_exception () {
-    exception_handler_n (1);
+    exception_handler_n (EXCEPTION_1);
 }
 
 void non_maskable_interrupt_exception () {
-    exception_handler_n (2);
+    exception_handler_n (EXCEPTION_2);
 }
 
 void breakpoint_exception () {
-    exception_handler_n (3);
+    exception_handler_n (EXCEPTION_3);
 }
 
 void overflow_exception () {
-    exception_handler_n (4);
+    exception_handler_n (EXCEPTION_4);
 }
 
 void bound_range_exceeded_exception () {
-    exception_handler_n (5);
+    exception_handler_n (EXCEPTION_5);
 }
 
 void invalid_opcode_exception () {
-    exception_handler_n (6);
+    exception_handler_n (EXCEPTION_6);
 }
 
 void device_not_available_exception () {
-    exception_handler_n (7);
+    exception_handler_n (EXCEPTION_7);
 }
 
 void double_fault_exception () {
-    exception_handler_n (8);
+    exception_handler_n (EXCEPTION_8);
 }
 
 void coprocessor_segment_overrun_exception () {
-    exception_handler_n (9);
+    exception_handler_n (EXCEPTION_9);
 }
 
 void invalid_tss_exception () {
-    exception_handler_n (10);
+    exception_handler_n (EXCEPTION_10);
 }
 
 void segment_not_present_exception () {
-    exception_handler_n (11);
+    exception_handler_n (EXCEPTION_11);
 }
 
 void stack_segment_fault_exception () {
-    exception_handler_n (12);
+    exception_handler_n (EXCEPTION_12);
 }
 
 void general_protection_fault_exception () {
-    exception_handler_n (13);
+    exception_handler_n (EXCEPTION_13);
 }
 
 void page_fault_exception () {
-    exception_handler_n (14);
+    exception_handler_n (EXCEPTION_14);
 }
 
 void reserved1_exception () {
-    exception_handler_n (15);
+    exception_handler_n (EXCEPTION_15);
 }
 
 void x87_floating_point_exception () {
-    exception_handler_n (16);
+    exception_handler_n (EXCEPTION_16);
 }
 
 void alignment_check_exception () {
-    exception_handler_n (17);
+    exception_handler_n (EXCEPTION_17);
 }
 
 void machine_check_exception () {
-    exception_handler_n (18);
+    exception_handler_n (EXCEPTION_18);
 }
 
 void simd_floating_point_exception () {
-    exception_handler_n (19);
+    exception_handler_n (EXCEPTION_19);
 }
 
 /*__________________________________________________________________*/
@@ -283,26 +283,26 @@ void idt_init () {
     // use SET_IDT_ENTRY function provided by x86_desc.h
     // to add all exception defined on the top with corresponding
     // IDT number
-    SET_IDT_ENTRY(idt[0], divide_by_zero_exception);
-    SET_IDT_ENTRY(idt[1], debug_exception);
-    SET_IDT_ENTRY(idt[2], non_maskable_interrupt_exception);
-    SET_IDT_ENTRY(idt[3], breakpoint_exception);
-    SET_IDT_ENTRY(idt[4], overflow_exception);
-    SET_IDT_ENTRY(idt[5], bound_range_exceeded_exception);
-    SET_IDT_ENTRY(idt[6], invalid_opcode_exception);
-    SET_IDT_ENTRY(idt[7], device_not_available_exception);
-    SET_IDT_ENTRY(idt[8], double_fault_exception);
-    SET_IDT_ENTRY(idt[9], coprocessor_segment_overrun_exception);
-    SET_IDT_ENTRY(idt[10], invalid_tss_exception);
-    SET_IDT_ENTRY(idt[11], segment_not_present_exception);
-    SET_IDT_ENTRY(idt[12], stack_segment_fault_exception);
-    SET_IDT_ENTRY(idt[13], general_protection_fault_exception);
-    SET_IDT_ENTRY(idt[14], page_fault_exception);
-    SET_IDT_ENTRY(idt[15], reserved1_exception);
-    SET_IDT_ENTRY(idt[16], x87_floating_point_exception);
-    SET_IDT_ENTRY(idt[17], alignment_check_exception);
-    SET_IDT_ENTRY(idt[18], machine_check_exception);
-    SET_IDT_ENTRY(idt[19], simd_floating_point_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_0], divide_by_zero_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_1], debug_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_2], non_maskable_interrupt_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_3], breakpoint_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_4], overflow_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_5], bound_range_exceeded_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_6], invalid_opcode_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_7], device_not_available_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_8], double_fault_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_9], coprocessor_segment_overrun_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_10], invalid_tss_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_11], segment_not_present_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_12], stack_segment_fault_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_13], general_protection_fault_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_14], page_fault_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_15], reserved1_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_16], x87_floating_point_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_17], alignment_check_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_18], machine_check_exception);
+    SET_IDT_ENTRY(idt[EXCEPTION_19], simd_floating_point_exception);
     /*
     SET_IDT_ENTRY(idt[20], virtualization_exception);
     SET_IDT_ENTRY(idt[21], control_protection_exception);
@@ -320,16 +320,16 @@ void idt_init () {
 
     // add interrupt handlers for keyboard and rtc to the IDT
     // and complete corresponding setup in idt array
-    SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);
-    add_intr_handler_setup(0x21);
+    SET_IDT_ENTRY(idt[KEYBOARD_INTR_NUM], keyboard_handler_linkage);
+    add_intr_handler_setup(KEYBOARD_INTR_NUM);
 
-    SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage);
-    add_intr_handler_setup(0x28);
+    SET_IDT_ENTRY(idt[RTC_INTR_NUM], rtc_handler_linkage);
+    add_intr_handler_setup(RTC_INTR_NUM);
 
     // add system call to the IDT at 0x80
-    SET_IDT_ENTRY(idt[0X80], system_call_handler);
-    idt[0X80].dpl = 3;
-    idt[0X80].present = 1;
+    SET_IDT_ENTRY(idt[SYS_CALL_NUM], system_call_handler);
+    idt[SYS_CALL_NUM].dpl = 3;
+    idt[SYS_CALL_NUM].present = 1;
     //idt[0X80].reserved3 = 0;
     return;
 }
