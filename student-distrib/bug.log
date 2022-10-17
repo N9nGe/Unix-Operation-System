@@ -24,8 +24,23 @@ Solution:
     2. construct handler_linkage in x86
     3. SET_IDT_ENTRY at idt.c
 
+
 <--------------------------------------------------------->
                           BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    Gabriel Gao.
+Description:
+    After we finish GTD and IDT, when we try to boot our kernel, there is a infinite loop in the start page. We cannot 
+    boot successfully. We do not initiliza and load IDT inside the boot.S.
+Solution:
+    Just call the idt_init function in idt.c to initialize the idt and lidt the idt_desc_ptr
+
+
+<--------------------------------------------------------->
+                          BUG 2                         
 <--------------------------------------------------------->
 Time:
     2022.10.16.
@@ -39,7 +54,7 @@ Solution:
     After finishing it, it's fine
 
 <--------------------------------------------------------->
-                          BUG 2                          
+                          BUG 3                          
 <--------------------------------------------------------->
 Time:
     2022.10.17.
@@ -54,10 +69,10 @@ Solution:
     the Intel X30 mannul
 
 <--------------------------------------------------------->
-                          BUG 3                          
+                          BUG 4                          
 <--------------------------------------------------------->
 Time:
-    2022.10.15.
+    2022.10.17.
 Creator:
     JIE WANG.
 Description:
@@ -68,4 +83,18 @@ Solution:
     1. dos2unix debug.sh
     2. chmod +x debug.sh
 
+<--------------------------------------------------------->
+                          BUG 5                          
+<--------------------------------------------------------->
+Time:
+    2022.10.17.
+Creator:
+    Gabriel Gao
+Description:
+    The RTC interrupt just run once. The problem is that after the interrupt, we use the wrong Register C value. We add 
+    the NMI_MASK into the outb function. 
+Solution:
+    Remove the mask of the Register C.
+    Old:     outb(RTC_C_OFFSET | NMI_MASK, RTC_PORT_INDEX);
+    Correct: outb(RTC_C_OFFSET, RTC_PORT_INDEX);
 
