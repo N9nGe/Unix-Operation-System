@@ -118,6 +118,7 @@ extern uint16_t ldt_desc;
 extern uint32_t ldt_size;
 extern seg_desc_t ldt_desc_ptr;
 extern seg_desc_t gdt_ptr;
+extern seg_desc_t gdt_desc_ptr;
 extern uint32_t ldt;
 
 extern uint32_t tss_size;
@@ -166,6 +167,74 @@ typedef union idt_desc_t {
 extern idt_desc_t idt[NUM_VEC];
 /* The descriptor used to load the IDTR */
 extern x86_desc_t idt_desc_ptr;
+
+/* The Page directory_entry struct */
+typedef struct page_directory_entry {
+    union {
+        uint32_t val;                        // the 32-bit entry
+        struct {
+            uint32_t present            : 1; // present -bit 0 
+            uint32_t read_write         : 1; // read_write -bit 1 
+            uint32_t user_supervisor    : 1; // user_supervisor -bit 2 
+            uint32_t write_through      : 1; // write_through -bit 3 
+            uint32_t cache_disabled     : 1; // cache_disabled -bit 4 
+            uint32_t accessed           : 1; // accessed -bit 5 
+            uint32_t reserved           : 1; // reserved -bit 6 
+            uint32_t page_size          : 1; // page_size -bit 7 
+            uint32_t global_page        : 1; // global_page -bit 8 
+            uint32_t avaliable          : 3; // avaliable for system programmer’s use -bit 9-11 
+            uint32_t base_addr          : 20; // Page-Table Base Address -bit 12-31 
+        } __attribute__ ((packed));
+    };
+} page_directory_entry_t;
+
+/* The Page table entry struct */
+typedef struct page_table_entry {
+    union {
+        uint32_t val;
+        struct {
+            uint32_t present            : 1; // present -bit 0 
+            uint32_t read_write         : 1; // read_write -bit 1 
+            uint32_t user_supervisor    : 1; // user_supervisor -bit 2 
+            uint32_t write_through      : 1; // write_through -bit 3 
+            uint32_t cache_disabled     : 1; // cache_disabled -bit 4 
+            uint32_t accessed           : 1; // accessed -bit 5 
+            uint32_t dirty              : 1; // dirty -bit 6 
+            uint32_t pat                : 1; // Page Table Attribute Index -bit 7 
+            uint32_t global_page        : 1; // global_page -bit 8 
+            uint32_t avaliable          : 3; // avaliable for system programmer’s use -bit 9-11 
+            uint32_t base_addr          : 20; // Page Base Address -bit 12-31 
+        } __attribute__ ((packed));
+    };
+} page_table_entry_t;
+
+/* The Page table entry 4mb struct */
+typedef struct page_directory_entry_4mb {
+    union {
+        uint32_t val;
+        struct {
+            uint32_t present            : 1; // present -bit 0 
+            uint32_t read_write         : 1; // read_write -bit 1 
+            uint32_t user_supervisor    : 1;  // user_supervisor -bit 2 
+            uint32_t write_through      : 1; // write_through -bit 3 
+            uint32_t cache_disabled     : 1; // cache_disabled -bit 4 
+            uint32_t accessed           : 1; // accessed -bit 5 
+            uint32_t dirty              : 1; // dirty -bit 6 
+            uint32_t page_size          : 1; // page_size -bit 7 
+            uint32_t global_page        : 1; // global_page -bit 8 
+            uint32_t avaliable          : 3; // avaliable for system programmer’s use -bit 9-11 
+            uint32_t pat                : 1; // Page Table Attribute Index -bit 12
+            uint32_t reserved           : 9; // Reserved bit 13-21
+            uint32_t base_addr          : 10; // Page Base Address -bit 22-31 
+        } __attribute__ ((packed));
+    };
+} page_directory_entry_4mb_t;
+
+// the combination of 4mb and 4b page directory
+typedef union page_directory {
+    page_directory_entry_t pd_kb;       // 4kb page directory
+    page_directory_entry_4mb_t pd_mb;   // 4mb page directory
+} page_directory_t;
 
 /* Sets runtime parameters for an IDT entry */
 #define SET_IDT_ENTRY(str, handler)                              \

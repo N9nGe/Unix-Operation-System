@@ -34,6 +34,13 @@ Makefile.dep: $(SRC)
 clean:
 	rm -f *.o */*.o Makefile.dep
 
+go:
+	make clean && make
+	make dep
+	sudo make
+
+
+
 ifneq ($(MAKECMDGOALS),dep)
 ifneq ($(MAKECMDGOALS),clean)
 include Makefile.dep

@@ -11,7 +11,9 @@
 /* Ports that each PIC sits on */
 #define MASTER_8259_PORT    0x20
 #define SLAVE_8259_PORT     0xA0
-
+// Data input port
+#define MASTER_8259_DATA MASTER_8259_PORT + 1
+#define SLAVE_8259_DATA  SLAVE_8259_PORT + 1
 /* Initialization control words to init each PIC.
  * See the Intel manuals for details on the meaning
  * of each word */
@@ -27,6 +29,12 @@
  * to declare the interrupt finished */
 #define EOI                 0x60
 
+
+/*Magic Number: Domain of irq*/
+#define IRQ_NUM_MIN 0
+#define IRQ_NUM_MAX 15
+#define PORTS_LIMIT 8
+#define SLAVE_IRQ   0x02
 /* Externally-visible functions */
 
 /* Initialize both PICs */
