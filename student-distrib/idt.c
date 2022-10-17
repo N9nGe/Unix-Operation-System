@@ -8,7 +8,7 @@
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
-char * exception_output[32] = {
+char * exception_output[20] = {
     "Divide-by-zero Error",
     "Debug",
     "Non-maskable Interrupt",
@@ -24,23 +24,11 @@ char * exception_output[32] = {
     "Stack-Segment Fault",
     "General Protection Fault",
     "Page Fault",
-    "Reserved 1",
+    "Intel Reserved",
     "x87 Floating-Point Exception",
     "Alignment Check",
     "Machine Check",
-    "SIMD Floating-Point Exception",
-    "Virtualization Exception",
-    "Control Protection Exception",
-    "Reserved 2",
-    "Reserved 3",
-    "Reserved 4",
-    "Reserved 5",
-    "Reserved 6",
-    "Reserved 7",
-    "Hypervisor Injection Exception	",
-    "VMM Communication Exception",
-    "Security Exception",
-    "Reserved 8"
+    "SIMD Floating-Point Exception"
 };
 
 /*
@@ -138,6 +126,7 @@ void simd_floating_point_exception () {
     exception_handler_n (19);
 }
 
+/*
 void virtualization_exception () {
     exception_handler_n (20);
 }
@@ -185,8 +174,13 @@ void security_exception () {
 void reserved8_exception () {
     exception_handler_n (31);
 }
+*/
 
-void add_int_handler_setup (unsigned int n) {
+void system_call () {
+    printf("system call");
+}
+
+void add_intr_handler_setup (unsigned int n) {
     idt[n].present = 1;
     idt[n].dpl = 0;
     idt[n].reserved3 = 0;
@@ -210,9 +204,9 @@ void idt_init () {
         idt[i].offset_31_16 = 0;
     }
 
-    // 32 slots for exception handler
+    // 20 slots for exception handler
 
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < 20; i++) {
         idt[i].dpl = 0;
         idt[i].present = 1;
     }
@@ -237,6 +231,7 @@ void idt_init () {
     SET_IDT_ENTRY(idt[17], alignment_check_exception);
     SET_IDT_ENTRY(idt[18], machine_check_exception);
     SET_IDT_ENTRY(idt[19], simd_floating_point_exception);
+    /*
     SET_IDT_ENTRY(idt[20], virtualization_exception);
     SET_IDT_ENTRY(idt[21], control_protection_exception);
     SET_IDT_ENTRY(idt[22], reserved2_exception);
@@ -249,11 +244,17 @@ void idt_init () {
     SET_IDT_ENTRY(idt[29], vmm_communication_exception);
     SET_IDT_ENTRY(idt[30], security_exception);
     SET_IDT_ENTRY(idt[31], reserved8_exception);
+    */
 
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);
-    add_int_handler_setup(0x21);
+    add_intr_handler_setup(0x21);
 
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage);
-    add_int_handler_setup(0x28);
+    add_intr_handler_setup(0x28);
+
+    SET_IDT_ENTRY(idt[0X80], system_call);
+    idt[0X80].dpl = 3;
+    idt[0X80].present = 1;
+    
     return;
 }

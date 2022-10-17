@@ -42,6 +42,7 @@ void machine_check_exception ();
 
 void simd_floating_point_exception ();
 
+/*
 void virtualization_exception ();
 
 void control_protection_exception ();
@@ -65,7 +66,8 @@ void vmm_communication_exception ();
 void security_exception ();
 
 void reserved8_exception ();
+*/
 
-void add_int_handler_setup (unsigned int n);
+void add_intr_handler_setup (unsigned int n);
 
 void idt_init ();
