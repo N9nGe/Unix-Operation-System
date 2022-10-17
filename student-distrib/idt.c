@@ -231,8 +231,11 @@ void system_call_handler () {
  */
 
 void add_intr_handler_setup (unsigned int n) {
+    // dpl 0 means kernel level, present means there's an handler
+    // at this IDT position
     idt[n].present = 1;
     idt[n].dpl = 0;
+    // change reserved3 to 0 to prevent general protection error
     idt[n].reserved3 = 0;
 }
 
@@ -268,11 +271,17 @@ void idt_init () {
     // 20 slots in IDT for exception handler
 
     for (i = 0; i < 20; i++) {
+        // dpl 0 means kernel level, present means there's an handler
+        // at this IDT position
         idt[i].dpl = 0;
         idt[i].present = 1;
+        // change reserved3 to 0 to prevent general protection error
         idt[i].reserved3 = 0;
     }
 
+    // use SET_IDT_ENTRY function provided by x86_desc.h
+    // to add all exception defined on the top with corresponding
+    // IDT number
     SET_IDT_ENTRY(idt[0], divide_by_zero_exception);
     SET_IDT_ENTRY(idt[1], debug_exception);
     SET_IDT_ENTRY(idt[2], non_maskable_interrupt_exception);
@@ -308,12 +317,15 @@ void idt_init () {
     SET_IDT_ENTRY(idt[31], reserved8_exception);
     */
 
+    // add interrupt handlers for keyboard and rtc to the IDT
+    // and complete corresponding setup in idt array
     SET_IDT_ENTRY(idt[0x21], keyboard_handler_linkage);
     add_intr_handler_setup(0x21);
 
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage);
     add_intr_handler_setup(0x28);
 
+    // add system call to the IDT at 0x80
     SET_IDT_ENTRY(idt[0X80], system_call_handler);
     idt[0X80].dpl = 3;
     idt[0X80].present = 1;
