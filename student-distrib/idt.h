@@ -1,8 +1,14 @@
+#ifndef _IDT_H
+#define _IDT_H
+
 #include "types.h"
 
+// helper function for exception handler
 void exception_handler_n (unsigned int n);
 
+
 /*__________________________________________________________________*/
+
 // define a set of exception handler. The functionality of each exception
 // handler is written in the name of the function
 
@@ -74,8 +80,14 @@ void security_exception ();
 void reserved8_exception ();
 */
 
+// system call handler only prints "system call"
 void system_call_handler (void);
 
+// complete other modifications in idt[] when adding a new interrupt
+// handler
 void add_intr_handler_setup (unsigned int n);
 
+// function that is called to initialize the IDT
 void idt_init ();
+
+#endif
