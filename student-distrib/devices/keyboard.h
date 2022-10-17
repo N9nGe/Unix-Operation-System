@@ -37,7 +37,7 @@ void keyboard_init(void);
 /* Keyboard Handler */
 void keyboard_interrupt_handler(void);
 /* Function key handler*/
-int function_key_handle(char scan_button);
+int function_key_handle(unsigned int key);
 /*set the key buffer to initial state*/
 void clear_keyboard_buffer(void);
 
