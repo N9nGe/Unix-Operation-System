@@ -257,6 +257,17 @@ int page_test_kernal_invalid_bottom() {
 	printf("Test location: %d", test);
 	return result;
 }
+
+/* rtc_set_freq_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test change of the freq of the rtc
+ */
+void rtc_set_freq_test() {
+	TEST_HEADER;
+	rtc_set_freq(8); // the number can be change as 2^(form 1 to 15)
+}
+
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -273,12 +284,16 @@ void launch_tests(){
 	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
 	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
 	// TEST_OUTPUT("test_system_call", test_system_call());
-	/*Test for i8259*/
-	i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
-	i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
-	i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
-	i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
+	// /*Test for i8259*/
+	// i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
+	// i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
+	// i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
+	// i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
 
+	/*Test for rtc set frequency*/
+	// rtc_set_freq_test();
+
+	/*Test for Paging */
 	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
