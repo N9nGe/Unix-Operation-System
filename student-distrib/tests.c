@@ -54,10 +54,46 @@ int idt_test(){
 
 /****** PAGING TESTS ******/
 
+int page_dir_struct_test() {
+	TEST_HEADER;
+	int result = FAIL;
+	clear();
+	if (page_directory[0].pd_kb.present == 1 && page_directory[1].pd_mb.present == 1) {
+		if (page_directory[3].pd_kb.present == 0) { // 3 change be change by from 2 - 1023 (the no present page directory entry)
+			result = PASS;
+			printf("Paging Directory Construct Successfully!\n");
+		} else {
+			printf("Paging Directory Construct Fail!\n");
+		}
+	} else {
+		printf("Paging Directory Construct Fail!\n");
+	}
+	
+	return result;
+}
+
+int page_table_struct_test() {
+	TEST_HEADER;
+	int result = FAIL;
+	clear();
+	if (page_table[0].present == 0 && page_table[5].present == 0) { // index can be 0-1023 rather than xb8;
+		if (page_table[VIDEO_MEMORY >> PT_SHIFT].present == 1) { // 3 change be change by from 2 - 1023 (the no present page directory entry)
+			result = PASS;
+			printf("Paging Table Construct Successfully!\n");
+		} else {
+			printf("Paging Table Construct Fail!\n");
+		}
+	} else {
+		printf("Paging Table Construct Fail!\n");
+	}
+	return result;
+}
+
 /* page_test_video_mem_valid()
  * Inputs: none
  * Return Value: test result
- * Function: test the case of dereferencing a valid video memory location */
+ * Function: test the case of dereferencing a valid video memory location 
+ */
 int page_test_video_mem_valid() {
 	TEST_HEADER;
 	int result = PASS;
@@ -152,9 +188,11 @@ int page_test_kernal_invalid_bottom() {
 /* Test suite entry point */
 void launch_tests(){
 	// TEST_OUTPUT("idt_test", idt_test());
+	TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
+	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
 	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());
-	TEST_OUTPUT("page_test_video_mem_bottom_invalid", page_test_video_mem_bottom_invalid());
+	// TEST_OUTPUT("page_test_video_mem_bottom_invalid", page_test_video_mem_bottom_invalid());
 	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
 	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
