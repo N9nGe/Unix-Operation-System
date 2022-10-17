@@ -52,7 +52,7 @@ char * exception_output[EXCEPTION_19 + 1] = {
 
 void exception_handler_n (unsigned int n) {
     clear();
-    printf ("%s\n",exception_output[n]);
+    printf ("\n\n\n\n\n\n===============   %s    ===============\n  ",exception_output[n]);
     while (1);
     
 }
@@ -154,58 +154,6 @@ void simd_floating_point_exception () {
 /*__________________________________________________________________*/
 
 /*
-void virtualization_exception () {
-    exception_handler_n (20);
-}
-
-void control_protection_exception () {
-    exception_handler_n (21);
-}
-
-void reserved2_exception () {
-    exception_handler_n (22);
-}
-
-void reserved3_exception () {
-    exception_handler_n (23);
-}
-
-void reserved4_exception () {
-    exception_handler_n (24);
-}
-
-void reserved5_exception () {
-    exception_handler_n (25);
-}
-
-void reserved6_exception () {
-    exception_handler_n (26);
-}
-
-void reserved7_exception () {
-    exception_handler_n (27);
-}
-
-void hypervisor_injection_exception () {
-    exception_handler_n (28);
-}
-
-void vmm_communication_exception () {
-    exception_handler_n (29);
-}
-
-void security_exception () {
-    exception_handler_n (30);
-}
-
-void reserved8_exception () {
-    exception_handler_n (31);
-}
-*/
-
-
-
-/*
  * system_call_handler ()
  * DESCRIPTION: Doesn't have other functionality yet.
  * Only prints system call. Located at 0x80 in the IDT
@@ -303,20 +251,6 @@ void idt_init () {
     SET_IDT_ENTRY(idt[EXCEPTION_17], alignment_check_exception);
     SET_IDT_ENTRY(idt[EXCEPTION_18], machine_check_exception);
     SET_IDT_ENTRY(idt[EXCEPTION_19], simd_floating_point_exception);
-    /*
-    SET_IDT_ENTRY(idt[20], virtualization_exception);
-    SET_IDT_ENTRY(idt[21], control_protection_exception);
-    SET_IDT_ENTRY(idt[22], reserved2_exception);
-    SET_IDT_ENTRY(idt[23], reserved3_exception);
-    SET_IDT_ENTRY(idt[24], reserved4_exception);
-    SET_IDT_ENTRY(idt[25], reserved5_exception);
-    SET_IDT_ENTRY(idt[26], reserved6_exception);
-    SET_IDT_ENTRY(idt[27], reserved7_exception);
-    SET_IDT_ENTRY(idt[28], hypervisor_injection_exception);
-    SET_IDT_ENTRY(idt[29], vmm_communication_exception);
-    SET_IDT_ENTRY(idt[30], security_exception);
-    SET_IDT_ENTRY(idt[31], reserved8_exception);
-    */
 
     // add interrupt handlers for keyboard and rtc to the IDT
     // and complete corresponding setup in idt array

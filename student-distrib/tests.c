@@ -194,12 +194,12 @@ int page_dir_struct_test() {
 	if (page_directory[0].pd_kb.present == 1 && page_directory[1].pd_mb.present == 1) {
 		if (page_directory[3].pd_kb.present == 0) { // 3 change be change by from 2 - 1023 (the no present page directory entry)
 			result = PASS;
-			printf("Paging Directory Construct Successfully!\n");
+			printf(" Paging Directory Construct Successfully!\n");
 		} else {
-			printf("Paging Directory Construct Fail!\n");
+			printf(" Paging Directory Construct Fail!\n");
 		}
 	} else {
-		printf("Paging Directory Construct Fail!\n");
+		printf(" Paging Directory Construct Fail!\n");
 	}
 	
 	return result;
@@ -212,12 +212,12 @@ int page_table_struct_test() {
 	if (page_table[0].present == 0 && page_table[5].present == 0) { // index can be 0-1023 rather than xb8;
 		if (page_table[VIDEO_MEMORY >> PT_SHIFT].present == 1) { // 3 change be change by from 2 - 1023 (the no present page directory entry)
 			result = PASS;
-			printf("Paging Table Construct Successfully!\n");
+			printf(" Paging Table Construct Successfully!\n");
 		} else {
-			printf("Paging Table Construct Fail!\n");
+			printf(" Paging Table Construct Fail!\n");
 		}
 	} else {
-		printf("Paging Table Construct Fail!\n");
+		printf(" Paging Table Construct Fail!\n");
 	}
 	return result;
 }
@@ -233,8 +233,8 @@ int page_test_video_mem_valid() {
 	uint32_t *ptr = (uint32_t *) VIDEO_START;
 	int test = *ptr;
 	clear();
-	printf("Paging Video Memory Success!\n");
-	printf("Test location: %d", test);
+	printf(" Paging Video Memory Success!\n");
+	printf(" Test location: %d", test);
 	return result;
 }
 
@@ -250,7 +250,7 @@ int page_test_video_mem_invalid() {
 	uint32_t *ptr = (uint32_t *) VIDEO_START-1;
 	int test = *ptr;
 	clear();
-	printf("Test location: %d", test);
+	printf(" Test location: %d", test);
 	return result;
 }
 
@@ -266,7 +266,7 @@ int page_test_video_mem_bottom_invalid() {
 	int result = PASS;
 	uint32_t *ptr = (uint32_t *) VIDEO_END;
 	int test = *ptr;
-	printf("Test location: %d", test);
+	printf(" Test location: %d", test);
 	return result;
 }
 
@@ -280,8 +280,8 @@ int page_test_kernal_valid() {
 	uint32_t *ptr = (uint32_t *) KERNAL_START;
 	int test = *ptr;
 	clear();
-	printf("Paging Kernal Sussess!\n");
-	printf("Test location: %d", test);
+	printf(" Paging Kernal Sussess!\n");
+	printf(" Test location: %d", test);
 	return result;
 }
 
@@ -295,7 +295,7 @@ int page_test_kernal_invalid_top() {
 	uint32_t *ptr = (uint32_t *) KERNAL_START-1;
 	int test = *ptr;
 	clear();
-	printf("Test location: %d", test);
+	printf(" Test location: %d", test);
 	return result;
 }
 
@@ -309,7 +309,7 @@ int page_test_kernal_invalid_bottom() {
 	uint32_t *ptr = (uint32_t *) KERNAL_END;
 	int test = *ptr;
 	clear();
-	printf("Test location: %d", test);
+	printf(" Test location: %d", test);
 	return result;
 }
 
@@ -333,7 +333,7 @@ void rtc_set_freq_test() {
 // launch your tests here
 void launch_tests(){
 	printf("---------------TEST CP1 START--------------\n");	
-	TEST_OUTPUT("idt_test", idt_test());
+	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
 	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
@@ -349,7 +349,7 @@ void launch_tests(){
 	// rtc_set_freq_test();
 
 	/*Test for Paging */
-	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
+	TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
 	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());
