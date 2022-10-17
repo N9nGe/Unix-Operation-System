@@ -43,7 +43,7 @@ void keyboard_interrupt_handler(){
     // cli(); // Clear all the interrupt first
     unsigned int key;
     unsigned int value;
-
+    printf("KEY pressed [");
     key = inb(KEYBOARD_PORT) & 0xff;
     value = scancode[key];
     
@@ -61,7 +61,7 @@ void keyboard_interrupt_handler(){
     {
         reset_keyboard_buffer();
     }
-    
+    printf("] ");
     return;
 };
 /* 

@@ -23,7 +23,8 @@ uint8_t slave_mask;  /* IRQs 8-15 */
 void i8259_init(void) {
     // printf("Initializing the PIC...\n");
     unsigned long flags;  // EFLAG saving 
-    master_mask = 0xff;
+    // First mask all irq port to disabled
+    master_mask = 0xff;   
     slave_mask  = 0xff;
     cli_and_save(flags);
     outb(master_mask,MASTER_8259_DATA);
@@ -44,7 +45,7 @@ void i8259_init(void) {
     outb(slave_mask, SLAVE_8259_DATA);
     
     // TODO 
-    enable_irq( 0x02 ); // Cascade to slave
+    enable_irq( SLAVE_IRQ ); // Cascade to slave
     sti(); // why we should call it here
     restore_flags(flags);
     // printf("Finished initializing the PIC\n");
@@ -78,7 +79,7 @@ void enable_irq(uint32_t irq_num) {
 
     }
     return;
-    // TODO : correct value
+
 }
 /* 
  * disable_irq
@@ -133,7 +134,7 @@ void send_eoi(uint32_t irq_num) {
         irq_num |= EOI;         // So slave can find right ports
         outb(irq_num,SLAVE_8259_PORT);
         outb(EOI | SLAVE_IRQ,MASTER_8259_PORT);
-        // Here we acknowledge the master pic 
+        // Here we need to acknowledge the master pic 
 
     }
 }
