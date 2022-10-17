@@ -1,9 +1,14 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "paging.h"
 
 #define PASS 1
 #define FAIL 0
+#define KERNAL_START 0x400000
+#define KERNAL_END	 0x800000
+#define VIDEO_START  0xB8000
+#define VIDEO_END	 0xB9000	 
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -47,6 +52,97 @@ int idt_test(){
 
 // add more tests here
 
+/****** PAGING TESTS ******/
+
+/* page_test_video_mem_valid()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the case of dereferencing a valid video memory location */
+int page_test_video_mem_valid() {
+	TEST_HEADER;
+	int result = PASS;
+	uint32_t *ptr = (uint32_t *) VIDEO_START;
+	int test = *ptr;
+	clear();
+	printf("Paging Video Memory Success!\n");
+	printf("Test location: %d", test);
+	return result;
+}
+
+/* page_test_video_mem_invalid()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the case of dereferencing the invalid video memory location
+ * 			 above video memory
+ */
+int page_test_video_mem_invalid() {
+	TEST_HEADER;
+	int result = PASS;
+	uint32_t *ptr = (uint32_t *) VIDEO_START-1;
+	int test = *ptr;
+	clear();
+	printf("Test location: %d", test);
+	return result;
+}
+
+/* page_test_video_mem_bottom_invalid()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the case of dereferencing the invalid video memory location
+ *			 below video memory
+ */
+int page_test_video_mem_bottom_invalid() {
+	TEST_HEADER;
+	clear();
+	int result = PASS;
+	uint32_t *ptr = (uint32_t *) VIDEO_END;
+	int test = *ptr;
+	printf("Test location: %d", test);
+	return result;
+}
+
+/* page_test_kernal_valid()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the case of dereferencing a valid kernal location */
+int page_test_kernal_valid() {
+	TEST_HEADER;
+	int result = PASS;
+	uint32_t *ptr = (uint32_t *) KERNAL_START;
+	int test = *ptr;
+	clear();
+	printf("Paging Kernal Sussess!\n");
+	printf("Test location: %d", test);
+	return result;
+}
+
+/* page_test_kernal_invalid_top()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the case of dereferencing an invalid kernal location*/
+int page_test_kernal_invalid_top() {
+	TEST_HEADER;
+	int result = PASS;
+	uint32_t *ptr = (uint32_t *) KERNAL_START-1;
+	int test = *ptr;
+	clear();
+	printf("Test location: %d", test);
+	return result;
+}
+
+/* page_test_kernal_invalid_bottom()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the case of dereferencing a valid kernal location */
+int page_test_kernal_invalid_bottom() {
+	TEST_HEADER;
+	int result = PASS;
+	uint32_t *ptr = (uint32_t *) KERNAL_END;
+	int test = *ptr;
+	clear();
+	printf("Test location: %d", test);
+	return result;
+}
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -55,6 +151,12 @@ int idt_test(){
 
 /* Test suite entry point */
 void launch_tests(){
-	TEST_OUTPUT("idt_test", idt_test());
+	// TEST_OUTPUT("idt_test", idt_test());
+	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
+	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());
+	TEST_OUTPUT("page_test_video_mem_bottom_invalid", page_test_video_mem_bottom_invalid());
+	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
+	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
+	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
 	// launch your tests here
 }

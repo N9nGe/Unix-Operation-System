@@ -66,4 +66,6 @@ void security_exception ();
 
 void reserved8_exception ();
 
+void add_int_handler_setup (unsigned int n);
+
 void idt_init ();

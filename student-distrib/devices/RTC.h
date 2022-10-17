@@ -1,8 +1,8 @@
 #ifndef _RTC_H_
 #define _RTC_H_
 
-#include "../student-distrib/lib.h"
-#include "../student-distrib/types.h"
+#include "../lib.h"
+#include "../types.h"
 
 // The default IRQ in the PIC
 #define RTC_IRQ         8

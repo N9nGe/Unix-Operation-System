@@ -1,8 +1,9 @@
 #include "x86_desc.h"
-//#include "../syscalls/ece391syscall.h"
 #include "i8259.h"
 #include "lib.h"
 #include "idt.h"
+#include "devices/RTC.h"
+#include "devices/keyboard.h"
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
@@ -50,7 +51,10 @@ char * exception_output[32] = {
  */
 
 void exception_handler_n (unsigned int n) {
+    clear();
     printf ("%s\n",exception_output[n]);
+    while (1);
+    
 }
 
 void divide_by_zero_exception () {
@@ -181,6 +185,11 @@ void reserved8_exception () {
     exception_handler_n (31);
 }
 
+void add_int_handler_setup (unsigned int n) {
+    idt[n].present = 1;
+    idt[n].dpl = 0;
+}
+
 void idt_init () {
     int i;
 
@@ -189,14 +198,21 @@ void idt_init () {
         idt[i].offset_15_00 = 0;
         idt[i].seg_selector = KERNEL_CS;
         idt[i].reserved4 = 0;
-        idt[i].reserved3 = 1;
+        idt[i].reserved3 = 0;
         idt[i].reserved2 = 1;
         idt[i].reserved1 = 1;
         idt[i].size      = 1;
-        idt[i].reserved0 = 1;
+        idt[i].reserved0 = 0;
+        idt[i].dpl = 0;
+        idt[i].present = 0;
+        idt[i].offset_31_16 = 0;
+    }
+
+    // 32 slots for exception handler
+
+    for (i = 0; i < 32; i++) {
         idt[i].dpl = 0;
         idt[i].present = 1;
-        idt[i].offset_31_16 = 0;
     }
 
     SET_IDT_ENTRY(idt[0], divide_by_zero_exception);
@@ -232,12 +248,8 @@ void idt_init () {
     SET_IDT_ENTRY(idt[30], security_exception);
     SET_IDT_ENTRY(idt[31], reserved8_exception);
 
-    // 32 slots for exception handler
-    /*
-    for (i = 0; i < 32; i++) {
-        SET_IDT_ENTRY(idt[i], exception_handler(i));
-    }
-    */
+    SET_IDT_ENTRY(idt[0x21], keyboard_interrupt_handler);
+    add_int_handler_setup(0x21);
 
     return;
 }
