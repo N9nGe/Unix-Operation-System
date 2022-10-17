@@ -176,7 +176,7 @@ void reserved8_exception () {
 }
 */
 
-void system_call () {
+void system_call_handler () {
     printf("system call");
 }
 
@@ -252,7 +252,7 @@ void idt_init () {
     SET_IDT_ENTRY(idt[0x28], rtc_handler_linkage);
     add_intr_handler_setup(0x28);
 
-    SET_IDT_ENTRY(idt[0X80], system_call);
+    SET_IDT_ENTRY(idt[0X80], system_call_handler);
     idt[0X80].dpl = 3;
     idt[0X80].present = 1;
     

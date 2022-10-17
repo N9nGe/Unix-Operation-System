@@ -43,7 +43,7 @@ int idt_test(){
 
 	int i;
 	int result = PASS;
-	for (i = 0; i < 10; ++i){
+	for (i = 0; i < 20; ++i){
 		if ((idt[i].offset_15_00 == NULL) && 
 			(idt[i].offset_31_16 == NULL)){
 			assertion_failure();
@@ -128,33 +128,6 @@ void i8259_enable_irq_test(){
 	// Simply open the devices
 	enable_irq(KEYBOARD_IRQ);
 	enable_irq(RTC_IRQ);
-}
-
-// Notice : to test it, you need uncomment here first
-int div_by_zero_test (){
-	TEST_HEADER;
-
-	int i = 10;
-	int result = PASS;
-	// i = i / 0;
-
-	return result;
-}
-
-int deref_null_pointer_test (){
-	TEST_HEADER;
-	//int i;
-	//int a[3] = {0,0,0};
-	int result = PASS;
-	/*for (i = 0; i < 11; i++) {
-		printf("%d", a[i]);
-	}*/
-	int *p = NULL;
-	*p = 1;
-	//asm volatile ("INT $3");  
-
-
-	return result;
 }
 
 /****** PAGING TESTS ******/
@@ -293,21 +266,19 @@ int page_test_kernal_invalid_bottom() {
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
-	printf("---------------TEST CP1 START--------------\n");
+	printf("---------------TEST CP1 START--------------\n");	
+	TEST_OUTPUT("idt_test", idt_test());
+	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
+	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
+	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
+	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
+	// TEST_OUTPUT("test_system_call", test_system_call());
 	/*Test for i8259*/
 	i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
 	i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
 	i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
 	i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
 
-
-	
-	// TEST_OUTPUT("idt_test", idt_test());
-	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
-	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
-	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
-	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
-	// TEST_OUTPUT("test_system_call", test_system_call());
 	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
 	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
 	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
