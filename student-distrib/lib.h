@@ -81,20 +81,6 @@ do {                                    \
             : "memory", "cc"            \
     );                                  \
 } while (0)
-/*– add PAUSE instruction after OUTB; “REP NOP” prior to P4
-– delay needed for old devices that cannot handle 
-processor’s output rate
-*/
-#define outb_p(data,port)               \
-do {                                    \
-    asm volatile ("outb_p %b1, (%w0)"     \
-            :                           \
-            : "d"(port), "a"(data)      \
-            : "memory", "cc"            \
-            : 
-    );                                  \
-} while (0)
-
 
 /* Writes two bytes to two consecutive ports */
 #define outw(data, port)                \
