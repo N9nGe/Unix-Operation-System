@@ -24,7 +24,20 @@ _start:
     jmp     continue
 
 continue:
-    # Load the GDT
+    # Load the GDT to GDT register by using "lgdt" opcode
+    lgdt gdt_desc_ptr
+
+    # initialize the idt with our idt tabel
+    pushl %eax
+    pushl %edx
+    pushl %ecx
+    call idt_init
+    popl %ecx
+    popl %edx
+    popl %eax
+
+    # Load the IDT to IDT register by using "lidt" opcode
+    lidt idt_desc_ptr
 
     # Load CS with the new descriptor value
     ljmp    $KERNEL_CS, $keep_going

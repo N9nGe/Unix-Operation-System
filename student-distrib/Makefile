@@ -1,4 +1,4 @@
-# Makefile for MentOS project
+# Makefile for OS project
 # To build, first `make dep`, them `make`. Everything should be automatic.
 # Will compile all *.c and *.S files in the current directory.
 
@@ -35,14 +35,11 @@ clean:
 	rm -f *.o */*.o Makefile.dep
 
 go:
-	make clean && make dep && make
+	make clean 
+	make dep
+	sudo make
 
-submit:
-	git status
-	git add -u 
-	git commit -m "Update using Makefile"
-	git push
-	git status
+
 
 ifneq ($(MAKECMDGOALS),dep)
 ifneq ($(MAKECMDGOALS),clean)

@@ -29,6 +29,12 @@
  * to declare the interrupt finished */
 #define EOI                 0x60
 
+
+/*Magic Number: Domain of irq*/
+#define IRQ_NUM_MIN 0
+#define IRQ_NUM_MAX 15
+#define PORTS_LIMIT 8
+#define SLAVE_IRQ   0x02
 /* Externally-visible functions */
 
 /* Initialize both PICs */

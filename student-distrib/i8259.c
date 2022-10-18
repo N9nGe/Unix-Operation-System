@@ -4,7 +4,7 @@
 
 #include "i8259.h"
 #include "lib.h"
-#include<stdio.h>  // TODO
+#include "types.h"
 
 /* Interrupt masks to determine which interrupts are enabled and disabled */
 uint8_t master_mask; /* IRQs 0-7  */
@@ -21,10 +21,11 @@ uint8_t slave_mask;  /* IRQs 8-15 */
  */
 // about 14 col
 void i8259_init(void) {
+    // printf("Initializing the PIC...\n");
     unsigned long flags;  // EFLAG saving 
-    master_mask = 0xff;
+    // First mask all irq port to disabled
+    master_mask = 0xff;   
     slave_mask  = 0xff;
-    // printf("initiliazing the PIC")
     cli_and_save(flags);
     outb(master_mask,MASTER_8259_DATA);
     outb(slave_mask,SLAVE_8259_DATA);
@@ -43,10 +44,11 @@ void i8259_init(void) {
     outb(master_mask, MASTER_8259_DATA);
     outb(slave_mask, SLAVE_8259_DATA);
     
-
-    enable_irq( ICW3_SLAVE );
-    sti() // why we should call it here
+    
+    enable_irq( SLAVE_IRQ ); // Cascade to slave
+    sti(); // why we should call it here
     restore_flags(flags);
+    // printf("Finished initializing the PIC\n");
 }
 
 
@@ -61,22 +63,23 @@ void i8259_init(void) {
  */
 // about 6
 void enable_irq(uint32_t irq_num) {
-    if (irq_num < 0 || irq_num > 15){   
-        printf("Failed to find corrsponding port");
+    // printf("Enabling the irq #%d\n",irq_num);
+    if (irq_num < IRQ_NUM_MIN || irq_num > IRQ_NUM_MAX){    
+        printf("Failed to find corrsponding port\n");
         return ;
     }
-    if (irq_num <8)
+    if (irq_num <PORTS_LIMIT)
     {// if it is master 
         master_mask &= ~( 1 << irq_num);
-        outb(master_mask,MASTER_8259_DATA);
+        outb(master_mask, MASTER_8259_DATA);
 
     }else{// then it's slave
-        slave_mask &= ~(1 << (irq_num-8));
-        outb(slave_mask,SLAVE_8259_DATA);
+        slave_mask &= ~(1 << (irq_num - PORTS_LIMIT));
+        outb(slave_mask, SLAVE_8259_DATA);
 
     }
-    
-    // TODO : correct value
+    return;
+
 }
 /* 
  * disable_irq
@@ -90,20 +93,21 @@ void enable_irq(uint32_t irq_num) {
 
 // about 6 
 void disable_irq(uint32_t irq_num) {
-    if (irq_num < 0 || irq_num > 15){   
-        printf("Failed to find corrsponding port");
+    // printf("Disabling the irq #%d\n",irq_num);
+    if (irq_num < IRQ_NUM_MIN || irq_num > IRQ_NUM_MAX){   
+        printf("Failed to find corrsponding port\n");
         return;
     }
-    if (irq_num <8)
+    if (irq_num < PORTS_LIMIT)
     {// if it is master 
-        master_mask |= ~(1 << irq_num);
+        master_mask |= 1 << irq_num;
         outb(master_mask,MASTER_8259_DATA);
 
     }else{// then it's slave
-        slave_mask |= ~(1 << (irq_num-8));
+        slave_mask |= 1 << (irq_num- PORTS_LIMIT);
         outb(slave_mask,SLAVE_8259_DATA);
-
     }
+    return;
 }
 /* 
  * send_eoi
@@ -116,19 +120,21 @@ void disable_irq(uint32_t irq_num) {
  */
 // about 5
 void send_eoi(uint32_t irq_num) {
-    if (irq_num < 0 || irq_num > 15){   
-        printf("Failed to find corrsponding port");
+    if (irq_num < IRQ_NUM_MIN || irq_num > IRQ_NUM_MAX){   
+        printf("\nFailed to find corrsponding port\n");
         return ;
     }
-    if (irq_num <8)
+    if (irq_num < PORTS_LIMIT)
     {// if it is master 
-        master_mask |= EOI;
-        outb(master_mask,MASTER_8259_PORT);
+        irq_num |= EOI;
+        outb(irq_num,MASTER_8259_PORT);
 
     }else{// then it's slave
-        slave_mask |= EOI;
-        outb(slave_mask,SLAVE_8259_PORT);
-        // TODO: OR WTIH 2?
+        irq_num -= PORTS_LIMIT; // Here we must minus the irqnum with 8
+        irq_num |= EOI;         // So slave can find right ports
+        outb(irq_num,SLAVE_8259_PORT);
+        outb(EOI | SLAVE_IRQ,MASTER_8259_PORT);
+        // Here we need to acknowledge the master pic 
 
     }
 }
