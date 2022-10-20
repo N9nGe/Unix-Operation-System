@@ -2,6 +2,8 @@
 #include "lib.h"
 #include "types.h"
 
+#define FILENAME_LEN    32
+
 typedef struct data_block {
     uint32_t random;
 } data_block_t;
@@ -11,13 +13,18 @@ typedef struct inode {
 } inode_t;
 
 typedef struct dentry {
-    uint32_t random;
+    uint8_t filename[FILENAME_LEN];
+    uint32_t filetype;
+    uint32_t inode_num;
+    uint8_t reserved[24];
 } dentry_t;
 
 typedef struct boot_block {
     uint32_t dentry_number;
     uint32_t inode_number;
     uint32_t data_blocks;
+    uint8_t reserved[52];
+    dentry_t dir_entries[63];
 } boot_block_t;
 
 void file_system_init(uint32_t* fs_start);
