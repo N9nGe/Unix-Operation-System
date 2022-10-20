@@ -13,11 +13,16 @@ void file_system_init(uint32_t* fs_start) {
 }
 
 int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry){
-
+    uint32_t idx;
+    for (idx = 0; idx < sizeof(dentry); idx++) {
+        if (strncmp(fname, dentry[idx].filename) == 0) {
+            break;
+        }
+    }
 }
 
-int32_t read_dentry_by_index(const uint8_t* fname, dentry_t* dentry){
-
+int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
+    
 }
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
