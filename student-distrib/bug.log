@@ -139,3 +139,27 @@ Description:
 Solution:
     I have to set the corresponding interrupt handler's reserved3
     to 0 when initializing the IDT
+
+
+    <=========================================================>
+    <=================>    BUG LOG HEADER   <=================>
+    <=========================================================>
+    Assignment:
+        MP3
+    CheckPoint:
+        CP2
+    CreateTime:
+        2022.10.20
+<--------------------------------------------------------->
+                          BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.??.??.
+Creator:
+    First Last.
+Description:
+    ....
+Solution:
+    ....
+
+    
