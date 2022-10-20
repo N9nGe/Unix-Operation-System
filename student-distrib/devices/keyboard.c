@@ -16,10 +16,13 @@
 int i = 0;            // #input counter 
 unsigned int pre = 0; // buffer to record last input key
 int ctrl_buf = 0;     // Ctrl buf
+
+int8_t keyboard_buf[KEY_BUF_SIZE]  = {'0'};
+
+
 /*The CP1 edition scancode list*/
 // CP1 : we only use a limited set 1
 // No cap no shift
-
 unsigned char scancode[MAX_SCAN_SIZE] = 
 {   0,0,'1','2','3','4','5','6','7','8','9','0','-','=',0,
     0,'q','w','e','r','t','y','u','i','o','p','[',']','\n',
@@ -27,6 +30,8 @@ unsigned char scancode[MAX_SCAN_SIZE] =
     'z','x','c','v','b','n','m',',','.','/',0,0,0,
     '\0'
 };
+
+//space probably has problem
 
 
 /* 
@@ -64,15 +69,19 @@ void keyboard_interrupt_handler(){
         if( 1){// Used for later structure
             // printf("KEY pressed [");
             if (function_key_handle(key) == 1){
-                putc('\0'); // Default input for function key in CP1
+             // Default input for function key in CP1
             }else{
+                if (ctrl_buf == 1 && value == 'l'){
+                    clear();
+                    printf("\n\n\n clear the screen\n");
+                    // sti();
+                    return;
+                }
                 // Clear the screen when necessary
                 putc(value);
             }
             // printf("] ");
         }
-        i++;
-        pre = value;
         if (i > MAX_INPUT_COUNT)
         {
             reset_keyboard_buffer();

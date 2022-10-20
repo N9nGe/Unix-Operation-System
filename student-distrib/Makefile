@@ -34,6 +34,13 @@ Makefile.dep: $(SRC)
 clean:
 	rm -f *.o */*.o Makefile.dep
 
+submit:
+	git status
+	git add -u
+	git commit -m "Small Update using Makefile"
+	git push
+	git status
+
 go:
 	make clean 
 	make dep
