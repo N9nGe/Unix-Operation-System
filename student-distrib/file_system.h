@@ -9,20 +9,21 @@ typedef struct data_block {
 } data_block_t;
 
 typedef struct inode {
-    uint32_t random;
+    uint32_t length;
+    uint32_t 
 } inode_t;
 
 typedef struct dentry {
     uint8_t filename[FILENAME_LEN];
     uint32_t filetype;
-    uint32_t inode_num;
+    uint32_t inode_num;     // inode number
     uint8_t reserved[24];
 } dentry_t;
 
 typedef struct boot_block {
-    uint32_t dentry_number;
-    uint32_t inode_number;
-    uint32_t data_blocks;
+    uint32_t dentry_cunt;          // number of direct entries
+    uint32_t inode_cunt;           // number of inodes
+    uint32_t data_blocks_cunt;     // number of data blocks
     uint8_t reserved[52];
     dentry_t dir_entries[63];
 } boot_block_t;
