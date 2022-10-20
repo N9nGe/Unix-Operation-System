@@ -4,7 +4,10 @@
 
 static uint32_t log_2(uint32_t freq);
 extern void test_interrupts(void);
+// the state rate in CP2
 static uint32_t current_rate = 2;
+// the flag to represent the rtc flag
+static uint8_t rtc_flag;
 
 /* uint8_t rtc_init()
  * Inputs: none
@@ -71,7 +74,9 @@ void rtc_interrupt() {
     cli();
     // test IRQ
     // test_interrupts();
-
+    
+    // rtc interrupt occurs -> set the flag to 1
+    rtc_flag = 1;
     // read register C to ensure interrupt happen again
     outb(RTC_C_OFFSET, RTC_PORT_INDEX); // select register C
     inb(RTC_PORT_CMOS);                 // just throw away contents
@@ -84,6 +89,8 @@ void rtc_interrupt() {
  * Return Value: the log_2 of the input freq
  * Function: convert the frequency to the log2 form
  */
+//TODO: this is a bug of the rtc current rate, it is the temp rate for calculate not the actural rate for the rtc
+//      need to be fix!!!
 uint32_t log_2(uint32_t freq) {
     // freq should be power of two
     // invalid input freq, no change for the rtc
@@ -104,7 +111,7 @@ uint32_t log_2(uint32_t freq) {
 /* int32_t rtc_open(const uint8_t * filename)
  * Inputs: filename  (//TODO: no need currently, not sure for later checkpoint)
  * Return Value: 0 for success, -1 for the named file does not exist or no descriptors are free
- * Function: use for open system call for rtc
+ * Function: use for open system call to rtc
  */
 int32_t rtc_open(const uint8_t * filename) {
     // pass the default freq = 2Hz into the rtc
@@ -112,9 +119,19 @@ int32_t rtc_open(const uint8_t * filename) {
     return 0;
 }
 
-
+/* int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes)
+ * Inputs: int32_t fd
+ *         void* buf
+ *         int32_t nbytes
+ *         *(//TODO:The above stuff is not used in CP2)
+ * Return Value: 0 for success(always)
+ * Function: For the real-time clock (RTC), this system call should always return 0, but only after an interrupt has
+ *           occurred (set a flag and wait until the interrupt handler clears it, then return 0). (Appendix B: read system call)
+ */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
-
+    // set the rtc flag become 0(rtc interrupt not occur -> do not return)
+    rtc_flag = 0;
+    while(rtc_flag == 0); // if rtc interrupt occur, the flag will be set to one and then break the while loop. 
     return 0;
 }
 
@@ -126,7 +143,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
 /* int32_t rtc_close(int32_t fd)
  * Inputs: fd  
  * Return Value: 0 for success, -1 for trying to close an invalid descriptor
- * Function: for the system call for rtc to close the specified file descriptor and makes fd available
+ * Function: for the system call to rtc to close the specified file descriptor and makes fd available
  */
 int32_t rtc_close(int32_t fd) {
     // do nothing (//TODO: what the meaning of the RTC virtualization?)
