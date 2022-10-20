@@ -104,7 +104,7 @@ uint32_t log_2(uint32_t freq) {
 /* int32_t rtc_open(const uint8_t * filename)
  * Inputs: filename  (//TODO: no need currently, not sure for later checkpoint)
  * Return Value: 0 for success, -1 for the named file does not exist or no descriptors are free
- * Function: convert the frequency to the log2 form
+ * Function: use for open system call for rtc
  */
 int32_t rtc_open(const uint8_t * filename) {
     // pass the default freq = 2Hz into the rtc
@@ -112,15 +112,23 @@ int32_t rtc_open(const uint8_t * filename) {
     return 0;
 }
 
+
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
 
     return 0;
 }
 
+
 int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
 
 }
 
+/* int32_t rtc_close(int32_t fd)
+ * Inputs: fd  
+ * Return Value: 0 for success, -1 for trying to close an invalid descriptor
+ * Function: for the system call for rtc to close the specified file descriptor and makes fd available
+ */
 int32_t rtc_close(int32_t fd) {
-
+    // do nothing (//TODO: what the meaning of the RTC virtualization?)
+    return 0;
 }
