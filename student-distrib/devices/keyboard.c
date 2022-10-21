@@ -131,7 +131,7 @@ void keyboard_interrupt_handler(){
     }
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
-        if( caps_lock == 1 || shift_buf == 1){// decide the scancode
+        if( shift_buf == 1){// decide the scancode
         // TODO 
             value = scancode[key][1];
         }
@@ -143,6 +143,10 @@ void keyboard_interrupt_handler(){
                     return;
                 }
                 // Clear the screen when necessary
+                if ((value >= 'a' && value <= 'z') && caps_lock == 1){
+                    value = scancode[key][1];
+                }
+                
                 putc(value);
 
             // printf("] ");
@@ -150,7 +154,7 @@ void keyboard_interrupt_handler(){
     
     sti();
     return;
-};
+}
 /* 
  * function_key_handle
  *  DESCRIPTION: a function port for further CP usage 
