@@ -1,5 +1,5 @@
 #include"../lib.h"
-#include"types.h"
+#include"../types.h"
 #include"keyboard.h"
 
 
