@@ -52,13 +52,14 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
 }
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
-    // uint32_t node_len = inode_ptr[inode].length;
+    // error checking
+    if (inode < 0 || inode > 62) return -1;
+    if (buf == NULL) return -1;
+
     uint32_t inode_startblk_idx = offset / 4096;     // calculate which block to start with
-    uint32_t startblk_idx = offset % 4096;               // calculate the start index within the start block
+    uint32_t startblk_idx = offset % 4096;           // calculate the start byte within the start block
     uint32_t inode_endblk_idx;
     uint32_t endblk_idx;
-    // const uint32_t buffer_size = length / 4096 + 1;
-    data_block_t temp_buffer[4095];
 
     // calculate which block to end with 
     if (length > inode_ptr[inode].length)
@@ -66,24 +67,59 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     else
         inode_endblk_idx = (length + offset) / 4096;
 
-    endblk_idx = (length + offset) % 4096;      // calculate the end index within the end block
+    endblk_idx = (length + offset) % 4096;      // calculate the end byte within the end block
     
     uint32_t idx, i;
+    uint32_t buf_idx = 0;   // stores where we are at in the buffer
+    uint32_t block_idx;     // index to the data blocks
+    uint32_t bytes_read = 0;    // number of bytes read
+    inode_t curr_inode = inode_ptr[inode];
+    
+    // loop through each data_block_num entry in the current inode
     for (idx = inode_startblk_idx; idx < inode_endblk_idx; ++idx){
-        if (idx == inode_startblk_idx){
-            
-        }
-        else if (idx == inode_endblk_idx){
-            
-        }
-        else {
-            for (i = 0; i < 1023; ++i){
-                temp_buffer[idx-inode_startblk_idx].entry[i] = data_block_ptr[idx];
+
+        // if it's the first block
+        if (idx == inode_startblk_idx){ 
+            for (i = startblk_idx; i < 4096; ++i){
+                block_idx = curr_inode.data_block_num[idx];
+                // block_idx error checking
+                if (block_idx < 0)  // TODO CHECK UPPER BOUND
+                    return -1;
+                // copy data of the first block (from startblk_idx to the end of this block) to buffer 
+                buf[buf_idx] = data_block_ptr[block_idx].entry[i];
+                buf_idx++;
+                bytes_read++;
             }
-            
+        }
+
+        // if it's the last block
+        else if (idx == inode_endblk_idx){  
+            // copy the data of the last block (from 0 to endblk_idx) to buffer
+            for (i = 0; i < endblk_idx; ++i){
+                block_idx = curr_inode.data_block_num[idx];
+                // block_idx error checking
+                if (block_idx < 0)  // TODO CHECK UPPER BOUND
+                    return -1;
+                buf[buf_idx] = data_block_ptr[curr_inode.data_block_num[idx]].entry[i];
+                buf_idx++;
+                bytes_read++;
+            }
+        }
+
+        // if it's not the first or last block, copy the entire block
+        else {  
+            for (i = 0; i < 4096; ++i){
+                block_idx = curr_inode.data_block_num[idx];
+                // block_idx error checking
+                if (block_idx < 0)  // TODO CHECK UPPER BOUND
+                    return -1;
+                buf[buf_idx] = data_block_ptr[curr_inode.data_block_num[idx]].entry[i];
+                buf_idx++;
+                bytes_read++;
+            }
         }
     }
-    
+    return bytes_read;
 }
 
 int file_open(uint8_t* fname) {

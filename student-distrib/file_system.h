@@ -4,13 +4,13 @@
 
 #define FILENAME_LEN            32
 #define DATA_BLOCK_SIZE         1023
-#define DATA_BLOCK_ENTRY_SIZE   1024
+#define DATA_BLOCK_ENTRY_SIZE   4096
 #define DENTRY_RESERVED         24
 #define BOOT_BLOCK_RESERVED     52
 #define DENTRY_SIZE             63
 
 typedef struct data_block {
-    uint32_t entry[DATA_BLOCK_ENTRY_SIZE];
+    uint32_t entry[DATA_BLOCK_ENTRY_SIZE];  // *** changed size to 4096
 } data_block_t;
 
 typedef struct inode {
