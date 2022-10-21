@@ -15,23 +15,82 @@
 /* Set to avoid release repetition*/
 int i = 0;            // #input counter 
 unsigned int pre = 0; // buffer to record last input key
-int ctrl_buf = 0;     // Ctrl buf
+int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
+int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
+int caps_lock = 0;    // Capitalize the charcter
 
-int8_t keyboard_buf[KEY_BUF_SIZE]  = {'0'};
+// int8_t keyboard_buf[KEY_BUF_SIZE]  = {'0'};
 
 
-/*The CP1 edition scancode list*/
+/*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
-// No cap no shift
-unsigned char scancode[MAX_SCAN_SIZE] = 
-{   0,0,'1','2','3','4','5','6','7','8','9','0','-','=',0,
-    0,'q','w','e','r','t','y','u','i','o','p','[',']','\n',
-    0,'a','s','d','f','g','h','j','k','l',';',39, '`',0,'\\',
-    'z','x','c','v','b','n','m',',','.','/',0,0,0,
-    '\0'
+// we improved the layout pattern of scancode, to make it more easily modified
+unsigned char scancode[MAX_SCAN_SIZE][2] = 
+{   {0x0, 0x0}, // 0x00 not use
+    {0x0, 0x0}, // 0x01 esc
+    /* 0x02 - 0x0e, "1" to backspace */
+    {'1', '!'}, 
+    {'2', '@'},
+    {'3', '#'}, 
+    {'4', '$'},
+    {'5', '%'},
+    {'6', '^'},
+    {'7', '&'}, 
+    {'8', '*'},
+    {'9', '('}, 
+    {'0', ')'},
+    {'-', '_'}, 
+    {'=', '+'},
+    {'\b', '\b'}, //backspace
+/* 0x0f - 0x1b, tab to "}" */
+    {' ', ' '}, // tab
+    {'q', 'Q'}, 
+    {'w', 'W'},
+    {'e', 'E'}, 
+    {'r', 'R'},
+    {'t', 'T'}, 
+    {'y', 'Y'},
+    {'u', 'U'}, 
+    {'i', 'I'},
+    {'o', 'O'}, 
+    {'p', 'P'},
+    {'[', '{'}, 
+    {']', '}'},
+/* 0x1c - 0x28, enter to "'"*/
+    {'\n', '\n'}, // enter
+    {0x0, 0x0}, // Left Ctrl
+    {'a', 'A'},
+    {'s', 'S'},
+    {'d', 'D'}, 
+    {'f', 'F'},
+    {'g', 'G'}, 
+    {'h', 'H'},
+    {'j', 'J'}, 
+    {'k', 'K'},
+    {'l', 'L'}, 
+    {';', ':'},
+    {SINGLE_QUATE, DOUBLE_QUATE},
+/* 0x29 - 0x39 "`" to Spacebar*/
+    {'`', '~'}, // the mapping is so confusing for this 
+    {0x0, 0x0}, // Left Shift
+    {'\\', '|'},
+    {'z', 'Z'}, 
+    {'x', 'X'},
+    {'c', 'C'}, 
+    {'v', 'V'},
+    {'b', 'B'}, 
+    {'n', 'N'},
+    {'m', 'M'}, 
+    {',', '<'},
+    {'.', '>'}, 
+    {'/', '?'},
+    {0x0, 0x0}, // Right Shift
+    {0x0, 0x0}, // Left Control
+    {0x0, 0x0}, // left alt?  I wonder where is the Fn
+    {' ', ' '}, // SPACE
 };
 
-//space probably has problem
+
 
 
 /* 
@@ -54,40 +113,42 @@ void keyboard_init(void){
  *  OUTPUTS: none
  *  RETURN VALUE: none
  *  SIDE EFFECTS: none
+ *  Notice: I used a cli-sti to create a crtical section, but it may be
+ *  unnecessary?
  */
 void keyboard_interrupt_handler(){
     // printf("key pressed ");
-    // cli(); // Clear all the interrupt first
+    cli(); // Clear all the interrupt first
     send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
     // NOTICE: it must be here! 
     unsigned int key;
     unsigned int value;
     key = inb(KEYBOARD_PORT) & 0xff;
-    value = scancode[key];
+    value = scancode[key][0];// default as smaller
+    if (function_key_handle(key) == 1){
+        sti();
+        return;
+    }
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
-        if( 1){// Used for later structure
+        if( caps_lock == 1 || shift_buf == 1){// decide the scancode
+        // TODO 
+            value = scancode[key][1];
+        }
             // printf("KEY pressed [");
-            if (function_key_handle(key) == 1){
-             // Default input for function key in CP1
-            }else{
                 if (ctrl_buf == 1 && value == 'l'){
                     clear();
-                    printf("\n\n\n clear the screen\n");
-                    // sti();
+                    printf("\n\n cleared the screen:\n");
+                    sti();
                     return;
                 }
                 // Clear the screen when necessary
                 putc(value);
-            }
+
             // printf("] ");
-        }
-        if (i > MAX_INPUT_COUNT)
-        {
-            reset_keyboard_buffer();
-        }
     }
-    // sti();
+    
+    sti();
     return;
 };
 /* 
@@ -105,16 +166,20 @@ int function_key_handle(unsigned int key){
     switch (key)
     {// NOTICE: These function keys are left for cp2
     case LEFT_SHIFT_PRESSED:
+        shift_buf = 1;
         ret = INVALID_RET;
         break;
     case LEFT_SHIFT_RELEASED:
+        shift_buf = 0;
         ret = INVALID_RET;
         break;
 
     case RIGHT_SHIFT_PRESSED:
+        shift_buf = 1;
         ret = INVALID_RET;
         break;
     case RIGHT_SHIFT_RELEASED:
+        shift_buf = 0;
         ret = INVALID_RET;
         break;
     case LEFT_CTRL_PRESSED:
@@ -123,7 +188,19 @@ int function_key_handle(unsigned int key){
         break;
     case LEFT_CTRL_RELEASED:
         ret = INVALID_RET;
+        ctrl_buf = 1;
         break;    
+    case CAPSLOCK_PRESSED:
+        ret = INVALID_RET;
+        i++;
+        caps_lock = 1;
+        break;
+    case CAPSLOCK_RELEASED:
+        caps_lock = (i%2);
+        ret = INVALID_RET;
+
+        break;
+
     default:
     
         break;
@@ -142,4 +219,12 @@ int function_key_handle(unsigned int key){
 void reset_keyboard_buffer(){
     i = 0;
     pre = 0;
+}
+
+
+int32_t keyboard_open(){
+    return 0;
+}
+int32_t keyboard_close(){
+    return 0;
 }

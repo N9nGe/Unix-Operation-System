@@ -2,7 +2,7 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
-
+// The text mode video is simply 80 * 25, very small size, hum?
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -11,6 +11,33 @@
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
+
+
+/* void update_cursor(x,y);
+ * Inputs: 
+ *      x -- cursor x location on the screen
+ *      y -- cursor y location on the screen
+ * Return Value: none
+ * Function: update the cursor to given location */
+void update_cursor(int x, int y){
+    int pos = y * NUM_COLS + x;
+    // notice the sequence is inverse of linux code
+    // that's because our outb functionality is different
+    outb(0x0F,0x3D4);
+    outb((uint8_t)(pos & 0xFF),0x3D5);
+    outb(0x0E,0x3D4);
+    outb((uint8_t)( (pos >> 8 ) & 0xFF),0x3D5);
+}
+/* the linux code from https://wiki.osdev.org/Text_Mode_Cursor
+My comment: magic x86
+void update_cursor(int x, int y){
+	uint16_t pos = y * VGA_WIDTH + x;
+ 
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}*/
 
 /* void clear(void);
  * Inputs: void
@@ -22,6 +49,9 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    screen_x = 0;
+    screen_y = 0;
+    update_cursor(screen_x,screen_y);
 }
 
 /* Standard printf().

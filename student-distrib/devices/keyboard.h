@@ -23,12 +23,17 @@
 #define VALID_RET 0
 #define INVALID_RET 1 
 // For checkpoint 2
+// TODO: data relationship
+#define SINGLE_QUATE      0x28 
+#define DOUBLE_QUATE      34
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_PRESSED 0x36
 #define RIGHT_SHIFT_RELEASED 0xB6
 #define LEFT_CTRL_PRESSED 0x1D
 #define LEFT_CTRL_RELEASED 0x9D
+#define CAPSLOCK_PRESSED 0x3A
+#define CAPSLOCK_RELEASED 0xBA
 /* Externally-visible functions */
 
 /* Initialize keyboard input device */
@@ -43,6 +48,7 @@ int function_key_handle(unsigned int key);
 void reset_keyboard_buffer(void);
 
 
-
+int32_t keyboard_open();
+int32_t keyboard_close();
 
 #endif /* _KEYBOARD_H */
