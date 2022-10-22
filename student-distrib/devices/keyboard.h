@@ -12,7 +12,7 @@
 #define KEYBOARD_IRQ 1
 #define KEYBOARD_PORT 0x60
 
-#define KEY_BUF_SIZE        1
+#define KEY_BUF_SIZE        128
 #define KEY_NULL           '\0'
 #define INITIAL_KEY         0x01
 #define KEYBOARD_IRQ_NUM 0x01
@@ -24,14 +24,19 @@
 #define INVALID_RET 1 
 // For checkpoint 2
 // TODO: data relationship
-#define SINGLE_QUATE      0x28 
+#define SINGLE_QUATE      39 
 #define DOUBLE_QUATE      34
+
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_PRESSED 0x36
 #define RIGHT_SHIFT_RELEASED 0xB6
 #define LEFT_CTRL_PRESSED 0x1D
 #define LEFT_CTRL_RELEASED 0x9D
+#define RIGHT_CTRL_PRESSED 0x1D
+#define RIGHT_CTRL_RELEASED 0x9D
+#define ALT_PRESSED      0x38
+#define ALT_RELEASED     (ALT_PRESSED + 0x80)
 #define CAPSLOCK_PRESSED 0x3A
 #define CAPSLOCK_RELEASED 0xBA
 /* Externally-visible functions */

@@ -13,13 +13,14 @@
 /* File Scope Variable*/
 
 /* Set to avoid release repetition*/
-int i = 0;            // #input counter 
+int i = 0;            // caps_lock counter 
 unsigned int pre = 0; // buffer to record last input key
 int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
+int alt_buf = 0;      // Alt buf, do nothing now
 
-// int8_t keyboard_buf[KEY_BUF_SIZE]  = {'0'};
+int8_t keyboard_buf[KEY_BUF_SIZE]  = {'!'};
 
 
 /*The CP2 edition scancode list*/
@@ -43,7 +44,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
     {'=', '+'},
     {'\b', '\b'}, //backspace
 /* 0x0f - 0x1b, tab to "}" */
-    {' ', ' '}, // tab
+    {'\t', '\t'}, // tab
     {'q', 'Q'}, 
     {'w', 'W'},
     {'e', 'E'}, 
@@ -123,6 +124,7 @@ void keyboard_interrupt_handler(){
     // NOTICE: it must be here! 
     unsigned int key;
     unsigned int value;
+
     key = inb(KEYBOARD_PORT) & 0xff;
     value = scancode[key][0];// default as smaller
     if (function_key_handle(key) == 1){
@@ -135,35 +137,66 @@ void keyboard_interrupt_handler(){
         // TODO 
             value = scancode[key][1];
         }
-            // printf("KEY pressed [");
+            // printf("KEY pressed ["); // used for testing
+            // Clear the screen when necessary
                 if (ctrl_buf == 1 && value == 'l'){
                     clear();
-                    printf("\n\n cleared the screen:\n");
+                    printf("Cleared the screen: ");
                     sti();
                     return;
                 }
-                // Clear the screen when necessary
+                if ( alt_buf == 1){
+                    // do nothing
+                }
+                if( value ==  '\b'){
+                    backspace_handler();
+                    sti();
+                    return;
+                }
+                if( value == '\t'){
+                    putc(' ');
+                    putc(' ');
+                    putc(' ');
+                    putc(' ');
+                    sti();
+                    return;
+                }
+                
                 if ((value >= 'a' && value <= 'z') && caps_lock == 1){
                     value = scancode[key][1];
                 }
                 
                 putc(value);
 
-            // printf("] ");
+            // printf("] ");  // used for testing
     }
     
     sti();
     return;
 }
+
+/* 
+ * backspace_handler
+ *  DESCRIPTION: a helper function port for further CP usage 
+ *  INPUTS:  none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: none
+ */
+void backspace_handler(){
+    
+}
+
+
 /* 
  * function_key_handle
- *  DESCRIPTION: a function port for further CP usage 
+ *  DESCRIPTION: set the function key buf according to different interrupt
  *  INPUTS: key -- the input key value
  *  OUTPUTS: none
  *  RETURN VALUE: 
  *      VALID_RET   -- 0, if there is no function key pressed
  *      INVALID_RET -- 1, if there is function key pressed
- *  SIDE EFFECTS: none
+ *  SIDE EFFECTS: modify the function key buf
  */
 int function_key_handle(unsigned int key){
     int ret = VALID_RET; 
@@ -192,7 +225,7 @@ int function_key_handle(unsigned int key){
         break;
     case LEFT_CTRL_RELEASED:
         ret = INVALID_RET;
-        ctrl_buf = 1;
+        ctrl_buf = 0;
         break;    
     case CAPSLOCK_PRESSED:
         ret = INVALID_RET;
@@ -200,15 +233,26 @@ int function_key_handle(unsigned int key){
         caps_lock = 1;
         break;
     case CAPSLOCK_RELEASED:
-        caps_lock = (i%2);
+        caps_lock = (i%2); // Use module to decide whether the lock should be changed
         ret = INVALID_RET;
 
         break;
-
+    case ALT_PRESSED:
+        alt_buf = 1;
+        ret = INVALID_RET;
+        break;
+    case ALT_RELEASED:
+        alt_buf = 0;
+        ret = INVALID_RET;
+        break;
     default:
     
         break;
     }
+   if(i > 100000){
+    reset_keyboard_buffer();
+   }
+    
     return ret;
 };
 /* 
@@ -223,6 +267,9 @@ int function_key_handle(unsigned int key){
 void reset_keyboard_buffer(){
     i = 0;
     pre = 0;
+    ctrl_buf = 0;
+    shift_buf = 0;
+    caps_lock = 0;
 }
 
 

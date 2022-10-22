@@ -18,4 +18,5 @@ Creator:
 Description:
     Keyboard:  symbol ' and backspace is wrong
 Solution:
-    ....
+    the mapping of single quate is wrong, since there is some C syntax difference,
+    I use a macro #define to record its correct ascii value.
