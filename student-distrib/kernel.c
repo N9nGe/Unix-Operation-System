@@ -8,11 +8,12 @@
 #include "i8259.h"
 #include "debug.h"
 #include "tests.h"
+#include "file_system.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
 #include "paging.h"
 
-#define RUN_TESTS
+//#define RUN_TESTS
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -139,6 +140,10 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    module_t* mod = (module_t*)mbi->mods_addr;
+
+    file_system_init (mod -> mod_start);
+
     /* Init the PIC */
     i8259_init();
     
@@ -148,11 +153,15 @@ void entry(unsigned long magic, unsigned long addr) {
     keyboard_init();
     rtc_init();
     rtc_set_freq(2);
+    clear();
+    file_open ("frame0.txt");
+    file_read ("frame0.txt");
+    //files_ls ();
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    printf("Enabling Interrupts\n");
+    //printf("Enabling Interrupts\n");
     sti();
 
 #ifdef RUN_TESTS
