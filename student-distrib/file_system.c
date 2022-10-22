@@ -133,6 +133,10 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 }
 
 int file_open(const uint8_t* fname) { 
+    if (strlen(fname) > 32){
+        printf("File open failed!");
+        return -1;
+    }
     dentry_t tmp_dentry;
     read_dentry_by_name (fname, &tmp_dentry);
     temp_pcb->inode_num = tmp_dentry.inode_num; 
@@ -141,18 +145,18 @@ int file_open(const uint8_t* fname) {
     return 0;
 }
 
-uint32_t file_read(int32_t fd, void* buf, int32_t nbytes) {        // need change; given a buf
+uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {        // need change; given a buf
     unsigned i;
     uint32_t bytes_read;
     bytes_read = read_data (temp_pcb->inode_num, 0, buf, inode_ptr[temp_pcb->inode_num].length);
 
-    //bug here, need to shift three lines
+    // TODO bug here, need to shift three lines
     printf("\n");
     printf("\n");
     printf("\n");
 
     for (i = 0; i < inode_ptr[temp_pcb->inode_num].length; i++) {
-        printf("%c", ((uint8_t*)buf)[i]);
+        printf("%c", buf[i]);
     }
     
     return bytes_read;
@@ -172,12 +176,21 @@ int dir_open() {
     return 0;
 }
 
-uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
+uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     (uint8_t*) buf;
     // need change for 3.3 
-    strcpy(boot_block_ptr->dir_entries[temp_position].filename, buf);
+    uint8_t* name = boot_block_ptr->dir_entries[temp_position].filename;
+    // strcpy(boot_block_ptr->dir_entries[temp_position].filename, buf);
+    int32_t i = 0;
+    while (name[i] != '\0'){
+        buf[i] = name[i];
+        i++;
+    }
+    buf[i] = '\0';
 
+    temp_position++;
+    return i;   // return bytes copied
 }
 
 int dir_write() {
@@ -189,11 +202,13 @@ int dir_close() {
 }
 
 void files_ls(){
-    uint32_t idx;
-    uint8_t fname;
+    uint32_t idx, ch, i;
+    uint8_t* temp_name;
+    uint8_t fname[32];
+    uint8_t* space_len;
     uint8_t ftype, inode_num;
     dentry_t tmp_dentry;
-    //bug here, need to shift three lines
+    // TODO bug here, need to shift three lines
     printf("\n");
     printf("\n");
     printf("\n");
@@ -203,8 +218,31 @@ void files_ls(){
         inode_num = boot_block_ptr->dir_entries[idx].inode_num;
         if (name == '\0') continue;
         printf("file_name: %s, file_type: %d, file_size: %d \n", name, type, inode_num);*/
+
         read_dentry_by_index(idx, &tmp_dentry);
+
+        if (strlen(tmp_dentry.filename) > 32){
+            space_len = 0;
+        } else {
+            space_len = 32-strlen(tmp_dentry.filename);
+        }
+        
+        for (ch = 0; ch < space_len; ++ch){
+            fname[ch] = 0x20;   // space
+        }
+
+        strncpy(temp_name, tmp_dentry.filename, 32);
+        ch = space_len;
+        i = 0;
+        while (temp_name[i] != '\0'){
+            fname[ch] = temp_name[i];
+            ch++;
+            i++;
+        }
+        // fname[ch] = '\0';
         printf("file_name: %s, file_type: %d, file_size: %d \n", 
-        tmp_dentry.filename, tmp_dentry.filetype, inode_ptr[tmp_dentry.inode_num].length);    
+            fname, tmp_dentry.filetype, inode_ptr[tmp_dentry.inode_num].length);    
     }
 }
+
+

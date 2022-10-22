@@ -153,13 +153,14 @@ void entry(unsigned long magic, unsigned long addr) {
     // rtc_init();
     // rtc_set_freq(2);
 
-    // PAGE FAULT WHEN UNCOMMENT THESE
+    // TODO PAGE FAULT WHEN UNCOMMENT THESE ^
 
     uint8_t temp_buf[9999];
     clear();
-    file_open ("verylargetextwithverylongname.txt");
-    file_read (0, temp_buf, 5277);   // need to change fd in the future
-    //files_ls ();
+    // file_open ("verylargetextwithverylongname.txt");
+    // file_open("frame0.txt");
+    // file_read (0, temp_buf, 5277);   // need to change fd in the future
+    files_ls ();
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
