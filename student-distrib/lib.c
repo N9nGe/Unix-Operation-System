@@ -228,7 +228,7 @@ void putc_advanced(uint8_t c) {
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
             screen_x--;
-            screen_x%= NUM_COLS;
+            screen_x %= NUM_COLS;
             screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
             update_cursor(screen_x,screen_y);
             return;
@@ -243,23 +243,32 @@ void putc_advanced(uint8_t c) {
     update_cursor(screen_x,screen_y);
     if (screen_y == NUM_COLS){
         scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
     }
     
 }
 
+/* void scroll_up(char* memory);
+ * Author : Tony 1 10.22.2022
+ * Inputs: char* memory = video_mem, a global variable
+ * Return Value: void
+ * Function: shift up the whole screen by one  */
 void scroll_up(char* memory){
     int x,y;
     int origin,update;
-    for ( x = 0; x < NUM_ROWS; x++){
+    for ( x = 1; x < NUM_ROWS; x++){
         for (y = 0; y < NUM_COLS; y++){
-            origin = NUM_COLS*(x+1) + y;
-            update = NUM_COLS*x + y;
+        // Here, the first line is naturally deleted
+            origin = NUM_COLS*x + y;
+            update = NUM_COLS*(x-1) + y;
             *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
         }
     }
-    screen_y = NUM_COLS -1;
+    screen_y = NUM_COLS -1; // now screen_x is retained, shift up screen_y by one
     /*Clear the last line*/
-    
+    for(y = 0; y < NUM_COLS;y++){
+        *(uint8_t *)(video_mem + ((NUM_COLS * NUM_ROWS + y) << 1)) = ' ';
+    }
 }
 
 

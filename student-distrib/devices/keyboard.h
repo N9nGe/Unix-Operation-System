@@ -19,6 +19,7 @@
 #define MAX_SCAN_SIZE 58
 #define MAX_SET_SIZE 100
 #define MAX_INPUT_COUNT 100000
+#define MAX_TERMINAL_NUMBER 3
 
 #define VALID_RET 0
 #define INVALID_RET 1 

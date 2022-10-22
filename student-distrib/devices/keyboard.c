@@ -6,11 +6,11 @@
  * Tony  4  10.22.2022    Add Backspace
  */
 #include "../lib.h"
-#include "keyboard.h"
 #include "../types.h"
 #include "../i8259.h"
 #include "../x86_desc.h"
-
+#include "keyboard.h"
+#include "terminal.h"
 /* File Scope Variable*/
 
 /* Set to avoid release repetition*/
@@ -21,8 +21,13 @@ int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
-int8_t keyboard_buf[KEY_BUF_SIZE]  = {'!'};
+// CP2: initialize these 2 as 0, prepare for future cp5
+int present_terminal = 0;
+int last_terminal = 0; 
 
+static terminal_t SCREEN;
+SCREEN.id = 0;
+SCREEN.index = 0;
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -30,7 +35,7 @@ int8_t keyboard_buf[KEY_BUF_SIZE]  = {'!'};
 unsigned char scancode[MAX_SCAN_SIZE][2] = 
 {   {0x0, 0x0}, // 0x00 not use
     {0x0, 0x0}, // 0x01 esc
-    /* 0x02 - 0x0e, "1" to backspace */
+    /* 0x02 - 0x0e: "1" -> backspace */
     {'1', '!'}, 
     {'2', '@'},
     {'3', '#'}, 
@@ -44,7 +49,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
     {'-', '_'}, 
     {'=', '+'},
     {'\b', '\b'}, //backspace
-/* 0x0f - 0x1b, tab to "}" */
+/* 0x0f - 0x1b: tab -> "}" */
     {'\t', '\t'}, // tab
     {'q', 'Q'}, 
     {'w', 'W'},
@@ -58,7 +63,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
     {'p', 'P'},
     {'[', '{'}, 
     {']', '}'},
-/* 0x1c - 0x28, enter to "'"*/
+/* 0x1c - 0x28: enter -> "'"*/
     {'\n', '\n'}, // enter
     {0x0, 0x0}, // Left Ctrl
     {'a', 'A'},
@@ -72,7 +77,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
     {'l', 'L'}, 
     {';', ':'},
     {SINGLE_QUATE, DOUBLE_QUATE},
-/* 0x29 - 0x39 "`" to Spacebar*/
+/* 0x29 - 0x39 : "`" -> SPACE*/
     {'`', '~'}, // the mapping is so confusing for this 
     {0x0, 0x0}, // Left Shift
     {'\\', '|'},
@@ -96,7 +101,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
 
 
 /* 
- * keyboard_interrupt_handler
+ * keyboard_init
  *  DESCRIPTION: Initialize keyboard input device 
  *  INPUTS: none
  *  OUTPUTS: none
@@ -135,14 +140,13 @@ void keyboard_interrupt_handler(){
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
         if( shift_buf == 1){// decide the scancode
-        // TODO 
             value = scancode[key][1];
         }
             // printf("KEY pressed ["); // used for testing
             // Clear the screen when necessary
-                if (ctrl_buf == 1 && value == 'l'){
+                if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
-                    printf("Cleared the screen: ");
+                    // printf("Cleared the screen: "); // TEST
                     // sti();
                     return;
                 }
@@ -154,19 +158,19 @@ void keyboard_interrupt_handler(){
                     // sti();
                     // return;
                 }
-                if( value == '\t'){
-                    putc(' ');
-                    putc(' ');
-                    putc(' ');
-                    putc(' ');
+                if( value == '\t'){ // Tab output, here I use the easiest way
+                    putc_advanced(' ');
+                    putc_advanced(' ');
+                    putc_advanced(' ');
+                    putc_advanced(' ');
                     // sti();
                     return;
                 }
                 
                 if ((value >= 'a' && value <= 'z') && caps_lock == 1){
-                    value = scancode[key][1];
+                    value = scancode[key][1]; // check if caps_lock is on
                 }
-                
+                if (SCREEN.keyboard_buf[])
                 putc_advanced(value);
 
             // printf("] ");  // used for testing
@@ -185,7 +189,9 @@ void keyboard_interrupt_handler(){
  *  SIDE EFFECTS: none
  */
 void backspace_handler(){
-    
+    int index = SCREEN.index;
+    SCREEN.keyboard_buf[index] = NULL;
+    SCREEN.index -= 1;
 }
 
 
@@ -239,10 +245,12 @@ int function_key_handle(unsigned int key){
 
         break;
     case ALT_PRESSED:
+        printf(" alt is pressed "); // TEST alt press
         alt_buf = 1;
         ret = INVALID_RET;
         break;
     case ALT_RELEASED:
+        printf(" alt is pressed "); // TEST alt release
         alt_buf = 0;
         ret = INVALID_RET;
         break;

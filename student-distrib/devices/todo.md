@@ -51,9 +51,9 @@ i think it is because scolling unimplement
     - memory lift up for one line, 
     - do we need to care lift up?
 5. terminal structure
-    - must implement now 
-    - in terminal.h
-    - 
+    - [x] must implement now 
+    - [x] in terminal.h
+    - [ ] where to initialize it?
 
 ## Q&A
 
