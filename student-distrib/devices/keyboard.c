@@ -1,8 +1,9 @@
-/* i8259.c - Functions to interact with the Keyboard interrupt device
+/* keyboard.c - Functions to interact with the Keyboard interrupt device
  * 
  * Tony  1  10.14&15.2022 CP1 keyboard
  * Tony  2  10.16.2022    reconstuct the keyboard.c
- * 
+ * Tony  3  10.20.2022    Add Capslock and Shift
+ * Tony  4  10.22.2022    Add Backspace
  */
 #include "../lib.h"
 #include "keyboard.h"
@@ -119,7 +120,7 @@ void keyboard_init(void){
  */
 void keyboard_interrupt_handler(){
     // printf("key pressed ");
-    cli(); // Clear all the interrupt first
+    // cli(); // Clear all the interrupt first
     send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
     // NOTICE: it must be here! 
     unsigned int key;
@@ -128,7 +129,7 @@ void keyboard_interrupt_handler(){
     key = inb(KEYBOARD_PORT) & 0xff;
     value = scancode[key][0];// default as smaller
     if (function_key_handle(key) == 1){
-        sti();
+        // sti();
         return;
     }
     // Ignore the key out of the scope of scan size
@@ -142,7 +143,7 @@ void keyboard_interrupt_handler(){
                 if (ctrl_buf == 1 && value == 'l'){
                     clear();
                     printf("Cleared the screen: ");
-                    sti();
+                    // sti();
                     return;
                 }
                 if ( alt_buf == 1){
@@ -150,15 +151,15 @@ void keyboard_interrupt_handler(){
                 }
                 if( value ==  '\b'){
                     backspace_handler();
-                    sti();
-                    return;
+                    // sti();
+                    // return;
                 }
                 if( value == '\t'){
                     putc(' ');
                     putc(' ');
                     putc(' ');
                     putc(' ');
-                    sti();
+                    // sti();
                     return;
                 }
                 
@@ -166,12 +167,12 @@ void keyboard_interrupt_handler(){
                     value = scancode[key][1];
                 }
                 
-                putc(value);
+                putc_advanced(value);
 
             // printf("] ");  // used for testing
     }
     
-    sti();
+    // sti();
     return;
 }
 

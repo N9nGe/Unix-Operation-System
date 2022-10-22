@@ -1,3 +1,9 @@
+/* terminal.c - Functions to interact with the terminal 
+ * 
+ * Tony  1  10.20.2022  -- initialize terminal
+ * Tony  2  10.22.2022  -- 
+ * 
+ */
 #include"../lib.h"
 #include"../types.h"
 #include"keyboard.h"
@@ -16,3 +22,6 @@ int32_t terminal_open(const uint8_t* filename){
 int32_t terminal_close(int32_t fd){
     return 0;
 }
+
+
+

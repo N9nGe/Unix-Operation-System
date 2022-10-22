@@ -16,6 +16,8 @@ uint32_t strlen(const int8_t* s);
 //CP2
 void update_cursor(int x, int y);
 void clear(void);
+void putc_advanced(uint8_t c);
+void scroll_up(char* memory);
 
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
@@ -60,7 +62,7 @@ static inline uint32_t inw(port) {
             : "memory"
     );
     return val;
-}
+};
 
 /* Reads four bytes from four consecutive ports, starting at "port",
  * concatenates them little-endian style, and returns them */
@@ -72,7 +74,7 @@ static inline uint32_t inl(port) {
             : "memory"
     );
     return val;
-}
+};
 
 /* Writes a byte to a port */
 #define outb(data, port)                \

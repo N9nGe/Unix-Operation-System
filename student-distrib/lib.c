@@ -14,6 +14,7 @@ static char* video_mem = (char *)VIDEO;
 
 
 /* void update_cursor(x,y);
+ * Author: Tony 10.20
  * Inputs: 
  *      x -- cursor x location on the screen
  *      y -- cursor y location on the screen
@@ -203,12 +204,66 @@ void putc(uint8_t c) {
         screen_x = 0;
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB; 
+        screen_x++;
+        screen_x %= NUM_COLS;
+        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+    }
+    update_cursor(screen_x,screen_y);
+
+}
+
+/* void putc_advanced(uint8_t c);
+ * Author : Tony 1 10.22.2022
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
+void putc_advanced(uint8_t c) {
+    if(c == '\n' || c == '\r') {
+        screen_y++;
+        screen_x = 0;
+    }else{// First detect backspace 
+        if ( c == '\b'){
+           
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
+            screen_x--;
+            screen_x%= NUM_COLS;
+            screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+            update_cursor(screen_x,screen_y);
+            return;
+        }
+    // common case
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    update_cursor(screen_x,screen_y);
+    if (screen_y == NUM_COLS){
+        scroll_up(video_mem);
+    }
+    
 }
+
+void scroll_up(char* memory){
+    int x,y;
+    int origin,update;
+    for ( x = 0; x < NUM_ROWS; x++){
+        for (y = 0; y < NUM_COLS; y++){
+            origin = NUM_COLS*(x+1) + y;
+            update = NUM_COLS*x + y;
+            *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
+        }
+    }
+    screen_y = NUM_COLS -1;
+    /*Clear the last line*/
+    
+}
+
+
+
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

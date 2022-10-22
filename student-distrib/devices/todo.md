@@ -40,9 +40,22 @@
     'z','x','c','v','b','n','m',',','.','/',0,0,0,
     '\0'},
     {}
+- sol: improve as a 58*2 col structure like ZLH's, because it will be more efficient
+
 
 3. update_cursor
+finished, but page fault
+i think it is because scolling unimplement
 
+4. scolling
+    - memory lift up for one line, 
+    - do we need to care lift up?
+5. terminal structure
+    - must implement now 
+    - in terminal.h
+    - 
+
+## Q&A
 
 4. how to test the extreme input case of keyboard
 
@@ -78,3 +91,5 @@ I am confused about the buffers in keyboard and terminal. So calling terminal re
 @ Peizhe Liu. The keyboard handler will handle putting each key in the keyboard buffer, and calling putc(character) to print that character. You need to modify putc to handle scrolling and what happens when you call putc('\b') and putc('\t') for backspace and tab.
 
 Thank you. So when terminal read is not called, we don't care the existing characters? Only start putting them to the buffer if terminal read is called, and return when a new line character is putted.
+
+

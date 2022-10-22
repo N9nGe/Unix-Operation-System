@@ -51,7 +51,8 @@ void keyboard_interrupt_handler(void);
 int function_key_handle(unsigned int key);
 /*set the key buffer to initial state*/
 void reset_keyboard_buffer(void);
-
+/*Handle backspace, modify corresponding keyboard buffer*/
+void backspace_handler();
 
 int32_t keyboard_open();
 int32_t keyboard_close();
