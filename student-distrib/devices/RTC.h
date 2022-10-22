@@ -4,6 +4,10 @@
 #include "../lib.h"
 #include "../types.h"
 
+// RTC return value
+#define RTC_SUCCESS     0
+#define RTC_FAIL        -1
+
 // The default IRQ in the PIC
 #define RTC_IRQ         8
 
@@ -12,8 +16,8 @@
 #define RTC_PORT_CMOS   0x71
 
 // The frecquency used for RTC
-#define RTC_FREC        2
-#define RTC_BASE_FREQ   1024
+#define RTC_INIT_DEFAULT_FREQ    1024
+#define RTC_OPEN_DEFAULT_FREQ    2
 
 // The offset used for CMOS RAM
 #define NMI_MASK        0X80

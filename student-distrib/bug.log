@@ -154,12 +154,16 @@ Solution:
                           BUG 1                          
 <--------------------------------------------------------->
 Time:
-    2022.??.??.
+    2022.10.22.
 Creator:
-    First Last.
+    Gabriel Gao
 Description:
-    ....
+    The variable used to store the current frequency of the rtc is not the actural frequency. It is the temp rate
+    used to convert the frequency to the rate.
 Solution:
-    ....
+    Use a global variable of the current_freq and use the freq directly to check whether it belongs to the the power of 
+    2. And only change the current_freq when initializing the rtc or giving a valid input rtc frequency (2~8126Hz) and 
+    set successfully.
+
 
     
