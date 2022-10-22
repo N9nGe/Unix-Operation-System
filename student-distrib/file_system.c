@@ -53,9 +53,9 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
     if (index < 0 || index > 62) return -1;
     if (dentry == NULL) return -1;
     tmp_dentry = boot_block_ptr -> dir_entries[index];
-    /*dentry -> filename = tmp_dentry.filename;
+    strcpy(dentry -> filename, tmp_dentry.filename);
     dentry -> filetype = tmp_dentry.filetype;
-    dentry -> inode_num = tmp_dentry.inode_num;*/
+    dentry -> inode_num = tmp_dentry.inode_num;
     return 0;
 }
 
@@ -155,11 +155,17 @@ int file_open(uint8_t* fname) {
 
 void file_read(uint8_t* fname) {
     dentry_t tmp_dentry;
-    uint8_t read_buf[(boot_block_ptr -> data_blocks_count) * 4096];
+    uint8_t read_buf[4096];
     unsigned i;
     read_dentry_by_name (fname, &tmp_dentry);
-    read_data (tmp_dentry.inode_num, 0, read_buf, (boot_block_ptr -> data_blocks_count) * 4096);
+    read_data (tmp_dentry.inode_num, 0, read_buf, 187);
     // clear();
+
+    //bug here, need to shift three lines
+    printf("\n");
+    printf("\n");
+    printf("\n");
+
     for (i = 0; i < 187; i++) {
         printf("%c", read_buf[i]);
     }
@@ -202,13 +208,17 @@ int dir_close() {
 
 void files_ls(){
     uint32_t idx;
-    uint8_t* name;
-    uint8_t type, inode_num;
-    for (idx = 0; idx < 63; idx++){
-        name = boot_block_ptr->dir_entries->filename;
-        type = boot_block_ptr->dir_entries->filetype;
-        inode_num = boot_block_ptr->dir_entries->inode_num;
+    uint8_t fname;
+    uint8_t ftype, inode_num;
+    dentry_t tmp_dentry;
+    for (idx = 0; idx < boot_block_ptr -> dentry_count; idx++){
+        /*strcpy (name, boot_block_ptr->dir_entries[idx].filename);
+        type = boot_block_ptr->dir_entries[idx].filetype;
+        inode_num = boot_block_ptr->dir_entries[idx].inode_num;
         if (name == '\0') continue;
-        printf("file_name: %s, file_type: %d, file_size: %d \n", name, type, inode_num);
+        printf("file_name: %s, file_type: %d, file_size: %d \n", name, type, inode_num);*/
+        read_dentry_by_index(idx, &tmp_dentry);
+        printf("file_name: %s, file_type: %d, file_size: %d \n", 
+        tmp_dentry.filename, tmp_dentry.filetype, inode_ptr[tmp_dentry.inode_num].length);    
     }
 }
