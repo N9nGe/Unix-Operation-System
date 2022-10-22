@@ -211,6 +211,10 @@ void files_ls(){
     uint8_t fname;
     uint8_t ftype, inode_num;
     dentry_t tmp_dentry;
+    //bug here, need to shift three lines
+    printf("\n");
+    printf("\n");
+    printf("\n");
     for (idx = 0; idx < boot_block_ptr -> dentry_count; idx++){
         /*strcpy (name, boot_block_ptr->dir_entries[idx].filename);
         type = boot_block_ptr->dir_entries[idx].filetype;
