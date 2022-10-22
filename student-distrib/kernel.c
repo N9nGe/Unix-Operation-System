@@ -11,8 +11,9 @@
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
 #include "paging.h"
+#include "file_system.h"
 
-#define RUN_TESTS
+// #define RUN_TESTS
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -139,20 +140,30 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    module_t* mod = (module_t*) mbi->mods_addr;
+    file_system_init((uint32_t*)mod->mod_start);
+
     /* Init the PIC */
     i8259_init();
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-    paging_init();
-    keyboard_init();
-    rtc_init();
-    rtc_set_freq(2);
+    // paging_init();
+    // keyboard_init();
+    // rtc_init();
+    // rtc_set_freq(2);
+    
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    printf("Enabling Interrupts\n");
+    // printf("Enabling Interrupts\n");
+
+    uint8_t temp_buf[9999];
+    clear();
+    file_open("frame0.txt");
+    file_read(0, temp_buf, 187); // need to change fd for future
+
     sti();
 
 #ifdef RUN_TESTS
