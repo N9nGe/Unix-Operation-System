@@ -1,29 +1,31 @@
 #include "file_system.h"
 
-static data_block_t * data_block_ptr;  // TODO: need to set
-static inode_t * inode_ptr;    // TODO: need to set
-static dentry_t * dentry_ptr;  // not needed?
-static boot_block_t * boot_block_ptr;  // TODO: need to set
+static data_block_t * data_block_ptr;
+static inode_t * inode_ptr;
+static dentry_t * dentry_ptr;
+static boot_block_t * boot_block_ptr; 
+static pcb_t* temp_pcb;  // create a temporary pcb for 3.2
+static uint32_t temp_position;  // temporary file position 
 
 void file_system_init(uint32_t* fs_start) {
     // point the boot_block_ptr to the head of system_start
     boot_block_ptr = (boot_block_t *) fs_start;
+
     // point the dentry_ptr to the head of directory entries array in bootblock
-    // printf("%u ", boot_block_ptr -> dentry_count);
-    // printf("%u ", boot_block_ptr -> inode_count);
-    // printf("%u ", boot_block_ptr -> data_blocks_count);
     dentry_ptr = (dentry_t *) boot_block_ptr -> dir_entries;
+
     // point the inode_ptr to the head of inode array
     // inode and boot_block have same size, therefore add the size of boot_block_t
     // to the pointer will automatically skip the first boot_block
     inode_ptr = (inode_t *) (boot_block_ptr + 1);
-    //printf("%x\n", boot_block_ptr);
-    //printf("%x\n", boot_block_ptr+1);
-    //printf("%u", inode_ptr -> length);
+
     // point the data block to the head of data block array using the similar
     // method to inode_ptr
     // data_block_ptr = (data_block_t *) (fs_start + sizeof(boot_block_ptr) +  (boot_block_ptr -> inode_count) * sizeof(inode_t));
     data_block_ptr = (data_block_t *) (inode_ptr + 64);
+
+    // temporary for 3.2
+    temp_position = 0;
 }
 
 int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry){
@@ -130,54 +132,39 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     return bytes_read;
 }
 
-int file_open(uint8_t* fname) {
+int file_open(const uint8_t* fname) { 
     dentry_t tmp_dentry;
-    //inode_t tmp_inode;
-
     read_dentry_by_name (fname, &tmp_dentry);
+    temp_pcb->inode_num = tmp_dentry.inode_num; 
+    temp_pcb->flag = 1;     // set to in-use
 
-    // if (read_dentry_by_name (fname, &tmp_dentry) == 0) {
-    //     if (strncmp(fname, tmp_dentry.filename, FILENAME_LEN) != 0) {
-    //         printf ("\nnot found");
-    //         printf ("\n");
-    //     } else {
-    //         printf ("%s, ", tmp_dentry.filename);
-    //         printf ("%u, ", tmp_dentry.filetype);
-    //         printf ("%u", inode_ptr[tmp_dentry.inode_num].length);
-    //     }
-    //     //printf ("found");
-    // }
-    //
-
-    //tmp_inode = tmp_dentry.
     return 0;
 }
 
-void file_read(uint8_t* fname) {
-    dentry_t tmp_dentry;
-    uint8_t read_buf[4096];
+uint32_t file_read(int32_t fd, void* buf, int32_t nbytes) {        // need change; given a buf
     unsigned i;
-    read_dentry_by_name (fname, &tmp_dentry);
-    read_data (tmp_dentry.inode_num, 0, read_buf, 187);
-    // clear();
+    uint32_t bytes_read;
+    bytes_read = read_data (temp_pcb->inode_num, 0, buf, inode_ptr[temp_pcb->inode_num].length);
 
     //bug here, need to shift three lines
     printf("\n");
     printf("\n");
     printf("\n");
 
-    for (i = 0; i < 187; i++) {
-        printf("%c", read_buf[i]);
+    for (i = 0; i < inode_ptr[temp_pcb->inode_num].length; i++) {
+        printf("%c", ((uint8_t*)buf)[i]);
     }
     
+    return bytes_read;
 }
 
 int file_write() {
     return -1;
 }
 
-int file_close() {
+int file_close(int32_t fd) {
     //inode_ptr = (inode_t *) (fs_start + sizeof(boot_block_t));
+    temp_pcb->flag = 0;     // set to unused
     return 0;
 }
 
@@ -185,17 +172,12 @@ int dir_open() {
     return 0;
 }
 
-void dir_read(int32_t fd, void* buf, int32_t nbytes) {
+uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
-    /*uint32_t idx;
     (uint8_t*) buf;
     // need change for 3.3 
-    
-    while (){
-        dentry_t curr_dentry = boot_block_ptr->dir_entries[idx];
-        if (curr_dentry.filename == '\0') return 0; // 0 byte is read for empty entries
-        
-    }*/
+    strcpy(boot_block_ptr->dir_entries[temp_position].filename, buf);
+
 }
 
 int dir_write() {
