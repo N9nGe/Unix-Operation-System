@@ -10,7 +10,7 @@
 #define DENTRY_SIZE             63
 
 typedef struct data_block {
-    uint32_t entry[DATA_BLOCK_ENTRY_SIZE];  // *** changed size to 4096
+    uint8_t entry[DATA_BLOCK_ENTRY_SIZE];  // *** changed size to 4096
 } data_block_t;
 
 typedef struct inode {
@@ -41,9 +41,9 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry);
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
-int file_open();
+int file_open(uint8_t* fname);
 
-void file_read();
+void file_read(uint8_t* fname);
 
 int file_write();
 
@@ -56,4 +56,6 @@ void dir_read(int32_t fd, void* buf, int32_t nbytes);
 int dir_write();
 
 int dir_close();
+
+void files_ls();
 
