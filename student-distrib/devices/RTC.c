@@ -8,6 +8,7 @@ extern void test_interrupts(void);
 static uint32_t current_freq;
 // the flag to represent the rtc flag (Appendix B: last paragraph Use simple volatile flag variables to do this synchronization)
 static volatile int rtc_interrupt_occurred; 
+uint32_t rtc_counter = 0;
 
 /* uint8_t rtc_init()
  * Inputs: none
@@ -27,7 +28,7 @@ uint8_t rtc_init() {
 
     // by the osdev, the initial rtc frequency is 1024Hz
     current_freq = RTC_INIT_DEFAULT_FREQ;
-
+    rtc_counter = 0;
     sti(); // set interrupt flags
     restore_flags(flags);   // restore flags 
 
@@ -91,13 +92,21 @@ void rtc_interrupt() {
     cli();
     // test IRQ
     // test_interrupts();
-    
+    rtc_counter += 1;
     // rtc interrupt occurs -> set the flag to 1
     rtc_interrupt_occurred = 1;
+    if (rtc_counter == 1) {
+        printf("RTC interrupt occured: %d\n", rtc_interrupt_occurred);
+    }
     // read register C to ensure interrupt happen again
     outb(RTC_C_OFFSET, RTC_PORT_INDEX); // select register C
     inb(RTC_PORT_CMOS);                 // just throw away contents
     send_eoi(RTC_IRQ);
+
+    printf("%d", rtc_counter);
+    if (rtc_counter == RTC_TEST_COUNTER){
+        printf("\n");
+    }
     sti();
 }
 
@@ -111,11 +120,12 @@ uint32_t log_2(uint32_t freq) {
     // invalid input freq, no change for the rtc frequency
     if ((freq & (freq - 1)) != 0) {
         freq = current_freq;
+        printf("invalid input frequency!\nUse the previous frequency: %d!\n", freq);
     }
 
     uint32_t result = 0;    // result of log_2(freq)
     uint32_t current = 1; 
-    while (current < freq) {
+    while (current < freq) { // to get the log, just the math calculation
         current *= 2;
         result++;
     }
@@ -130,10 +140,12 @@ uint32_t log_2(uint32_t freq) {
 int32_t rtc_open(const uint8_t * filename) {
     // check the whether the input is valid
     if (filename == NULL) {
+        printf("RTC fails to open\n");
         return RTC_FAIL;
     }
     // pass the default freq = 2Hz into the rtc
     rtc_set_freq(RTC_OPEN_DEFAULT_FREQ);
+    printf("RTC Successfully opens\n");
     return RTC_SUCCESS;
 }
 
@@ -151,10 +163,11 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     if (buf == NULL) {  
         return 0;
     }
-
     // set the rtc flag become 0(rtc interrupt not occur -> do not return)
     rtc_interrupt_occurred = 0;
+    printf("Set RTC interrupt to %d\n", rtc_interrupt_occurred);
     while(rtc_interrupt_occurred == 0); // if rtc interrupt occur, the flag will be set to one and then break the while loop. 
+    printf("RTC interrupt occurs\n");
     return RTC_SUCCESS;
 }
 
@@ -188,6 +201,13 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
  */
 int32_t rtc_close(int32_t fd) {
     // do nothing (//TODO: what the meaning of the RTC virtualization?)
+    // should we check the fd as null pointer? how to check the fd is invalid?
+
+    if (fd == NULL) {
+        printf("RTC fails to close\n");
+        return RTC_FAIL;
+    }
+    printf("RTC Successfully closes\n");
     return RTC_SUCCESS;
 }
 

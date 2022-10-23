@@ -8,6 +8,9 @@
 #define RTC_SUCCESS     0
 #define RTC_FAIL        -1
 
+// just for the test
+#define RTC_TEST_COUNTER 	32
+
 // The default IRQ in the PIC
 #define RTC_IRQ         8
 
@@ -24,6 +27,8 @@
 #define RTC_A_OFFSET    0x0A
 #define RTC_B_OFFSET    0x0B
 #define RTC_C_OFFSET    0x0C
+
+extern uint32_t rtc_counter;
 
 uint8_t rtc_init();
 uint8_t rtc_set_freq();
