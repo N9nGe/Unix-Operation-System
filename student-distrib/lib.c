@@ -2,7 +2,7 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
-
+// The text mode video is simply 80 * 25, very small size, hum?
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -11,6 +11,34 @@
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
+
+
+/* void update_cursor(x,y);
+ * Author: Tony 10.20
+ * Inputs: 
+ *      x -- cursor x location on the screen
+ *      y -- cursor y location on the screen
+ * Return Value: none
+ * Function: update the cursor to given location */
+void update_cursor(int x, int y){
+    int pos = y * NUM_COLS + x;
+    // notice the sequence is inverse of linux code
+    // that's because our outb functionality is different
+    outb(0x0F,0x3D4);
+    outb((uint8_t)(pos & 0xFF),0x3D5);
+    outb(0x0E,0x3D4);
+    outb((uint8_t)( (pos >> 8 ) & 0xFF),0x3D5);
+}
+/* the linux code from https://wiki.osdev.org/Text_Mode_Cursor
+My comment: magic x86
+void update_cursor(int x, int y){
+	uint16_t pos = y * VGA_WIDTH + x;
+ 
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}*/
 
 /* void clear(void);
  * Inputs: void
@@ -22,6 +50,9 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    screen_x = 0;
+    screen_y = 0;
+    update_cursor(screen_x,screen_y);
 }
 
 /* Standard printf().
@@ -173,12 +204,96 @@ void putc(uint8_t c) {
         screen_x = 0;
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB; 
+        screen_x++;
+        screen_x %= NUM_COLS;
+        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+    }
+    update_cursor(screen_x,screen_y);
+
+}
+
+/* void putc_advanced(uint8_t c);
+ * Author : Tony 1 10.22.2022
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
+void putc_advanced(uint8_t c) {
+    if(c == '\n' || c == '\r') { // TODO: \r in terminal?
+        screen_y++;
+        screen_x = 0;
+    } else{// First detect backspace 
+        if ( c == '\b'){
+            backspace();
+            return;
+        }
+
+    // common case
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
+    update_cursor(screen_x,screen_y);
 }
+
+/* void backspace();
+ * Author : Tony 1 10.22.2022
+ * Inputs: none
+ * Return Value: void
+ * Function: delete last charcter  */
+void backspace(){
+    if(screen_x == 0 || screen_y == 0){ 
+        return;// if it is at the (0,0), can't backspace
+    }
+    if (screen_x == 0){ // At the left end
+        screen_y--;
+        screen_x = NUM_COLS - 1;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        update_cursor(screen_x, screen_y);
+        return;
+    }
+// Else in the middle 
+    screen_x--;
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
+    update_cursor(screen_x,screen_y);
+    return;
+    
+}
+
+/* void scroll_up(char* memory);
+ * Author : Tony 1 10.22.2022
+ * Inputs: char* memory = video_mem, a global variable
+ * Return Value: void
+ * Function: shift up the whole screen by one  */
+void scroll_up(char* memory){
+    uint32_t x,y;
+    uint32_t origin,update;
+    for ( y = 1; y < NUM_ROWS; y++){
+        for (x = 0; x < NUM_COLS; x++){
+        // Here, the first line is naturally deleted
+            origin = NUM_COLS*y + x;
+            update = NUM_COLS*(y-1) + x;
+            *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
+        }
+    }
+    screen_y = NUM_ROWS - 1; // now screen_x is retained, shift up screen_y by one
+    /*Clear the last line*/
+    for(x = 0; x < NUM_COLS; x++){ //  TODO
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
+    }
+}
+
+
+
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

@@ -151,9 +151,9 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {        // need ch
     bytes_read = read_data (temp_pcb->inode_num, 0, buf, inode_ptr[temp_pcb->inode_num].length);
 
     // TODO bug here, need to shift three lines
-    printf("\n");
-    printf("\n");
-    printf("\n");
+    // printf("\n");
+    // printf("\n");
+    // printf("\n");
 
     for (i = 0; i < inode_ptr[temp_pcb->inode_num].length; i++) {
         printf("%c", buf[i]);
@@ -208,10 +208,11 @@ void files_ls(){
     uint8_t* space_len;
     uint8_t ftype, inode_num;
     dentry_t tmp_dentry;
+    uint32_t len;
     // TODO bug here, need to shift three lines
-    printf("\n");
-    printf("\n");
-    printf("\n");
+    // printf("\n");
+    // printf("\n");
+    // printf("\n");
     for (idx = 0; idx < boot_block_ptr -> dentry_count; idx++){
         /*strcpy (name, boot_block_ptr->dir_entries[idx].filename);
         type = boot_block_ptr->dir_entries[idx].filetype;
@@ -247,8 +248,25 @@ void files_ls(){
         }
         printf(" ");
         // fname[ch] = '\0';
-        printf("%s, file_type: %d, file_size: %d \n", 
-            fname, tmp_dentry.filetype, inode_ptr[tmp_dentry.inode_num].length);    
+        printf("%s, file_type: %d, file_size:", 
+            fname, tmp_dentry.filetype); 
+        printf("  ");
+        len = inode_ptr[tmp_dentry.inode_num].length;
+        if (len < 10000 && len >= 1000) {
+            space_len = 1;
+        } else if (len < 1000 && len >= 100) {
+            space_len = 2;
+        } else if (len < 100 && len >= 10) {
+            space_len = 3;
+        } else if (len < 10 && len >= 0) {
+            space_len = 4;
+        } else {
+            space_len = 0;
+        }
+        for (i = 0; i < space_len; i++) {
+            printf(" ");
+        }
+        printf("%d \n", inode_ptr[tmp_dentry.inode_num].length);
     }
 }
 
