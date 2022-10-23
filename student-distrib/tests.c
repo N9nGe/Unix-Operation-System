@@ -330,8 +330,6 @@ void rtc_set_freq_test() {
 /* Checkpoint 2 tests */
 
 //  RTC driver test 
-//TODO: how to test open or close
-//TODO: do we need to close the rtc, after calling the rtc_close
 
 /* //  RTC rtc_open_read_close_test test ()
  * Inputs: none

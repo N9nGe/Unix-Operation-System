@@ -62,7 +62,6 @@ uint8_t rtc_set_freq(uint32_t freq) {
     // frequency =  32768 >> (rate-1) 
     uint8_t rate = 16 - log_2(freq);
     // the upper bound of the frequnce is 2^13(8192) Hz -> upper bound rate is 3 (Appendix B, doc pg. 19, last paragraph)
-    //TODO: rate &= 0x0F;			// rate must be above 2 and not over 15 (from osdev)
     if (rate > 2 && rate < 16) { // rate must be above 2 and not over 15 (from osdev)
         cli_and_save(flags);    // CLI and save EFLAGS
 
@@ -133,7 +132,7 @@ uint32_t log_2(uint32_t freq) {
 }
 
 /* int32_t rtc_open(const uint8_t * filename)
- * Inputs: filename  (//TODO: no need currently, not sure for later checkpoint)
+ * Inputs: filename  (no need currently, not sure for later checkpoint)
  * Return Value: 0 for success, -1 for the named file does not exist or no descriptors are free
  * Function: use for open system call to rtc
  */
@@ -200,8 +199,8 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
  * Function: for the system call to rtc to close the specified file descriptor and makes fd available
  */
 int32_t rtc_close(int32_t fd) {
-    // do nothing (//TODO: what the meaning of the RTC virtualization?)
-    // should we check the fd as null pointer? how to check the fd is invalid?
+    // do nothing (what the meaning of the RTC virtualization?)
+    // TODO: should we check the fd as null pointer? how to check the fd is invalid?(range of pcb fd?)
 
     if (fd == NULL) {
         printf("RTC fails to close\n");
