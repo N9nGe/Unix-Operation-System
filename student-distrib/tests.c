@@ -489,7 +489,7 @@ void launch_tests(){
 	printf("---------------TEST CP1 END--------------\n");
 
 	/*Test for rtc_driver*/
-	TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
+	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
 	// TEST_OUTPUT("rtc_write_test", rtc_write_test());
 	// TEST_OUTPUT("rtc_invalid_input_frequency_test", rtc_invalid_input_frequency_test(3));
 	
