@@ -405,11 +405,14 @@ void launch_tests(){
 	
 
 	/***** CP2 TESTS *****/
-
+	// printf("---------------TEST CP2 START--------------\n");	
 	/* File System Tests */
 	// filesys_ls_test();			// list all files and their file types and sizes
 	// filesys_frame0_test();		// read a normal text file
 	// filesys_cat_test();			// read an executable file
 	// filesys_long_name_test();	// reading a file with name exceeding 32B; should fail
-	filesys_long_name_test2();	// reading a file with name exactly 32B; should suceed
+	//filesys_long_name_test2();	// reading a file with name exactly 32B; should suceed
+	// printf("---------------TEST CP2 END--------------\n");
+
+
 }

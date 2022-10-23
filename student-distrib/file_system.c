@@ -164,7 +164,7 @@ int file_open(const uint8_t* fname) {
 uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     unsigned i;
     uint32_t bytes_read;
-    if (fd < 2 || fd > 7) return -1;
+    // if (fd < 2 || fd > 7) return -1;
     bytes_read = read_data (temp_pcb.inode_num, 0, buf, inode_ptr[temp_pcb.inode_num].length);
 
     for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
@@ -192,7 +192,7 @@ int dir_open() {
 uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
-    if (fd < 2 || fd > 7) return -1;
+    // if (fd < 2 || fd > 7) return -1;
     strncpy(buf, boot_block_ptr->dir_entries[temp_position].filename, 32);
     bytes_copied = strlen(buf);
 
