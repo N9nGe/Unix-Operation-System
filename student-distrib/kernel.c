@@ -10,6 +10,7 @@
 #include "tests.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
+#include "devices/terminal.h"
 #include "paging.h"
 
 #define RUN_TESTS
@@ -146,6 +147,8 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     paging_init();
     keyboard_init();
+    terminal_init();
+
     rtc_init();
     rtc_set_freq(2);
     /* Enable interrupts */

@@ -1,7 +1,9 @@
 /* terminal.c - Functions to interact with the terminal 
  * 
  * Tony  1  10.20.2022  -- initialize terminal
- * Tony  2  10.22.2022  -- 
+ * Tony  2  10.22.2022  -- finish basic structure, init, open and close
+ * Gabriel 1 10.23.2022 -- finish read 
+ * Tony  3  10.23.2022  -- finish write and test function 
  * 
  */
 #include"../lib.h"
@@ -9,7 +11,7 @@
 #include"keyboard.h"
 #include"terminal.h"
 
-static terminal_t main_terminal;
+terminal_t main_terminal;
 /* 
  * terminal_init
  *  DESCRIPTION: Initialize terminal display
@@ -41,8 +43,9 @@ void terminal_reset(terminal_t terminal){
  *  INPUTS: 
  *     fd     -- file descripter buffer 
  *     buf    -- the terminal buffer to read 
- *     nbytes -- the n-bytes need to be read
- *  RETURN VALUE: nbytes successfully read
+ *     nbytes -- the bytes numbers need to be read
+ *  RETURN VALUE:
+ *     number of bytes successfully copied
  */
 int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
     //TODO: what the relationship between nbytes and kb_count?
@@ -75,27 +78,63 @@ int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
             *(uint8_t*)buf = 0;
         }
     }
-    // choose the return n bytes
+    // choose the return n bytes  
     if (nbytes <= keybuf_count) {
         copy_byte = nbytes;
     } else {
         copy_byte = keybuf_count;
     }
 
-    return copy_byte;
+    return copy_byte;// return number of bytes successfully copied
 }
 
 /* 
  * terminal_write
- *  DESCRIPTION: Initialize terminal display
- *  INPUTS: none
+ *  DESCRIPTION: output the content in the buffer into terminal
+ *  INPUTS: 
+ *      fd      -- file descriptor 
+ *      buf     -- buffer used to 
+ *      nbytes  --
  *  OUTPUTS: none
  *  RETURN VALUE: none
  *  SIDE EFFECTS: none
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
-    
-    return 0;
+    // check whether the fd is valid
+    if (fd < 2 || fd > 7){
+        printf("Fd must be in [2,7]\n ");
+        return -1;
+    }
+    // check whether the buffer is invalid
+    if(buf == NULL){
+        return -1;
+    }
+    // the variable used for return
+    int32_t copy_byte;
+    // loop index for copy
+    int32_t index;
+    // Output charcter
+    int8_t  c;
+    // set the flag off and wait for the enter pressed
+    kb_flag = 0;
+    while (kb_flag == 0);
+    const char* char_buf = buf; 
+    // copy nbytes from the buffer to the terminal 
+    for (index = 0; index < nbytes; index++) {
+        // the buf still have character
+        if (index < keybuf_count-1) { // last \n
+            c = char_buf[index];
+            putc_advanced(c);
+        }
+    }
+    // choose the return n bytes  
+    if (nbytes <= keybuf_count) {
+        copy_byte = nbytes;
+    } else {
+        copy_byte = keybuf_count;
+    }
+
+    return copy_byte;// return number of bytes successfully copied
 }
 
 /* 

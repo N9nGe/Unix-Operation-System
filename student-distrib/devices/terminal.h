@@ -19,6 +19,8 @@ typedef struct terminal_t
 
 } terminal_t;
 
+extern terminal_t main_terminal;
+
 void terminal_init();
 void terminal_reset(terminal_t terminal);
 int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes);
