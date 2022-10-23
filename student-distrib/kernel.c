@@ -13,7 +13,7 @@
 #include "devices/RTC.h"
 #include "paging.h"
 
-//#define RUN_TESTS
+#define RUN_TESTS
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -148,19 +148,29 @@ void entry(unsigned long magic, unsigned long addr) {
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
-    // paging_init();
-    // keyboard_init();
-    // rtc_init();
-    // rtc_set_freq(2);
+    paging_init();
+    keyboard_init();
+    rtc_init();
+    rtc_set_freq(2);
 
-    // TODO PAGE FAULT WHEN UNCOMMENT THESE ^
+    // uint8_t temp_buf[9999];
+    // clear();
+    // dir_open();
+    // files_ls();
 
-    uint8_t temp_buf[9999];
-    clear();
-    // file_open ("verylargetextwithverylongname.txt");
-    file_open("ls");
-    file_read (0, temp_buf, 5277);   // need to change fd in the future
-    //files_ls ();
+    // int i,j;
+    // for (i = 0 ; i < 17; i++){
+    //     j = dir_read(0, temp_buf, 0);
+    //     printf("%s  %d \n", temp_buf, j);
+    // }
+    
+    
+    
+
+    // file_open ("verylargetextwithverylongname.tx");
+    // file_open("frame0.txt");
+    // file_read (0, temp_buf, 9999);   // need to change fd in the future
+
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close

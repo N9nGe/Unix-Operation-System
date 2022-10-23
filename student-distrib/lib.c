@@ -209,6 +209,10 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
     update_cursor(screen_x,screen_y);
 
 }

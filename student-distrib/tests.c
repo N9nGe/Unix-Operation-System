@@ -325,6 +325,49 @@ void rtc_set_freq_test() {
 }
 
 /* Checkpoint 2 tests */
+
+/* File System Tests */
+
+void filesys_ls_test() {
+	uint8_t temp_buf[99999];
+	TEST_HEADER;
+	clear();
+    dir_open();
+    files_ls();
+}
+
+void filesys_frame0_test() {
+	uint8_t temp_buf[99999];
+	TEST_HEADER;
+	clear();
+    file_open("frame0.txt");
+    file_read(2, temp_buf, 99999);
+}
+
+void filesys_cat_test() {
+	uint8_t temp_buf[99999];
+	TEST_HEADER;
+	clear();
+    file_open("cat");
+    file_read(2, temp_buf, 99999);
+}
+
+void filesys_long_name_test() {
+	uint8_t temp_buf[99999];
+	TEST_HEADER;
+	clear();
+    file_open("verylargetextwithverylongname.txt");
+    file_read(2, temp_buf, 99999);
+}
+
+void filesys_long_name_test2() {
+	uint8_t temp_buf[99999];
+	TEST_HEADER;
+	clear();
+    file_open("verylargetextwithverylongname.tx");
+    file_read(2, temp_buf, 99999);
+}
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -333,8 +376,8 @@ void rtc_set_freq_test() {
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
-	printf("---------------TEST CP1 START--------------\n");	
-	TEST_OUTPUT("idt_test", idt_test());
+	// printf("---------------TEST CP1 START--------------\n");	
+	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
 	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
@@ -358,6 +401,15 @@ void launch_tests(){
 	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
 	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
-	printf("---------------TEST CP1 END--------------\n");
+	// printf("---------------TEST CP1 END--------------\n");
 	
+
+	/***** CP2 TESTS *****/
+
+	/* File System Tests */
+	// filesys_ls_test();			// list all files and their file types and sizes
+	// filesys_frame0_test();		// read a normal text file
+	// filesys_cat_test();			// read an executable file
+	// filesys_long_name_test();	// reading a file with name exceeding 32B; should fail
+	filesys_long_name_test2();	// reading a file with name exactly 32B; should suceed
 }
