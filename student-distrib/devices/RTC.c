@@ -162,6 +162,11 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     if (buf == NULL) {  
         return 0;
     }
+    // check whether fd is reasonable
+    if (fd < 2 || fd > 7) {
+        printf("fd is invalid! RTC fails to close\n");
+        return RTC_FAIL;
+    }
     // set the rtc flag become 0(rtc interrupt not occur -> do not return)
     rtc_interrupt_occurred = 0;
     printf("Set RTC interrupt to %d\n", rtc_interrupt_occurred);
@@ -182,7 +187,11 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
     if (buf == NULL || nbytes != 4 ) { 
         return RTC_FAIL;
     }
-    
+    // check whether fd is reasonable
+    if (fd < 2 || fd > 7) {
+        printf("fd is invalid! RTC fails to close\n");
+        return RTC_FAIL;
+    }
     // write the frequency into the rtc(Appendix B: should block interrupts to interact with the device, last paragraph)
     uint32_t flags;
     cli_and_save(flags);
@@ -201,9 +210,8 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
 int32_t rtc_close(int32_t fd) {
     // do nothing (what the meaning of the RTC virtualization?)
     // TODO: should we check the fd as null pointer? how to check the fd is invalid?(range of pcb fd?)
-
-    if (fd == NULL) {
-        printf("RTC fails to close\n");
+    if (fd < 2 || fd > 7) {
+        printf("fd is invalid! RTC fails to close\n");
         return RTC_FAIL;
     }
     printf("RTC Successfully closes\n");
