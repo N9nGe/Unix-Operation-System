@@ -390,7 +390,7 @@ int rtc_write_test() {
 	}
 	printf("current frequency is %d Hz\n", frequency);
 	// using a counter to change the rate
-	while (frequency <= RTC_INIT_DEFAULT_FREQ) { // <= 1024
+	while (frequency <= RTC_INIT_DEFAULT_FREQ) { // <= 1024 //TODO: the range of rtc frequency?
 		// for each frequency, there are total 32 times rtc interrupt
 		if (rtc_counter >= RTC_TEST_COUNTER) {
 			// change to the next ferquency
@@ -441,7 +441,7 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 	if (test != RTC_SUCCESS) {
 		return FAIL;
 	}
-	
+
 	printf("current frequency is %d Hz\n", current_freq);
 	// write the invalid frequency into the rtc
 	rtc_write(fd, &freq, RTC_DATA_BYTES);
