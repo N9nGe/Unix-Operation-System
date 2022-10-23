@@ -204,7 +204,7 @@ int dir_close() {
 void files_ls(){
     uint32_t idx, ch, i;
     uint8_t* temp_name;
-    uint8_t fname[32];
+    uint8_t fname[33];
     uint8_t* space_len;
     uint8_t ftype, inode_num;
     dentry_t tmp_dentry;
@@ -224,7 +224,7 @@ void files_ls(){
         if (strlen(tmp_dentry.filename) > 32){
             space_len = 0;
         } else {
-            space_len = 32-strlen(tmp_dentry.filename);
+            space_len = 32 - strlen(tmp_dentry.filename);
         }
         
         for (ch = 0; ch < space_len; ++ch){
@@ -234,13 +234,20 @@ void files_ls(){
         strncpy(temp_name, tmp_dentry.filename, 32);
         ch = space_len;
         i = 0;
-        while (temp_name[i] != '\0'){
+        /*while (temp_name[i] != '\0'){
             fname[ch] = temp_name[i];
             ch++;
             i++;
+        }*/
+        strncpy(fname, tmp_dentry.filename, 32);
+
+        printf("file_name:");
+        for (i = 0; i < space_len; i++) {
+            printf(" ");
         }
+        printf(" ");
         // fname[ch] = '\0';
-        printf("file_name: %s, file_type: %d, file_size: %d \n", 
+        printf("%s, file_type: %d, file_size: %d \n", 
             fname, tmp_dentry.filetype, inode_ptr[tmp_dentry.inode_num].length);    
     }
 }
