@@ -32,5 +32,19 @@ Creator:
 Description:
     backspace firstly delete a strange space, then delete the target character
 Solution:
+    The order between screen_x-- and backspacee() is wrong, I exchange them, and it's fine
+
+<--------------------------------------------------------->
+                          BUG 2                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Tony.
+Description:
+    Scrolling will meet with paging error.
+Solution:
+    Because .
+
     
 

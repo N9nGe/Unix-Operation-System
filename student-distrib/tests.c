@@ -6,6 +6,7 @@
 #include "i8259.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
+#include "devices/terminal.h"
 
 #define PASS 1
 #define FAIL 0
@@ -186,6 +187,28 @@ void i8259_enable_irq_test(){
 	enable_irq(RTC_IRQ);
 }
 
+/****** Terminal TESTS ******/
+int terminal_test(){
+	
+	char test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
+	clear();
+
+	if( 1){
+		printf("Can't open terminal here");
+	}
+	if (0 == terminal_read(2,(void*)test_str,20))
+	{
+		
+	}
+	
+	while (1){
+		
+		printf("[user@localhost]$ ");
+		terminal_write(2,test_str,50);
+	}
+	
+}
+
 /****** PAGING TESTS ******/
 
 int page_dir_struct_test() {
@@ -333,8 +356,18 @@ void rtc_set_freq_test() {
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
-	printf("---------------TEST CP1 START--------------\n");	
+	printf("---------------TEST CP2 START--------------\n");	
 	TEST_OUTPUT("idt_test", idt_test());
+
+	// int terminal_test();
+
+	printf("---------------TEST CP2 END--------------\n");
+	
+}
+
+// CP1 test list
+// to use it, copy-paste into launch_tests()
+
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
 	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
@@ -358,6 +391,3 @@ void launch_tests(){
 	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
 	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
-	printf("---------------TEST CP1 END--------------\n");
-	
-}

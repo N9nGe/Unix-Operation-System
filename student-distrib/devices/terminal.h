@@ -10,12 +10,12 @@
 #include"../types.h"
 #include"keyboard.h"
 
-#define KEY_BUF_SIZE 128
+#define TERMINAL_BUF_SIZE 128
 typedef struct terminal_t
 {
     int id;
     int index; // line buffer index&counter
-    unsigned int keyboard_buf[KEY_BUF_SIZE];
+    unsigned int buf[TERMINAL_BUF_SIZE];
 
 } terminal_t;
 

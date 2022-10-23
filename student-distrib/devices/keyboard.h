@@ -32,16 +32,18 @@
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_PRESSED 0x36
 #define RIGHT_SHIFT_RELEASED 0xB6
-#define LEFT_CTRL_PRESSED 0x1D
-#define LEFT_CTRL_RELEASED 0x9D
-// #define RIGHT_CTRL_PRESSED 0x1D
-// #define RIGHT_CTRL_RELEASED 0x9D
+#define CTRL_PRESSED 0x1D
+#define CTRL_RELEASED 0x9D
+// The left and right control shares the same id
 #define ALT_PRESSED      0x38
 #define ALT_RELEASED     (ALT_PRESSED + 0x80)
 #define CAPSLOCK_PRESSED 0x3A
 #define CAPSLOCK_RELEASED 0xBA
 /* Externally-visible functions */
 
+extern uint8_t keyboard_buf[KEY_BUF_SIZE];
+extern int     keybuf_count;
+extern int     kb_flag;
 /* Initialize keyboard input device */
 void keyboard_init(void);
 
@@ -54,8 +56,8 @@ int function_key_handle(unsigned int key);
 void reset_keyboard_buffer(void);
 /*Handle backspace, modify corresponding keyboard buffer*/
 void backspace_handler();
-
-int32_t keyboard_open();
-int32_t keyboard_close();
+/*set as device driver*/
+int32_t keyboard_open(const uint8_t* filename);
+int32_t keyboard_close(int32_t fd);
 
 #endif /* _KEYBOARD_H */

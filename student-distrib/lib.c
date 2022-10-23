@@ -6,7 +6,8 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0x7
+// Font(?) color 0x7 == black, 0x2 == green
+#define ATTRIB      0x2 
 
 static int screen_x;
 static int screen_y;
@@ -209,8 +210,11 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
     update_cursor(screen_x,screen_y);
-
 }
 
 /* void putc_advanced(uint8_t c);
@@ -223,11 +227,6 @@ void putc_advanced(uint8_t c) {
         screen_y++;
         screen_x = 0;
     } else{// First detect backspace 
-        if ( c == '\b'){
-            backspace();
-            return;
-        }
-
     // common case
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
@@ -235,6 +234,12 @@ void putc_advanced(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if( screen_x == NUM_COLS-1){ // 80, need to shift to next line
+        screen_x = 0;
+        screen_y++; // TODO
+    }
+
+
     if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one

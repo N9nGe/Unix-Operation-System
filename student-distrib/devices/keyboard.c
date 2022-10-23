@@ -15,17 +15,18 @@
 
 /* Set to avoid release repetition*/
 int i = 0;            // caps_lock counter 
-unsigned int pre = 0; // buffer to record last input key
 int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
 // CP2: initialize these 2 as 0, prepare for future cp5
-int present_terminal = 0;
-int last_terminal = 0; 
-static terminal_t SCREEN;
+// int present_terminal = 0;
+// int last_terminal = 0; 
 
+uint8_t keyboard_buf[KEY_BUF_SIZE];
+int     keybuf_count = 0;
+int     kb_flag = 0;
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -108,9 +109,6 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
  */
 void keyboard_init(void){
     // printf("initialize keyboard...");
-
-    SCREEN.id = 0;
-    SCREEN.index = 0;
     enable_irq( KEYBOARD_IRQ_NUM );
     return;
 };
@@ -131,12 +129,17 @@ void keyboard_interrupt_handler(){
     // NOTICE: it must be here! 
     unsigned int key;
     unsigned int value;
+    
  
     key = inb(KEYBOARD_PORT) & 0xff;
     value = scancode[key][0];// default as smaller
     if (function_key_handle(key) == 1){
         // sti();
         return;
+    }
+    if (keybuf_count == 127){
+        key   = 0x1C; // set as enter
+        value = '\n'; // set as enter for 128
     }
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
@@ -145,6 +148,15 @@ void keyboard_interrupt_handler(){
         }
             // printf("KEY pressed ["); // used for testing
             // Clear the screen when necessary
+                if ( value == '\n' ){
+                    // memset(keyboard_buf,0,KEY_BUF_SIZE);
+                    for ( keybuf_count = 0; keybuf_count < KEY_BUF_SIZE; keybuf_count++)
+                    {
+                        keyboard_buf[keybuf_count] = 0;
+                    }
+                    keybuf_count = 0;
+                    kb_flag = 1;
+                }
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
                     // printf("Cleared the screen: "); // TEST
@@ -152,19 +164,20 @@ void keyboard_interrupt_handler(){
                     return;
                 }
                 if ( alt_buf == 1){
-                    // do nothing
+                    // TODO do nothing for now
                 }
-                if( value ==  '\b'){
+                if( value ==  '\b' && keybuf_count > 0){
+
                     backspace_handler();
-                    // sti();
-                    // return;
+                    return;
                 }
                 if( value == '\t'){ // Tab output, here I use the easiest way
                     putc_advanced(' ');
                     putc_advanced(' ');
                     putc_advanced(' ');
                     putc_advanced(' ');
-                    SCREEN.index += 4;
+                    keybuf_count++;
+                    keyboard_buf[keybuf_count] = '\t'; 
                     // sti();
                     return;
                 }
@@ -172,11 +185,10 @@ void keyboard_interrupt_handler(){
                 if ((value >= 'a' && value <= 'z') && caps_lock == 1){
                     value = scancode[key][1]; // check if caps_lock is on
                 }
-                if( SCREEN.index >= 80){
-                    
-                }
+               
                 putc_advanced(value);
-                SCREEN.index += 1;
+                keybuf_count++;
+                keyboard_buf[keybuf_count] = value;
             // printf("] ");  // used for testing
     }
     
@@ -193,9 +205,18 @@ void keyboard_interrupt_handler(){
  *  SIDE EFFECTS: none
  */
 void backspace_handler(){
-    int index = SCREEN.index;
-    SCREEN.keyboard_buf[index] = NULL;
-    SCREEN.index -= 1;
+    if (keyboard_buf[keybuf_count] == '\t'){
+        backspace();
+        backspace();
+        backspace();
+        backspace();
+        keyboard_buf[keybuf_count] = '\0';
+        
+    }else{
+        backspace();
+    }
+    keyboard_buf[keybuf_count] = '\0';
+    keybuf_count--;
 }
 
 
@@ -230,11 +251,11 @@ int function_key_handle(unsigned int key){
         shift_buf = 0;
         ret = INVALID_RET;
         break;
-    case LEFT_CTRL_PRESSED:
+    case CTRL_PRESSED:
         ret = INVALID_RET;
         ctrl_buf = 1;
         break;
-    case LEFT_CTRL_RELEASED:
+    case CTRL_RELEASED:
         ret = INVALID_RET;
         ctrl_buf = 0;
         break;    
@@ -262,7 +283,7 @@ int function_key_handle(unsigned int key){
     
         break;
     }
-   if(i > 100000){
+   if(i > MAX_INPUT_COUNT){
     reset_keyboard_buffer();
    }
     
@@ -279,16 +300,41 @@ int function_key_handle(unsigned int key){
  */
 void reset_keyboard_buffer(){
     i = 0;
-    pre = 0;
     ctrl_buf = 0;
     shift_buf = 0;
     caps_lock = 0;
 }
-
-
-int32_t keyboard_open(){
-    return 0;
+// TODO
+/* 
+ * keyboard_open
+ *  DESCRIPTION: a helper function to reset the 
+ *  keyboard buffer 
+ *  INPUTS: none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: reset two global variable i and pre
+ */
+int32_t keyboard_open(const uint8_t* filename){
+    if ( filename == NULL){
+        return -1;
+    }else{
+        return 0;
+    }
 }
-int32_t keyboard_close(){
-    return 0;
+/* 
+ * reset_keyboard_buffer
+ *  DESCRIPTION: a helper function to reset the 
+ *  keyboard buffer 
+ *  INPUTS: none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: reset two global variable i and pre
+ */
+int32_t keyboard_close(int32_t fd){
+    if(fd >=2 && fd <= 8){
+        return 0;
+    }else{
+        printf("Fd must be in [2,8]\n ");
+        return -1;
+    }
 }
