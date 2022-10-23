@@ -24,10 +24,8 @@ int alt_buf = 0;      // Alt buf, do nothing now
 // CP2: initialize these 2 as 0, prepare for future cp5
 int present_terminal = 0;
 int last_terminal = 0; 
-
 static terminal_t SCREEN;
-SCREEN.id = 0;
-SCREEN.index = 0;
+
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -110,6 +108,9 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
  */
 void keyboard_init(void){
     // printf("initialize keyboard...");
+
+    SCREEN.id = 0;
+    SCREEN.index = 0;
     enable_irq( KEYBOARD_IRQ_NUM );
     return;
 };
@@ -130,7 +131,7 @@ void keyboard_interrupt_handler(){
     // NOTICE: it must be here! 
     unsigned int key;
     unsigned int value;
-
+ 
     key = inb(KEYBOARD_PORT) & 0xff;
     value = scancode[key][0];// default as smaller
     if (function_key_handle(key) == 1){
@@ -163,6 +164,7 @@ void keyboard_interrupt_handler(){
                     putc_advanced(' ');
                     putc_advanced(' ');
                     putc_advanced(' ');
+                    SCREEN.index += 4;
                     // sti();
                     return;
                 }
@@ -170,9 +172,11 @@ void keyboard_interrupt_handler(){
                 if ((value >= 'a' && value <= 'z') && caps_lock == 1){
                     value = scancode[key][1]; // check if caps_lock is on
                 }
-                if (SCREEN.keyboard_buf[])
+                if( SCREEN.index >= 80){
+                    
+                }
                 putc_advanced(value);
-
+                SCREEN.index += 1;
             // printf("] ");  // used for testing
     }
     
@@ -245,12 +249,12 @@ int function_key_handle(unsigned int key){
 
         break;
     case ALT_PRESSED:
-        printf(" alt is pressed "); // TEST alt press
+        // printf(" alt is pressed "); // TEST alt press
         alt_buf = 1;
         ret = INVALID_RET;
         break;
     case ALT_RELEASED:
-        printf(" alt is pressed "); // TEST alt release
+        // printf(" alt is released "); // TEST alt release
         alt_buf = 0;
         ret = INVALID_RET;
         break;

@@ -18,5 +18,19 @@ Creator:
 Description:
     Keyboard:  symbol ' and backspace is wrong
 Solution:
-    the mapping of single quate is wrong, since there is some C syntax difference,
+    - the mapping of single quate is wrong, since there is some C syntax difference,
     I use a macro #define to record its correct ascii value.
+    - I modify the putc logic, develop it into putc_advance
+
+<--------------------------------------------------------->
+                          BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Tony & Gabriel
+Description:
+    backspace firstly delete a strange space, then delete the target character
+Solution:
+    
+

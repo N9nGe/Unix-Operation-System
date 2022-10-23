@@ -53,13 +53,13 @@ int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
 // 	return buffer_index;
 //
     //printf("terminal_read called, buffer address：%x",&buf);
-
+/*
     terminals[scheduled_index].terminal_read_flag = 1;
     terminals[scheduled_index].stdin_enable = 0;
     if(buf == NULL){
         return FAIL;
     }
-    return copy_buffer(buf); // need to build a bufer?
+    return copy_buffer(buf); // need to build a bufer? */
 }
 
 /* 
@@ -71,7 +71,7 @@ int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
  *  SIDE EFFECTS: none
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
-    int32_t temp_count; // TODO
+/*   int32_t temp_count; // TODO
     cli();
     if(buf == NULL){
         return FAIL;
@@ -82,7 +82,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     }
     sti();
     /* return # of bytes written */
-    return temp_count;
+    // return temp_count; 
 }
 
 /* 

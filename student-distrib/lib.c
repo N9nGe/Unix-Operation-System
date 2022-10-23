@@ -219,20 +219,15 @@ void putc(uint8_t c) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc_advanced(uint8_t c) {
-    if(c == '\n' || c == '\r') {
+    if(c == '\n' || c == '\r') { // TODO: \r in terminal?
         screen_y++;
         screen_x = 0;
-    }else{// First detect backspace 
+    } else{// First detect backspace 
         if ( c == '\b'){
-           
-            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
-            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
-            screen_x--;
-            screen_x %= NUM_COLS;
-            screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
-            update_cursor(screen_x,screen_y);
+            backspace();
             return;
         }
+
     // common case
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
@@ -240,11 +235,36 @@ void putc_advanced(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
-    update_cursor(screen_x,screen_y);
-    if (screen_y == NUM_COLS){
+    if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one
     }
+    update_cursor(screen_x,screen_y);
+}
+
+/* void backspace();
+ * Author : Tony 1 10.22.2022
+ * Inputs: none
+ * Return Value: void
+ * Function: delete last charcter  */
+void backspace(){
+    if(screen_x == 0 || screen_y == 0){ 
+        return;// if it is at the (0,0), can't backspace
+    }
+    if (screen_x == 0){ // At the left end
+        screen_y--;
+        screen_x = NUM_COLS - 1;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        update_cursor(screen_x, screen_y);
+        return;
+    }
+// Else in the middle 
+    screen_x--;
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
+    update_cursor(screen_x,screen_y);
+    return;
     
 }
 
@@ -254,20 +274,21 @@ void putc_advanced(uint8_t c) {
  * Return Value: void
  * Function: shift up the whole screen by one  */
 void scroll_up(char* memory){
-    int x,y;
-    int origin,update;
-    for ( x = 1; x < NUM_ROWS; x++){
-        for (y = 0; y < NUM_COLS; y++){
+    uint32_t x,y;
+    uint32_t origin,update;
+    for ( y = 1; y < NUM_ROWS; y++){
+        for (x = 0; x < NUM_COLS; x++){
         // Here, the first line is naturally deleted
-            origin = NUM_COLS*x + y;
-            update = NUM_COLS*(x-1) + y;
+            origin = NUM_COLS*y + x;
+            update = NUM_COLS*(y-1) + x;
             *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
         }
     }
-    screen_y = NUM_COLS -1; // now screen_x is retained, shift up screen_y by one
+    screen_y = NUM_ROWS - 1; // now screen_x is retained, shift up screen_y by one
     /*Clear the last line*/
-    for(y = 0; y < NUM_COLS;y++){
-        *(uint8_t *)(video_mem + ((NUM_COLS * NUM_ROWS + y) << 1)) = ' ';
+    for(x = 0; x < NUM_COLS; x++){ //  TODO
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
     }
 }
 
