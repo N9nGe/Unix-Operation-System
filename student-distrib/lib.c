@@ -2,11 +2,14 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
+#include "devices/keyboard.h"
 // The text mode video is simply 80 * 25, very small size, hum?
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-#define ATTRIB      0x7
+// Font color 0x7 == black, 0x2 == green 
+#define ATTRIB      0x3
+// 0x11 == blue screen
 
 static int screen_x;
 static int screen_y;
@@ -209,12 +212,100 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
+        screen_x = 0; 
+        screen_y +=1 ; 
+    }
     if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one
     }
     update_cursor(screen_x,screen_y);
+}
 
+/* void putc_advanced(uint8_t c);
+ * Author : Tony 1 10.22.2022
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
+void putc_advanced(uint8_t c) {
+    if(c == '\n' || c == '\r') { // TODO: \r in terminal?
+        screen_y++;
+        screen_x = 0;
+    } else{// First detect backspace 
+    // common case
+        if(c != '\b'){
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+            screen_x++;
+            screen_x %= NUM_COLS;
+            screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        }
+    }
+    if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
+        screen_x = 0; 
+        screen_y +=1 ; 
+        keyboard_buf[keybuf_count] = '\n';
+        keybuf_count++;
+    }
+
+    // When the cursor is at the bottom of terminal
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
+    update_cursor(screen_x,screen_y);
+}
+
+/* void backspace();
+ * Author : Tony 1 10.22.2022
+ * Inputs: none
+ * Return Value: void
+ * Function: delete last charcter  */
+void backspace(){
+    if(screen_x == 0 && screen_y == 0){ 
+        return;// if it is at the (0,0), can't backspace
+    }
+    if (screen_x == 0){ // At the left end
+        screen_y--;
+        screen_x = NUM_COLS - 1;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        update_cursor(screen_x, screen_y);
+        return;
+    }
+// Else in the middle 
+    screen_x--;
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
+    update_cursor(screen_x,screen_y);
+    return;
+    
+}
+
+/* void scroll_up(char* memory);
+ * Author : Tony 1 10.22.2022          Create the scroll up without debugging
+            Jerry&Gabriel 2 10.22.2022 Debug  
+ * Inputs: char* memory = video_mem, a global variable
+ * Return Value: void
+ * Function: shift up the whole screen by one  */
+void scroll_up(char* memory){
+    uint32_t x,y;
+    uint32_t origin,update;
+    for ( y = 1; y < NUM_ROWS; y++){
+        for (x = 0; x < NUM_COLS; x++){
+        // Here, the first line is naturally deleted
+            origin = NUM_COLS*y + x;
+            update = NUM_COLS*(y-1) + x;
+            *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
+        }
+    }
+    screen_y = NUM_ROWS - 1; // now screen_x is retained, shift up screen_y by one
+    /*Clear the last line*/
+    for(x = 0; x < NUM_COLS; x++){ //  
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
+    }
 }
 
 /* void putc_advanced(uint8_t c);

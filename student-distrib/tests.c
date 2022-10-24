@@ -6,6 +6,7 @@
 #include "i8259.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
+#include "devices/terminal.h"
 #include "file_system.h"
 
 #define PASS 1
@@ -198,6 +199,7 @@ void i8259_enable_irq_test(){
 	enable_irq(RTC_IRQ);
 }
 
+
 /****** PAGING TESTS ******/
 
 int page_dir_struct_test() {
@@ -337,6 +339,59 @@ void rtc_set_freq_test() {
 }
 
 /* Checkpoint 2 tests */
+
+/****** Terminal TESTS ******/
+//CP2:
+void terminal_test(){
+	
+	const int8_t test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
+	clear();
+	printf("=====Start testing the terminal open/read/write/close driver=====\n");
+	int32_t fd = 3; // Testing, set fd as any number
+	uint32_t test1,test2;
+	uint8_t read_buffer[KEY_BUF_SIZE];
+	uint8_t write_buffer[] = "Test the terminal write\n"; // its length is 24
+	memset(read_buffer,NULL,KEY_BUF_SIZE);
+	const uint8_t filename[10] = "TEST.txt";
+	// Open
+	printf("[Test terminal_open()]$\n");
+	if( 0 != terminal_open(filename)){
+		printf("Can't open terminal here\n");
+	}else{
+		printf("---Pass the open test\n");
+	}
+	// Close
+	printf("[Test terminal_close()]$\n");
+	if( 0 != terminal_close(fd)){
+		printf("Can't open terminal here\n");
+	}else{
+		printf("---Pass the open test\n");
+	}
+
+	// TEST WRITE FROM A NORMAL BUF
+	printf("[Test terminal_write()]$\n");
+	printf("terminal output is: ");
+	if (0 != terminal_write(fd,(void*)test_str,27)){
+		printf("---Pass the write test\n");
+	}else{
+		printf("Fail to pass the write test.\n");
+	}
+
+	// Loop to test the input case
+	printf("[TEST terminal_read() and write()]$\n");
+	printf("Start testing terminal-keyboard interrupt\n");
+	while (1){
+		
+		printf("[user@localhost]$ ");
+		test1 = terminal_read(fd,read_buffer,KEY_BUF_SIZE);
+		printf("The number of bytes is read: %d\n", test1);
+		test2 = terminal_write(2,write_buffer,sizeof(write_buffer));
+		printf("The number of bytes is write: %d\n", test2);
+	}	
+}
+
+
+
 
 /* File System Tests */
 
@@ -484,9 +539,36 @@ void launch_tests(){
 	// filesys_file_open_failed_test();
 	// filesys_file_read_half_test();
 	// filesys_dir_read_test();
-
+	terminal_test();
 
 	// printf("---------------TEST CP2 END--------------\n");
 
 
 }
+
+// CP1 test list
+// to use it, copy-paste into launch_tests()
+
+	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
+	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
+	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
+	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
+	// TEST_OUTPUT("test_system_call", test_system_call());
+	// /*Test for i8259*/
+	// i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
+	// i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
+	// i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
+	// i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
+
+	/*Test for rtc set frequency*/
+	// rtc_set_freq_test();
+
+	/*Test for Paging */
+	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
+	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
+	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
+	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());
+	// TEST_OUTPUT("page_test_video_mem_bottom_invalid", page_test_video_mem_bottom_invalid());
+	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
+	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
+	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());

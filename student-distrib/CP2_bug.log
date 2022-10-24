@@ -1,0 +1,93 @@
+<=========================================================>
+<=================>    BUG LOG HEADER   <=================>
+<=========================================================>
+Assignment:
+    MP3
+CheckPoint:
+    CP2
+CreateTime:
+    2022.10.21
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.21.
+Creator:
+    JIE WANG.
+Description:
+    Keyboard:  symbol ' and backspace is wrong
+Solution:
+    - the mapping of single quate is wrong, since there is some C syntax difference,
+    I use a macro #define to record its correct ascii value.
+    - I modify the putc logic, develop it into putc_advance
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Tony & Gabriel
+Description:
+    - backspace firstly delete a strange space, then delete the target character
+    - backspace can't delete the character at the left side of screen_x, it will display
+    a \b instead
+Solution:
+    - The order between screen_x-- and backspacee() is wrong, I exchange them, and it's fine
+    - 
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Tony.
+Description:
+    Scrolling will meet with paging error.
+Solution:
+    Because the screen_y boundary is set wrong, I previously
+    messed up with NUM_ROWS and NUM_COLS, this cause many 
+    misunderstanding on it.
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Tony.
+Description:
+    
+Solution:
+    ....
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Gabriel & Tony
+Description:
+    After press the enter, and then press the backspace to delete the empty Keyboard buffer. Normally, it should
+    do nothing because the buffer is empty. However, our cursor goes back to the end of the last line.
+Solution:
+    We forget to return after we consider the cases. Actually, when we press the enter, \n is put into the buffer.
+    but we have no need to consider backspace this case. Because after press the \n we should clear all stuff in the 
+    buffer.
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.24.
+Creator:
+    Gabriel Gao
+Description:
+    For print the string, there is a '\0' existing. We need to ignore this case by using putc
+Solution:
+    Just add if statement to jump over this case.
+
+

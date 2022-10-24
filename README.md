@@ -48,5 +48,6 @@ By Team09
 		- hardware, more in ECE385
 - Read Only File System Driver !!!
 	- 2 people, hard 
-	- [ ] lecture review
+	- [x] lecture review
 	-  
+
