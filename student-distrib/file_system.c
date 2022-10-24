@@ -58,8 +58,8 @@ int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry){
     for (i = 0; i < sizeof(boot_block_ptr -> dir_entries); i++) {
         tmp_dentry = boot_block_ptr -> dir_entries[i];
         // use string compare to check if the filenames match
-        if (strncmp(fname, tmp_dentry.filename, FILENAME_LEN)== 0) {
-            strcpy(dentry -> filename, tmp_dentry.filename);
+        if (strncmp_unsigned(fname, tmp_dentry.filename, FILENAME_LEN)== 0) {
+            strcpy_unsigned(dentry -> filename, tmp_dentry.filename);
             dentry -> filetype = tmp_dentry.filetype;
             dentry -> inode_num = tmp_dentry.inode_num;
             return 0;
@@ -89,12 +89,12 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
     tmp_dentry = boot_block_ptr -> dir_entries[index];
     uint8_t testnull[FILENAME_LEN] = {0};
     // check if the dentry at this index is invalid
-    if (strncmp(tmp_dentry.filename, testnull, FILENAME_LEN) == 0) {
+    if (strncmp_unsigned(tmp_dentry.filename, testnull, FILENAME_LEN) == 0) {
         return -1;
     }
 
     //printf("%u",inode_ptr[0].length);
-    strcpy(dentry -> filename, tmp_dentry.filename);
+    strcpy_unsigned(dentry -> filename, tmp_dentry.filename);
     dentry -> filetype = tmp_dentry.filetype;
     dentry -> inode_num = tmp_dentry.inode_num;
     return 0;
@@ -114,21 +114,21 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
  */
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length){
     // error checking
-    if (inode < 0 || inode > 62 || buf == NULL || boot_block_ptr == NULL) return -1;
+    if (inode < 0 || inode >= DENTRY_SIZE || buf == NULL || boot_block_ptr == NULL) return -1;
 
-    uint32_t inode_startblk_idx = offset / 4096;     // calculate which block to start with
-    uint32_t startblk_idx = offset % 4096;           // calculate the start byte within the start block
+    uint32_t inode_startblk_idx = offset / DATA_BLOCK_ENTRY_SIZE;     // calculate which block to start with
+    uint32_t startblk_idx = offset % DATA_BLOCK_ENTRY_SIZE;           // calculate the start byte within the start block
     uint32_t inode_endblk_idx;  // the block to end with
     uint32_t endblk_idx;        // the end byte within the end block
 
     // calculate which block to end with 
     if ((length + offset) > inode_ptr[inode].length) {  // if reading more data than the actual size of the file
-        inode_endblk_idx = inode_ptr[inode].length / 4096;
-        endblk_idx = (inode_ptr[inode].length) % 4096;      // end byte is the ending byte of the file
+        inode_endblk_idx = inode_ptr[inode].length / DATA_BLOCK_ENTRY_SIZE;
+        endblk_idx = (inode_ptr[inode].length) % DATA_BLOCK_ENTRY_SIZE;      // end byte is the ending byte of the file
     }
     else{    // we are reading within the size of the file
-        inode_endblk_idx = (length + offset) / 4096;
-        endblk_idx = (length + offset) % 4096;
+        inode_endblk_idx = (length + offset) / DATA_BLOCK_ENTRY_SIZE;
+        endblk_idx = (length + offset) % DATA_BLOCK_ENTRY_SIZE;
     }
     
     uint32_t idx, i;
@@ -146,7 +146,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
             for (i = 0; i < endblk_idx; ++i){
                 block_idx = curr_inode.data_block_num[idx];
                 // block_idx error checking
-                if (block_idx < 0 || block_idx > 1023)
+                if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
                     return -1;
                 buf[buf_idx] = data_block_ptr[block_idx].entry[i];
                 buf_idx++;
@@ -157,10 +157,10 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
         // if it's the first block
         if (idx == inode_startblk_idx){ 
-            for (i = startblk_idx; i < 4096; ++i){
+            for (i = startblk_idx; i < DATA_BLOCK_ENTRY_SIZE; ++i){
                 block_idx = curr_inode.data_block_num[idx];
                 // block_idx error checking
-                if (block_idx < 0 || block_idx > 1023)
+                if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
                     return -1;
                 // copy data of the first block (from startblk_idx to the end of this block) to buffer 
                 buf[buf_idx] = data_block_ptr[block_idx].entry[i]; 
@@ -172,10 +172,10 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
         // if it's not the first or last block, copy the entire block
         else {  
-            for (i = 0; i < 4096; ++i){
+            for (i = 0; i < DATA_BLOCK_ENTRY_SIZE; ++i){
                 block_idx = curr_inode.data_block_num[idx];
                 // block_idx error checking
-                if (block_idx < 0 || block_idx > 1023)
+                if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
                     return -1;
                 buf[buf_idx] = data_block_ptr[block_idx].entry[i];
                 buf_idx++;
@@ -198,12 +198,15 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *  SIDE EFFECTS: none
  */
 int file_open(const uint8_t* fname) { 
-    if (strlen(fname) > 32){    // return failed if file name is larger than 32B
+    if (strlen_unsigned(fname) > FILENAME_LEN){    // return failed if file name is larger than 32B
         printf("File open failed!");
         return -1;
     }
     dentry_t tmp_dentry;
-    read_dentry_by_name (fname, &tmp_dentry); 
+    if (read_dentry_by_name (fname, &tmp_dentry) != 0){
+        return -1;
+    }
+    
     temp_pcb.inode_num = tmp_dentry.inode_num; 
     temp_pcb.flag = 1;     // set to in-use
 
@@ -224,17 +227,21 @@ int test_readdentrybyidx(const uint32_t idx) {
  *  DESCRIPTION: 
  *  INPUTS: int32_t fd -- not used for checkpoint 3.2
  *          uint8_t* buf -- the buffer that stores the data read from file
- *          int32_t nbytes -- number of 
+ *          int32_t nbytes -- number of bytes to be re
  *  OUTPUTS: none
  *  RETURN VALUE: number of bytes read; 0 if no byte is read
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
 uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     unsigned i;
+    unsigned length;
     uint32_t bytes_read;
     // if (fd < 2 || fd > 7) return -1;
     bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
-
+    length = inode_ptr[temp_pcb.inode_num].length;
+    if ((unsigned) nbytes > length) {
+        nbytes = length;
+    }
     //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
     for (i = 0; i < nbytes; i++) {
         printf("%c", buf[i]);
@@ -286,8 +293,8 @@ uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
     // if (fd < 2 || fd > 7) return -1;
-    strncpy(buf, boot_block_ptr->dir_entries[temp_position].filename, 32);
-    bytes_copied = strlen(buf);
+    strncpy_unsigned(buf, boot_block_ptr->dir_entries[temp_position].filename, 32);
+    bytes_copied = strlen_unsigned(buf);
 
     if (temp_position < boot_block_ptr->dentry_count)
         temp_position++;
@@ -328,10 +335,9 @@ int dir_close() {
  *  SIDE EFFECTS: none
  */
 void files_ls(){ 
-    uint32_t idx, ch, i;
-    uint8_t fname[33];
-    uint8_t* space_len;
-    uint8_t ftype, inode_num;
+    uint32_t idx, i;
+    uint8_t fname[FILENAME_LEN+1];
+    uint32_t space_len;
     dentry_t tmp_dentry;
     uint32_t len;
 
@@ -339,13 +345,13 @@ void files_ls(){
         dir_read(0, fname, 0);
         read_dentry_by_name(fname, &tmp_dentry);
 
-        if (strlen(tmp_dentry.filename) > 32)
+        if (strlen_unsigned(tmp_dentry.filename) > FILENAME_LEN)
             space_len = 0;
         else
-            space_len = 32 - strlen(tmp_dentry.filename);
+            space_len = FILENAME_LEN - strlen_unsigned(tmp_dentry.filename);
 
         i = 0;
-        strncpy(fname, tmp_dentry.filename, 32);
+        strncpy_unsigned(fname, tmp_dentry.filename, FILENAME_LEN);
 
         printf("file_name:");
         for (i = 0; i < space_len; i++) {

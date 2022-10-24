@@ -26,6 +26,17 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
+void file_system_init(uint32_t* fs_start);
+int file_open(const uint8_t* fname);
+uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+int file_write();
+int file_close(int32_t fd);
+int dir_open();
+uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+int dir_write();
+int dir_close();
+void files_ls();
+
 
 /* Checkpoint 1 tests */
 
@@ -329,43 +340,60 @@ void rtc_set_freq_test() {
 /* File System Tests */
 
 void filesys_ls_test() {
-	uint8_t temp_buf[99999];
-	TEST_HEADER;
 	clear();
     dir_open();
     files_ls();
 }
 
 void filesys_frame0_test() {
-	uint8_t temp_buf[99999];
-	TEST_HEADER;
+	uint8_t temp_buf[9999];
 	clear();
-    file_open("frame0.txt");
-    file_read(2, temp_buf, 99999);
+    file_open((uint8_t *) "frame0.txt");
+    file_read(2, temp_buf, 9999);
 }
 
 void filesys_cat_test() {
-	uint8_t temp_buf[99999];
-	TEST_HEADER;
+	uint8_t temp_buf[9999];
 	clear();
-    file_open("cat");
-    file_read(2, temp_buf, 99999);
+    file_open((uint8_t *) "cat");
+    file_read(2, temp_buf, 9999);
 }
 
-void filesys_long_name_test() {
-	uint8_t temp_buf[99999];
-	TEST_HEADER;
+void filesys_long_name_fail_test() {
+	uint8_t temp_buf[9999];
 	clear();
-    file_open("verylargetextwithverylongname.txt");
-    file_read(2, temp_buf, 99999);
+    file_open((uint8_t *)  "verylargetextwithverylongname.txt");
+    file_read((uint32_t) 2, temp_buf, 9999);
 }
 
-void filesys_long_name_test2() {
-	uint8_t temp_buf[99999];
-	TEST_HEADER;
+void filesys_long_name_success_test() {
+	uint8_t temp_buf[9999];
 	clear();
-    file_open("verylargetextwithverylongname.tx");
-    file_read(2, temp_buf, 99999);
+    file_open((uint8_t *)  "verylargetextwithverylongname.tx");
+    file_read((uint32_t) 2, temp_buf, (uint32_t) 5277);
+}
+
+void filesys_file_open_failed_test(){
+	clear();
+	file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
+}
+
+void filesys_file_read_half_test(){
+	uint8_t temp_buf[9999];
+	clear();
+	file_open((uint8_t *) "frame0.txt");
+	file_read((uint32_t) 0, temp_buf, (uint32_t) 93);
+}
+
+void filesys_dir_read_test(){
+	clear();
+	uint32_t idx;
+	uint8_t temp_buf[9999];
+	dir_open();
+	for (idx = 0; idx < 17; idx++){
+		dir_read((uint32_t) 0, temp_buf, (uint32_t) 32);
+		printf("file name: %s\n", temp_buf);
+	}
 }
 
 /* Checkpoint 3 tests */
@@ -410,8 +438,13 @@ void launch_tests(){
 	// filesys_ls_test();			// list all files and their file types and sizes
 	// filesys_frame0_test();		// read a normal text file
 	// filesys_cat_test();			// read an executable file
-	// filesys_long_name_test();	// reading a file with name exceeding 32B; should fail
-	//filesys_long_name_test2();	// reading a file with name exactly 32B; should suceed
+	// filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
+	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
+	// filesys_file_open_failed_test();
+	// filesys_file_read_half_test();
+	filesys_dir_read_test();
+
+
 	// printf("---------------TEST CP2 END--------------\n");
 
 

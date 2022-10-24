@@ -367,6 +367,17 @@ uint32_t strlen(const int8_t* s) {
     return len;
 }
 
+/* uint32_t strlen(const int8_t* s);
+ * Inputs: const int8_t* s = string to take length of
+ * Return Value: length of string s
+ * Function: return length of string s */
+uint32_t strlen_unsigned(const uint8_t* s) {
+    register uint32_t len = 0;
+    while (s[len] != '\0')
+        len++;
+    return len;
+}
+
 /* void* memset(void* s, int32_t c, uint32_t n);
  * Inputs:    void* s = pointer to memory
  *          int32_t c = value to set memory to
@@ -549,12 +560,54 @@ int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n) {
     return 0;
 }
 
+/* int32_t strncmp_unsigned(const uint8_t* s1, const uint8_t* s2, uint32_t n)
+ * Inputs: const uint8_t* s1 = first string to compare
+ *         const uint8_t* s2 = second string to compare
+ *               uint32_t n = number of bytes to compare
+ * Return Value: A zero value indicates that the characters compared
+ *               in both strings form the same string.
+ *               A value greater than zero indicates that the first
+ *               character that does not match has a greater value
+ *               in str1 than in str2; And a value less than zero
+ *               indicates the opposite.
+ * Function: compares string 1 and string 2 for equality */
+int32_t strncmp_unsigned(const uint8_t* s1, const uint8_t* s2, uint32_t n) {
+    int32_t i;
+    for (i = 0; i < n; i++) {
+        if ((s1[i] != s2[i]) || (s1[i] == '\0') /* || s2[i] == '\0' */) {
+
+            /* The s2[i] == '\0' is unnecessary because of the short-circuit
+             * semantics of 'if' expressions in C.  If the first expression
+             * (s1[i] != s2[i]) evaluates to false, that is, if s1[i] ==
+             * s2[i], then we only need to test either s1[i] or s2[i] for
+             * '\0', since we know they are equal. */
+            return s1[i] - s2[i];
+        }
+    }
+    return 0;
+}
+
 /* int8_t* strcpy(int8_t* dest, const int8_t* src)
  * Inputs:      int8_t* dest = destination string of copy
  *         const int8_t* src = source string of copy
  * Return Value: pointer to dest
  * Function: copy the source string into the destination string */
 int8_t* strcpy(int8_t* dest, const int8_t* src) {
+    int32_t i = 0;
+    while (src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
+    return dest;
+}
+
+/* int8_t* strcpy_unsigned(uint8_t* dest, const uint8_t* src)
+ * Inputs:      uint8_t* dest = destination string of copy
+ *         const uint8_t* src = source string of copy
+ * Return Value: pointer to dest
+ * Function: copy the source string into the destination string */
+uint8_t* strcpy_unsigned(uint8_t* dest, const uint8_t* src) {
     int32_t i = 0;
     while (src[i] != '\0') {
         dest[i] = src[i];
@@ -571,6 +624,19 @@ int8_t* strcpy(int8_t* dest, const int8_t* src) {
  * Return Value: pointer to dest
  * Function: copy n bytes of the source string into the destination string */
 int8_t* strncpy(int8_t* dest, const int8_t* src, uint32_t n) {
+    int32_t i = 0;
+    while (src[i] != '\0' && i < n) {
+        dest[i] = src[i];
+        i++;
+    }
+    while (i < n) {
+        dest[i] = '\0';
+        i++;
+    }
+    return dest;
+}
+
+uint8_t* strncpy_unsigned(uint8_t* dest, const uint8_t* src, uint32_t n) {
     int32_t i = 0;
     while (src[i] != '\0' && i < n) {
         dest[i] = src[i];

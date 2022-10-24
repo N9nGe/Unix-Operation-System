@@ -13,6 +13,7 @@ int32_t puts(int8_t *s);
 int8_t *itoa(uint32_t value, int8_t* buf, int32_t radix);
 int8_t *strrev(int8_t* s);
 uint32_t strlen(const int8_t* s);
+uint32_t strlen_unsigned(const uint8_t* s);
 //CP2
 void update_cursor(int x, int y);
 void clear(void);
@@ -25,8 +26,11 @@ void* memset_dword(void* s, int32_t c, uint32_t n);
 void* memcpy(void* dest, const void* src, uint32_t n);
 void* memmove(void* dest, const void* src, uint32_t n);
 int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);
+int32_t strncmp_unsigned(const uint8_t* s1, const uint8_t* s2, uint32_t n);
 int8_t* strcpy(int8_t* dest, const int8_t*src);
+uint8_t* strcpy_unsigned(uint8_t* dest, const uint8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
+uint8_t* strncpy_unsigned(uint8_t* dest, const uint8_t*src, uint32_t n);
 
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);

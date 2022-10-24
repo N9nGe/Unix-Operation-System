@@ -141,7 +141,7 @@ void entry(unsigned long magic, unsigned long addr) {
     }
 
     module_t* mod = (module_t*)mbi->mods_addr;
-    file_system_init (mod -> mod_start);
+    file_system_init ((uint32_t *) mod -> mod_start);
 
     /* Init the PIC */
     i8259_init();
