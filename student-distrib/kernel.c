@@ -164,8 +164,8 @@ void entry(unsigned long magic, unsigned long addr) {
     //     printf("%s  %d \n", temp_buf, j);
     // }
     
-    
-    
+    // clear();
+    // test_readdentrybyidx(19);
 
     // file_open ("verylargetextwithverylongname.tx");
     // file_open("frame0.txt");
