@@ -500,6 +500,26 @@ void filesys_dir_read_test(){
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
+
+	/***** CP2 TESTS *****/
+	// printf("---------------TEST CP2 START--------------\n");	
+	/* File System Tests */
+	// filesys_ls_test();			// list all files and their file types and sizes
+	// filesys_frame0_test();		// read a normal text file
+	// filesys_cat_test();			// read an executable file
+	filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
+	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
+	// filesys_file_open_failed_test();
+	// filesys_file_read_half_test();
+	// filesys_dir_read_test();
+	terminal_test();
+
+	// printf("---------------TEST CP2 END--------------\n");
+
+
+
+
+	
 	// printf("---------------TEST CP1 START--------------\n");	
 	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
@@ -527,48 +547,5 @@ void launch_tests(){
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
 	// printf("---------------TEST CP1 END--------------\n");
 	
-
-	/***** CP2 TESTS *****/
-	// printf("---------------TEST CP2 START--------------\n");	
-	/* File System Tests */
-	// filesys_ls_test();			// list all files and their file types and sizes
-	// filesys_frame0_test();		// read a normal text file
-	// filesys_cat_test();			// read an executable file
-	filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
-	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
-	// filesys_file_open_failed_test();
-	// filesys_file_read_half_test();
-	// filesys_dir_read_test();
-	terminal_test();
-
-	// printf("---------------TEST CP2 END--------------\n");
-
-
 }
 
-// CP1 test list
-// to use it, copy-paste into launch_tests()
-
-	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
-	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
-	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
-	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
-	// TEST_OUTPUT("test_system_call", test_system_call());
-	// /*Test for i8259*/
-	// i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
-	// i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
-	// i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
-	// i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
-
-	/*Test for rtc set frequency*/
-	// rtc_set_freq_test();
-
-	/*Test for Paging */
-	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
-	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
-	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
-	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());
-	// TEST_OUTPUT("page_test_video_mem_bottom_invalid", page_test_video_mem_bottom_invalid());
-	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
-	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
-	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
