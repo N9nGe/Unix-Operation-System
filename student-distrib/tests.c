@@ -187,40 +187,6 @@ void i8259_enable_irq_test(){
 	enable_irq(RTC_IRQ);
 }
 
-/****** Terminal TESTS ******/
-//CP2:
-void terminal_test(){
-	
-	char test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
-	clear();
-	printf("Start testing the terminal open/read/write/close driver:\n");
-	int32_t fd = 3; // Testing
-	const uint8_t filename[10] = "TEST.txt";
-	// const uint8_t toolong_filename[20] = "TOO_LONG_TEST.txt";
-	// const uint8_t NULL_filename = NULL;
-	
-	printf("Test the open: ");
-	if( 0 != terminal_open(filename)){
-		printf("Can't open terminal here\n");
-	}
-	if (0 == terminal_read(fd,(void*)test_str,strlen(test_str))){
-		printf("test case 1: ");
-		puts(test_str);
-		printf("\nterminal output is: ");
-		terminal_write(fd,main_terminal.buf,sizeof(main_terminal.buf)/sizeof(unsigned int));
-	}
-	// Loop to test the input case
-	printf("start testing keyboard interrupt case");
-	while (1){
-		
-		printf("[user@localhost]$ ");
-		terminal_read(fd,keyboard_buf,keybuf_count);
-		terminal_write(2,test_str,50);
-	}
-
-	
-	
-}
 
 /****** PAGING TESTS ******/
 
@@ -361,6 +327,44 @@ void rtc_set_freq_test() {
 }
 
 /* Checkpoint 2 tests */
+
+/****** Terminal TESTS ******/
+//CP2:
+void terminal_test(){
+	
+	char test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
+	clear();
+	printf("Start testing the terminal open/read/write/close driver:\n");
+	int32_t fd = 3; // Testing
+	const uint8_t filename[10] = "TEST.txt";
+	// const uint8_t toolong_filename[20] = "TOO_LONG_TEST.txt";
+	// const uint8_t NULL_filename = NULL;
+	
+	printf("Test the open: ");
+	if( 0 != terminal_open(filename)){
+		printf("Can't open terminal here\n");
+	}
+	if (0 == terminal_read(fd,(void*)test_str,strlen(test_str))){
+		printf("test case 1: ");
+		puts(test_str);
+		printf("\nterminal output is: ");
+		terminal_write(fd,main_terminal.buf,sizeof(main_terminal.buf)/sizeof(unsigned int));
+	}
+	// Loop to test the input case
+	printf("start testing keyboard interrupt case");
+	while (1){
+		
+		printf("[user@localhost]$ ");
+		terminal_read(fd,keyboard_buf,keybuf_count);
+		terminal_write(2,test_str,50);
+	}
+
+	
+	
+}
+
+
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -372,7 +376,7 @@ void launch_tests(){
 	printf("---------------TEST CP2 START--------------\n");	
 	TEST_OUTPUT("idt_test", idt_test());
 
-	terminal_test();
+	// terminal_test();
 
 	printf("---------------TEST CP2 END--------------\n");
 	

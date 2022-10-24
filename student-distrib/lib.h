@@ -19,6 +19,7 @@ void clear(void);
 void putc_advanced(uint8_t c);
 void scroll_up(char* memory);
 void backspace();
+
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
 void* memset_dword(void* s, int32_t c, uint32_t n);

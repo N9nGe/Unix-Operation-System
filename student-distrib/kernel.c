@@ -146,8 +146,8 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     paging_init();
-    keyboard_init();
     terminal_init();
+    keyboard_init();
 
     rtc_init();
     rtc_set_freq(2);

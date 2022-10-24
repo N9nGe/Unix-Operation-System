@@ -62,9 +62,9 @@ int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
     int32_t copy_byte;
     // loop index for copy
     int32_t index;
-    // set the flag off and wait for the enter pressed
+    // set the flag off and wait for the [enter] pressed
     kb_flag = 0;
-    while (kb_flag == 0);
+    while (kb_flag == 0); // lock the terminal until the keyboard flag is set 1
 
     // copy nbytes from the keyboard 
     for (index = 0; index < nbytes; index++) {
@@ -115,16 +115,18 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     int32_t index;
     // Output charcter
     int8_t  c;
+    // TODO
     // set the flag off and wait for the enter pressed
-    kb_flag = 0;
-    while (kb_flag == 0);
+    // kb_flag = 0;
+    // while (kb_flag == 0);
     const char* char_buf = buf; 
     // copy nbytes from the buffer to the terminal 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
-        if (index < keybuf_count-1) { // last \n
+        if (index < (keybuf_count-1) ) { // last \n
             c = char_buf[index];
-            putc_advanced(c);
+            if( c != '\b')
+                putc_advanced( c);
         }
     }
     // choose the return n bytes  

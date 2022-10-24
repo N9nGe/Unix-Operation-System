@@ -26,7 +26,7 @@ int alt_buf = 0;      // Alt buf, do nothing now
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
-int     kb_flag = 0;
+int     kb_flag = 0;                // flag used to open the terminal read 
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -120,26 +120,25 @@ void keyboard_init(void){
  *  RETURN VALUE: none
  *  SIDE EFFECTS: none
  *  Notice: I used a cli-sti to create a crtical section, but it may be
- *  unnecessary?
+ *  unnecessary? I delete it now
  */
 void keyboard_interrupt_handler(){
     // printf("key pressed ");
-    // cli(); // Clear all the interrupt first
+    cli(); // Clear all the interrupt first
     send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
     // NOTICE: it must be here! 
     unsigned int key;
     unsigned int value;
-    
- 
-    key = inb(KEYBOARD_PORT) & 0xff;
-    value = scancode[key][0];// default as smaller
+    // Get key interrupt from the pic port 0x60
+    key = inb(KEYBOARD_PORT) & 0xff; // & with 0b1111 1111 to control as char
+    value = scancode[key][0];        // default as smaller
     if (function_key_handle(key) == 1){
-        // sti();
+        sti();
         return;
     }
-    if (keybuf_count == 127){
-        key   = 0x1C; // set as enter
-        value = '\n'; // set as enter for 128
+    if (keybuf_count == 126){
+        // key   = 0x1C; // set as enter
+        // value = '\n'; // set as enter for 127
     }
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
@@ -149,26 +148,27 @@ void keyboard_interrupt_handler(){
             // printf("KEY pressed ["); // used for testing
             // Clear the screen when necessary
                 if ( value == '\n' ){
-                    // memset(keyboard_buf,0,KEY_BUF_SIZE);
-                    for ( keybuf_count = 0; keybuf_count < KEY_BUF_SIZE; keybuf_count++)
-                    {
-                        keyboard_buf[keybuf_count] = 0;
-                    }
+                    memset(keyboard_buf,NULL,sizeof(keyboard_buf));
                     keybuf_count = 0;
-                    kb_flag = 1;
+                    kb_flag = 1;            // interrupt the terminal 
                 }
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
                     // printf("Cleared the screen: "); // TEST
-                    // sti();
+                    sti();
                     return;
                 }
                 if ( alt_buf == 1){
                     // TODO do nothing for now
                 }
-                if( value ==  '\b' && keybuf_count > 0){
 
+                if( value ==  '\b' && keybuf_count >= 0){
+                    if (keybuf_count == 0){
+                        sti();
+                        return;
+                    }
                     backspace_handler();
+                    sti();
                     return;
                 }
                 if( value == '\t'){ // Tab output, here I use the easiest way
@@ -178,7 +178,7 @@ void keyboard_interrupt_handler(){
                     putc_advanced(' ');
                     keybuf_count++;
                     keyboard_buf[keybuf_count] = '\t'; 
-                    // sti();
+                    sti();
                     return;
                 }
                 
@@ -192,7 +192,7 @@ void keyboard_interrupt_handler(){
             // printf("] ");  // used for testing
     }
     
-    // sti();
+    sti();
     return;
 }
 
@@ -210,12 +210,12 @@ void backspace_handler(){
         backspace();
         backspace();
         backspace();
-        keyboard_buf[keybuf_count] = '\0';
+        keyboard_buf[keybuf_count] = '\b';
         
     }else{
         backspace();
     }
-    keyboard_buf[keybuf_count] = '\0';
+    keyboard_buf[keybuf_count] = '\b';
     keybuf_count--;
 }
 

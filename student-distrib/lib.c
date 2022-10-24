@@ -6,8 +6,9 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-// Font(?) color 0x7 == black, 0x2 == green
-#define ATTRIB      0x2 
+// Font color 0x7 == black, 0x2 == green 
+#define ATTRIB      0x2
+// 0x11 == blue screen
 
 static int screen_x;
 static int screen_y;
@@ -228,18 +229,20 @@ void putc_advanced(uint8_t c) {
         screen_x = 0;
     } else{// First detect backspace 
     // common case
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
-        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
-        screen_x++;
-        screen_x %= NUM_COLS;
-        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        if(c != '\b'){
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+            screen_x++;
+            screen_x %= NUM_COLS;
+            screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+        }
     }
-    if( screen_x == NUM_COLS-1){ // 80, need to shift to next line
-        screen_x = 0;
-        screen_y++; // TODO
+    if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
+        screen_x = 0; //TODO
+        screen_y +=1 ; 
     }
 
-
+    // When the cursor is at the bottom of terminal
     if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one
@@ -253,7 +256,7 @@ void putc_advanced(uint8_t c) {
  * Return Value: void
  * Function: delete last charcter  */
 void backspace(){
-    if(screen_x == 0 || screen_y == 0){ 
+    if(screen_x == 0 && screen_y == 0){ 
         return;// if it is at the (0,0), can't backspace
     }
     if (screen_x == 0){ // At the left end
@@ -274,7 +277,8 @@ void backspace(){
 }
 
 /* void scroll_up(char* memory);
- * Author : Tony 1 10.22.2022
+ * Author : Tony 1 10.22.2022          Create the scroll up without debugging
+            Jerry&Gabriel 2 10.22.2022 Debug  
  * Inputs: char* memory = video_mem, a global variable
  * Return Value: void
  * Function: shift up the whole screen by one  */
@@ -291,7 +295,7 @@ void scroll_up(char* memory){
     }
     screen_y = NUM_ROWS - 1; // now screen_x is retained, shift up screen_y by one
     /*Clear the last line*/
-    for(x = 0; x < NUM_COLS; x++){ //  TODO
+    for(x = 0; x < NUM_COLS; x++){ //  
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
     }
