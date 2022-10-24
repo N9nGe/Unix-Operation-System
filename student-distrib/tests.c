@@ -14,7 +14,10 @@
 #define KERNAL_START 0x400000
 #define KERNAL_END	 0x800000
 #define VIDEO_START  0xB8000
-#define VIDEO_END	 0xB9000	 
+#define VIDEO_END	 0xB9000
+#define RTC_DATA_BYTES		4
+#define RTC_TEST_VALUS		3
+
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -492,6 +495,131 @@ void filesys_dir_read_test(){
 	}
 }
 
+
+//  RTC driver test 
+
+/* //  RTC rtc_open_read_close_test test ()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the open, read, close for rtc
+ */
+int rtc_open_read_close_test() {
+	TEST_HEADER;
+	int result = PASS;
+	// give the test value
+	int test = RTC_TEST_VALUS;
+	uint8_t filename = RTC_TEST_VALUS;
+	uint32_t fd = RTC_TEST_VALUS;
+	uint32_t buf = RTC_TEST_VALUS;
+	clear();
+	rtc_init();
+	// test open
+	printf("Wait for RTC opens......\n");
+	test = rtc_open(&filename);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+	// test read
+	printf("RTC_read begins\n");
+	printf("Wait for RTC interrupt occurs......\n");
+	rtc_read(fd, &buf, RTC_DATA_BYTES);
+	// test close
+	printf("Wait for RTC closes......\n");
+	test = rtc_close(fd);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	return result;
+}
+
+/* rtc_write_test()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the write for rtc
+ */
+int rtc_write_test() {
+	TEST_HEADER;
+	int result = PASS;
+	int test = RTC_TEST_VALUS;
+	uint8_t filename = RTC_TEST_VALUS;
+	uint32_t fd = RTC_TEST_VALUS;
+	uint32_t frequency = RTC_OPEN_DEFAULT_FREQ;
+	clear();
+	rtc_init();
+	// the parameters of the open,read and close are not used in the function during the CP2
+	printf("Wait for RTC opens......\n");
+	test = rtc_open(&filename);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+	printf("current frequency is %d Hz\n", frequency);
+	// using a counter to change the rate
+	while (frequency <= RTC_INIT_DEFAULT_FREQ) { // <= 1024 //TODO: the range of rtc frequency?
+		// for each frequency, there are total 32 times rtc interrupt
+		if (rtc_counter >= RTC_TEST_COUNTER) {
+			// change to the next ferquency
+			clear();
+			// go to the next reasonable frequency
+			frequency *= 2;
+			if (frequency <= RTC_INIT_DEFAULT_FREQ) {
+				printf("current frequency is %d Hz\n", frequency);
+			}
+			// pass the new frequency into the rtc
+			rtc_write(fd, &frequency, RTC_DATA_BYTES);
+			// reset the counter
+			rtc_counter = 0;
+		}
+	}
+	// after test, reset the frequency back to the 2 Hz
+	frequency = RTC_OPEN_DEFAULT_FREQ;
+	rtc_write(fd, &frequency, RTC_DATA_BYTES);
+
+	printf("Wait for RTC closes......\n");
+	rtc_close(fd);
+	test = rtc_close(fd);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	return result;
+}
+
+/* rtc_valid_input_frequency_test(uint32_t freq)
+ * Inputs: uint32_t freq -- the input frequency
+ * Return Value: test result
+ * Function: test the invalid input frequency for rtc
+ */
+int rtc_invalid_input_frequency_test(uint32_t freq) {
+	TEST_HEADER;
+	int result = PASS;
+	// give the test values
+	int test = RTC_TEST_VALUS;
+	uint8_t filename = RTC_TEST_VALUS;
+	uint32_t fd = RTC_TEST_VALUS;
+	uint32_t current_freq = RTC_OPEN_DEFAULT_FREQ;
+	clear();
+	rtc_init();
+	// the parameters of the open,read and close are not used in the function during the CP2
+	printf("Wait for RTC opens......\n");
+	test = rtc_open(&filename);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	printf("current frequency is %d Hz\n", current_freq);
+	// write the invalid frequency into the rtc
+	rtc_write(fd, &freq, RTC_DATA_BYTES);
+
+	printf("Wait for RTC closes......\n");
+	rtc_close(fd);
+	test = rtc_close(fd);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	return result;
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -500,6 +628,31 @@ void filesys_dir_read_test(){
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
+
+	/***** CP2 TESTS *****/
+	// printf("---------------TEST CP2 START--------------\n");	
+	/*Test for rtc_driver*/
+	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
+	// TEST_OUTPUT("rtc_write_test", rtc_write_test());
+	// TEST_OUTPUT("rtc_invalid_input_frequency_test", rtc_invalid_input_frequency_test(3));
+
+	/* File System Tests */
+	// filesys_ls_test();			// list all files and their file types and sizes
+	// filesys_frame0_test();		// read a normal text file
+	// filesys_cat_test();			// read an executable file
+	// filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
+	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
+	// filesys_file_open_failed_test();
+	// filesys_file_read_half_test();
+	// filesys_dir_read_test();
+
+	// terminal_test();
+
+	// printf("---------------TEST CP2 END--------------\n");
+
+
+
+
 	// printf("---------------TEST CP1 START--------------\n");	
 	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
@@ -527,48 +680,5 @@ void launch_tests(){
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
 	// printf("---------------TEST CP1 END--------------\n");
 	
-
-	/***** CP2 TESTS *****/
-	// printf("---------------TEST CP2 START--------------\n");	
-	/* File System Tests */
-	// filesys_ls_test();			// list all files and their file types and sizes
-	// filesys_frame0_test();		// read a normal text file
-	// filesys_cat_test();			// read an executable file
-	filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
-	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
-	// filesys_file_open_failed_test();
-	// filesys_file_read_half_test();
-	// filesys_dir_read_test();
-	terminal_test();
-
-	// printf("---------------TEST CP2 END--------------\n");
-
-
 }
 
-// CP1 test list
-// to use it, copy-paste into launch_tests()
-
-	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
-	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
-	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
-	// TEST_OUTPUT("test_other_exceptions", test_other_exceptions());
-	// TEST_OUTPUT("test_system_call", test_system_call());
-	// /*Test for i8259*/
-	// i8259_disable_irq_garbege_test();	/*test whether garbage input will mask the interrupts*/
-	// i8259_disable_irq_test();			/*test whether disable_irq can mask the interrupts from keyboard and rtc*/
-	// i8259_enable_irq_garbege_test();	/*test whether garbage input will unmask the interrupts*/
-	// i8259_enable_irq_test();			/*test whether enable_irq can unmask the interrupts from keyboard and rtc*/
-
-	/*Test for rtc set frequency*/
-	// rtc_set_freq_test();
-
-	/*Test for Paging */
-	// TEST_OUTPUT("page_dir_struct_test", page_dir_struct_test());
-	// TEST_OUTPUT("page_table_struct_test", page_table_struct_test());
-	// TEST_OUTPUT("page_test_video_mem_valid_test", page_test_video_mem_valid());
-	// TEST_OUTPUT("page_test_video_mem_invalid", page_test_video_mem_invalid());
-	// TEST_OUTPUT("page_test_video_mem_bottom_invalid", page_test_video_mem_bottom_invalid());
-	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
-	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
-	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());

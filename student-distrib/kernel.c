@@ -140,6 +140,10 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    module_t* mod = (module_t*)mbi->mods_addr;
+    /* initialize file system */
+    file_system_init ((uint32_t *) mod -> mod_start);
+
     /* Init the PIC */
     i8259_init();
     
