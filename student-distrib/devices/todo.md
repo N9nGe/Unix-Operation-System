@@ -53,7 +53,9 @@ i think it is because scolling unimplement
 5. terminal structure
     - [x] must implement now 
     - [x] in terminal.h
-    - [ ] where to initialize it?
+    - [x] where to initialize it?
+    - [ ] construct test 
+    - [ ] construct open lines
 
 ## Q&A
 

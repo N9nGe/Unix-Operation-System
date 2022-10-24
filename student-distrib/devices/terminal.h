@@ -20,12 +20,18 @@ typedef struct terminal_t
 } terminal_t;
 
 extern terminal_t main_terminal;
-
+extern uint32_t terminal_count;
+// initalize the terminal
 void terminal_init();
+// reset the specific terminal structure 
 void terminal_reset(terminal_t terminal);
+// Load kb_buf -> buf specificed
 int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes);
+// Load buf -> screen
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes);
+// Open the file, uselss for CP2
 int32_t terminal_open(const uint8_t* filename);
+// Close the file, uselss for CP2
 int32_t terminal_close(int32_t fd);
 
 

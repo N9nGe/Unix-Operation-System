@@ -136,10 +136,11 @@ void keyboard_interrupt_handler(){
         sti();
         return;
     }
-    if (keybuf_count != 126){
-        // key   = 0x1C; // set as enter
-        // value = '\n'; // set as enter for 127
-    }
+    // TODO: After considering the real design of terminal, we change our design method here
+    // if (keybuf_count != 126){
+    //     // key   = 0x1C; // set as enter
+    //     // value = '\n'; // set as enter for 127
+    // }
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
         if( shift_buf == 1){// decide the scancode
@@ -149,9 +150,11 @@ void keyboard_interrupt_handler(){
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
+                    terminal_count = keybuf_count;
                     keybuf_count = 0;
                     kb_flag = 1;            // interrupt the terminal 
                     putc_advanced(value);
+                    sti();
                     return;
                 }
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
@@ -309,15 +312,17 @@ void reset_keyboard_buffer(){
     shift_buf = 0;
     caps_lock = 0;
 }
-// TODO
+
 /* 
  * keyboard_open
- *  DESCRIPTION: a helper function to reset the 
- *  keyboard buffer 
- *  INPUTS: none
+ *  DESCRIPTION: keyboard driver open
+ *  INPUTS: filename -- a const string
  *  OUTPUTS: none
- *  RETURN VALUE: none
- *  SIDE EFFECTS: reset two global variable i and pre
+ *  RETURN VALUE:
+ *        SUCCESS -- 0
+ *        FAIL    -- 1
+ *  SIDE EFFECTS: none
+ *  In fact, this function is useless for CP2
  */
 int32_t keyboard_open(const uint8_t* filename){
     if ( filename == NULL){
@@ -328,12 +333,14 @@ int32_t keyboard_open(const uint8_t* filename){
 }
 /* 
  * reset_keyboard_buffer
- *  DESCRIPTION: a helper function to reset the 
- *  keyboard buffer 
- *  INPUTS: none
+ *  DESCRIPTION: keyboard driver close 
+ *  INPUTS: fd -- file descriptor, range from 2 to 7
  *  OUTPUTS: none
- *  RETURN VALUE: none
- *  SIDE EFFECTS: reset two global variable i and pre
+ *  RETURN VALUE: 
+ *        SUCCESS -- 0
+ *        FAIL    -- 1
+ *  SIDE EFFECTS: none
+ *  In fact, this function is useless for CP2
  */
 int32_t keyboard_close(int32_t fd){
     if(fd >=2 && fd <= 8){

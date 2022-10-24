@@ -24,7 +24,6 @@
 #define VALID_RET 0
 #define INVALID_RET 1 
 // For checkpoint 2
-// TODO: data relationship
 #define SINGLE_QUATE      39 
 #define DOUBLE_QUATE      34
 

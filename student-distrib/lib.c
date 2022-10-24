@@ -8,7 +8,7 @@
 #define NUM_COLS    80
 #define NUM_ROWS    25
 // Font color 0x7 == black, 0x2 == green 
-#define ATTRIB      0x2
+#define ATTRIB      0x3
 // 0x11 == blue screen
 
 static int screen_x;
@@ -212,6 +212,10 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
+        screen_x = 0; 
+        screen_y +=1 ; 
+    }
     if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one
@@ -239,7 +243,7 @@ void putc_advanced(uint8_t c) {
         }
     }
     if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
-        screen_x = 0; //TODO
+        screen_x = 0; 
         screen_y +=1 ; 
         keyboard_buf[keybuf_count] = '\n';
         keybuf_count++;
@@ -303,9 +307,6 @@ void scroll_up(char* memory){
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
     }
 }
-
-
-
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

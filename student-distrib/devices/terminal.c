@@ -12,6 +12,7 @@
 #include"terminal.h"
 
 terminal_t main_terminal;
+uint32_t terminal_count;
 /* 
  * terminal_init
  *  DESCRIPTION: Initialize terminal display
@@ -29,12 +30,10 @@ void terminal_init(){
 };
 
 void terminal_reset(terminal_t terminal){
-    int i; // loop variable
     terminal.id = 0;
     terminal.index = 0;
-    for(i = 0; i < TERMINAL_BUF_SIZE ; i++){
-        terminal.buf[i] = NULL;
-    }
+    memset(main_terminal.buf, NULL, sizeof(main_terminal.buf));
+
 }
 
 /* 
@@ -69,7 +68,7 @@ int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
     // copy nbytes from the keyboard 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
-        if (index < keybuf_count) {
+        if (index < terminal_count) {
             *(uint8_t*)buf = keyboard_buf[index];
         } else {
             //TODO: if we do not have the enough staff to copy, what should we fill
@@ -79,10 +78,10 @@ int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
         }
     }
     // choose the return n bytes  
-    if (nbytes <= keybuf_count) {
+    if (nbytes <= terminal_count) {
         copy_byte = nbytes;
     } else {
-        copy_byte = keybuf_count;
+        copy_byte = terminal_count;
     }
 
     return copy_byte;// return number of bytes successfully copied
@@ -115,27 +114,21 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     int32_t index;
     // Output charcter
     int8_t  c;
-    // TODO
-    // set the flag off and wait for the enter pressed
-    // kb_flag = 0;
-    // while (kb_flag == 0);
     const char* char_buf = buf; 
     // copy nbytes from the buffer to the terminal 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
-        if (index < (keybuf_count-1) ) { // last \n
             c = char_buf[index];
-            if( c != '\b')
-                putc_advanced( c);
-        }
+        if( c != '\b') // ignore the backspace
+                putc_advanced(c);
     }
     // choose the return n bytes  
-    if (nbytes <= keybuf_count) {
+    if (nbytes <= strlen(buf)) {
         copy_byte = nbytes;
     } else {
-        copy_byte = keybuf_count;
+        copy_byte = strlen(buf);
     }
-
+    // copy_byte = index;
     return copy_byte;// return number of bytes successfully copied
 }
 
@@ -145,6 +138,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
  *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: 0 as success
+ *                -1 as FAILs
  *  SIDE EFFECTS: none
  */
 int32_t terminal_open(const uint8_t* filename){

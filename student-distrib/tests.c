@@ -332,35 +332,50 @@ void rtc_set_freq_test() {
 //CP2:
 void terminal_test(){
 	
-	char test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
+	const int8_t test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
 	clear();
-	printf("Start testing the terminal open/read/write/close driver:\n");
-	int32_t fd = 3; // Testing
+	printf("=====Start testing the terminal open/read/write/close driver=====\n");
+	int32_t fd = 3; // Testing, set fd as any number
+	uint32_t test1,test2;
+	uint8_t read_buffer[KEY_BUF_SIZE];
+	uint8_t write_buffer[] = "Test the terminal write\n"; // its length is 24
+	memset(read_buffer,NULL,KEY_BUF_SIZE);
 	const uint8_t filename[10] = "TEST.txt";
-	// const uint8_t toolong_filename[20] = "TOO_LONG_TEST.txt";
-	// const uint8_t NULL_filename = NULL;
-	
-	printf("Test the open: ");
+	// Open
+	printf("[Test terminal_open()]$\n");
 	if( 0 != terminal_open(filename)){
 		printf("Can't open terminal here\n");
+	}else{
+		printf("---Pass the open test\n");
 	}
-	if (0 == terminal_read(fd,(void*)test_str,strlen(test_str))){
-		printf("test case 1: \n");
-		puts(test_str);
-		printf("\nterminal output is: \n");
-		terminal_write(fd,main_terminal.buf,sizeof(main_terminal.buf)/sizeof(unsigned int));
+	// Close
+	printf("[Test terminal_close()]$\n");
+	if( 0 != terminal_close(fd)){
+		printf("Can't open terminal here\n");
+	}else{
+		printf("---Pass the open test\n");
 	}
+
+	// TEST WRITE FROM A NORMAL BUF
+	printf("[Test terminal_write()]$\n");
+	printf("terminal output is: ");
+	if (0 != terminal_write(fd,(void*)test_str,27)){
+		printf("---Pass the write test\n");
+	}else{
+		printf("Fail to pass the write test.\n");
+	}
+
 	// Loop to test the input case
-	printf("start testing keyboard interrupt case\n");
+	printf("[TEST terminal_read() and write()]$\n");
+	printf(" Start testing terminal-keyboard interrupt\n");
 	while (1){
 		
 		printf("[user@localhost]$ ");
-		terminal_read(fd,keyboard_buf,keybuf_count);
-		terminal_write(2,test_str,50);
-	}
-
-	
-	
+		test1 = terminal_read(fd,read_buffer,KEY_BUF_SIZE);
+		printf("The number of bytes is read: %d\n", test1);
+		test2 = terminal_write(2,write_buffer,sizeof(write_buffer));
+		printf("The number of bytes is write: %d\n", test2);
+	}	
 }
 
 
@@ -376,7 +391,7 @@ void launch_tests(){
 	printf("---------------TEST CP2 START--------------\n");	
 	TEST_OUTPUT("idt_test", idt_test());
 
-	terminal_test();
+	// terminal_test();
 
 	printf("---------------TEST CP2 END--------------\n");
 	

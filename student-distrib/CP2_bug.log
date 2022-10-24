@@ -9,7 +9,7 @@ CreateTime:
     2022.10.21
 
 <--------------------------------------------------------->
-                          BUG 0                          
+                          BUG X                          
 <--------------------------------------------------------->
 Time:
     2022.10.21.
@@ -23,19 +23,22 @@ Solution:
     - I modify the putc logic, develop it into putc_advance
 
 <--------------------------------------------------------->
-                          BUG 1                          
+                          BUG X                          
 <--------------------------------------------------------->
 Time:
     2022.10.22.
 Creator:
     Tony & Gabriel
 Description:
-    backspace firstly delete a strange space, then delete the target character
+    - backspace firstly delete a strange space, then delete the target character
+    - backspace can't delete the character at the left side of screen_x, it will display
+    a \b instead
 Solution:
-    The order between screen_x-- and backspacee() is wrong, I exchange them, and it's fine
+    - The order between screen_x-- and backspacee() is wrong, I exchange them, and it's fine
+    - 
 
 <--------------------------------------------------------->
-                          BUG 2                          
+                          BUG X                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
@@ -44,7 +47,36 @@ Creator:
 Description:
     Scrolling will meet with paging error.
 Solution:
-    Because .
+    Because the screen_y boundary is set wrong, I previously
+    messed up with NUM_ROWS and NUM_COLS, this cause many 
+    misunderstanding on it.
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Tony.
+Description:
+    
+Solution:
+    ....
+
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Gabriel & Tony
+Description:
+    After press the enter, and then press the backspace to delete the empty Keyboard buffer. Normally, it should
+    do nothing because the buffer is empty. However, our cursor goes back to the end of the last line.
+Solution:
+    We forget to return after we consider the cases. Actually, when we press the enter, \n is put into the buffer.
+    but we have no need to consider backspace this case. Because after press the \n we should clear all stuff in the 
+    buffer.
 
     
 
