@@ -190,8 +190,9 @@ void keyboard_interrupt_handler(){
                     putc_advanced(' ');
                     putc_advanced(' ');
                     putc_advanced(' ');
-                    keybuf_count++;
+                    // keybuf_count++;
                     keyboard_buf[keybuf_count] = '\t'; 
+                    keybuf_count++;
                     sti();
                     return;
                 }
@@ -222,19 +223,20 @@ void keyboard_interrupt_handler(){
  *  SIDE EFFECTS: delete a char on the screen
  */
 void backspace_handler(){
+    keybuf_count--;
     if (keyboard_buf[keybuf_count] == '\t'){
         backspace();
         backspace();
         backspace();
         backspace();
-        keyboard_buf[keybuf_count] = '\b';
+        // keyboard_buf[keybuf_count] = '\b';
 
         // keybuf_count++;
     }else{
         backspace();
     }
-    keyboard_buf[keybuf_count] = '\b';
-    keybuf_count--;
+    // keyboard_buf[keybuf_count] = '\b';
+    // keybuf_count--;
 }
 
 
