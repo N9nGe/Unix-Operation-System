@@ -200,3 +200,35 @@ Description:
 Solution:
     It is a complex bug related to backspace(), putc_advanced() and keyboard_interrupt_handler()
     After carefully examine the edge case, it is fine
+
+<--------------------------------------------------------->
+                          BUG 13                         
+<--------------------------------------------------------->
+Time:
+    2022.10.21.
+Creator:
+    Yiming Zhao.
+Description:
+    - inode number derived from boot_block is +3 larger than the actual
+      index in the inode array
+    - 
+Solution:
+    - use boot_block_ptr + 1 instead of fs_start + 4096
+
+<--------------------------------------------------------->
+                          BUG 14                         
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Yiming Zhao.
+Description:
+    - terminal ls output an incorrect file name string
+    due to incorrect use string copy
+    - Some strings are showing random characters
+Solution:
+    - use a loop to print specific number of space first, then
+    print the string instead of adding space and the old string to
+    a new bigger string
+
+
