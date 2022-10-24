@@ -209,7 +209,6 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
  */
 int32_t rtc_close(int32_t fd) {
     // do nothing (what the meaning of the RTC virtualization?)
-    // TODO: should we check the fd as null pointer? how to check the fd is invalid?(range of pcb fd?)
     if (fd < 2 || fd > 7) {
         printf("fd is invalid! RTC fails to close\n");
         return RTC_FAIL;
