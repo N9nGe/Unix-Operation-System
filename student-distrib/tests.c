@@ -6,13 +6,18 @@
 #include "i8259.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
+#include "devices/terminal.h"
+#include "file_system.h"
 
 #define PASS 1
 #define FAIL 0
 #define KERNAL_START 0x400000
 #define KERNAL_END	 0x800000
 #define VIDEO_START  0xB8000
-#define VIDEO_END	 0xB9000	 
+#define VIDEO_END	 0xB9000
+#define RTC_DATA_BYTES		4
+#define RTC_TEST_VALUS		3
+
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -25,6 +30,17 @@ static inline void assertion_failure(){
 	   reserved by Intel */
 	asm volatile("int $15");
 }
+
+void file_system_init(uint32_t* fs_start);
+int file_open(const uint8_t* fname);
+uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+int file_write();
+int file_close(int32_t fd);
+int dir_open();
+uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+int dir_write();
+int dir_close();
+void files_ls();
 
 
 /* Checkpoint 1 tests */
@@ -186,6 +202,7 @@ void i8259_enable_irq_test(){
 	enable_irq(RTC_IRQ);
 }
 
+
 /****** PAGING TESTS ******/
 
 int page_dir_struct_test() {
@@ -325,6 +342,295 @@ void rtc_set_freq_test() {
 }
 
 /* Checkpoint 2 tests */
+
+/****** Terminal TESTS ******/
+//CP2:
+void fully_functional_keyboard_test(){
+	printf("\n\n\n=== Keyboard Test===\n");
+	printf("0. There is another fully functional terminal test\n");
+	printf("1. For keyboard input, there is two kind of ideas on the input limit \n");
+	printf("2. And we designed both, selected by a control unit terminal_mode:\n");
+	printf("     -- terminal_mode == 0, unlimited keyboard input \n");
+	printf("     -- terminal_mode == 1, limited to 127 keyboard input \n");
+	printf("     -- Defaultly set as 1\n");
+	printf("3. Please enter any value within the standard 58 keyboard scanset below:\n");
+
+}
+void terminal_test(){
+	
+	const int8_t test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
+	clear();
+	printf("=====Start testing the terminal open/read/write/close driver=====\n");
+	int32_t fd = 3; // Testing, set fd as any number
+	uint32_t test1,test2;
+	uint8_t read_buffer[KEY_BUF_SIZE];
+	uint8_t write_buffer[] = "Test the terminal write\n"; // its length is 24
+	memset(read_buffer,NULL,KEY_BUF_SIZE);
+	const uint8_t filename[10] = "TEST.txt";
+	// Open
+	printf("[Test terminal_open()]$\n");
+	if( 0 != terminal_open(filename)){
+		printf("Can't open terminal here\n");
+	}else{
+		printf("---Pass the open test\n");
+	}
+	// Close
+	printf("[Test terminal_close()]$\n");
+	if( 0 != terminal_close(fd)){
+		printf("Can't open terminal here\n");
+	}else{
+		printf("---Pass the open test\n");
+	}
+
+	// TEST WRITE FROM A NORMAL BUF
+	printf("[Test terminal_write()]$\n");
+	printf("terminal output is: ");
+	if (0 != terminal_write(fd,(void*)test_str,27)){
+		printf("---Pass the write test\n");
+	}else{
+		printf("Fail to pass the write test.\n");
+	}
+
+	// Loop to test the input case
+	printf("[TEST terminal_read() and write()]$\n");
+	printf("Start testing terminal-keyboard interrupt\n");
+	while (1){
+		
+		printf("[user@localhost]$ ");
+		test1 = terminal_read(fd,read_buffer,KEY_BUF_SIZE);
+		printf("The number of bytes is read: %d\n", test1);
+		test2 = terminal_write(2,write_buffer,sizeof(write_buffer));
+		printf("The number of bytes is write: %d\n", test2);
+	}	
+}
+
+
+
+
+/* File System Tests */
+
+/* filesys_ls_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test file list function
+ */
+void filesys_ls_test() {
+	clear();
+    dir_open();
+    files_ls();
+}
+
+/* filesys_frame0_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test displaying frame0 of fish
+ */
+void filesys_frame0_test() {
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	clear();
+    file_open((uint8_t *) "frame0.txt");
+    file_read(2, temp_buf, LARGE_BUF_SIZE);
+}
+
+/* filesys_cat_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test displaying executable cat
+ */
+void filesys_cat_test() {
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	clear();
+    file_open((uint8_t *) "cat");
+    file_read(2, temp_buf, LARGE_BUF_SIZE);
+}
+
+/* filesys_long_name_fail_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test opening a file with name exceeding 32B; should fail
+ */
+void filesys_long_name_fail_test() {
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	clear();
+    file_open((uint8_t *)  "verylargetextwithverylongname.txt");
+    file_read((uint32_t) 2, temp_buf, LARGE_BUF_SIZE);
+}
+
+/* filesys_long_name_success_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test reading a file with exactly 32B in name
+ */
+void filesys_long_name_success_test() {
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	clear();
+    file_open((uint8_t *)  "verylargetextwithverylongname.tx");
+    file_read((uint32_t) 2, temp_buf, (uint32_t) LONG_FILE_SIZE);
+}
+
+/* filesys_file_open_failed_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test reading a non-existing file with a really long name
+ */
+void filesys_file_open_failed_test(){
+	clear();
+	file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
+}
+
+/* filesys_file_read_half_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test reading half of a text file
+ */
+void filesys_file_read_half_test(){
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	clear();
+	file_open((uint8_t *) "frame0.txt");
+	file_read((uint32_t) 0, temp_buf, (uint32_t) HALF_FRAME0);
+}
+
+/* filesys_dir_read_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test dir_read that read file names one by one in the directory
+ */
+void filesys_dir_read_test(){
+	clear();
+	uint32_t idx;
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	dir_open();
+	for (idx = 0; idx < FILE_COUNT; idx++){
+		dir_read((uint32_t) 0, temp_buf, (uint32_t) FILENAME_LEN);
+		printf("file name: %s\n", temp_buf);
+	}
+}
+
+
+//  RTC driver test 
+
+/* //  RTC rtc_open_read_close_test test ()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the open, read, close for rtc
+ */
+int rtc_open_read_close_test() {
+	TEST_HEADER;
+	int result = PASS;
+	// give the test value
+	int test = RTC_TEST_VALUS;
+	uint8_t filename = RTC_TEST_VALUS;
+	uint32_t fd = RTC_TEST_VALUS;
+	uint32_t buf = RTC_TEST_VALUS;
+	clear();
+	rtc_init();
+	// test open
+	printf("Wait for RTC opens......\n");
+	test = rtc_open(&filename);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+	// test read
+	printf("RTC_read begins\n");
+	printf("Wait for RTC interrupt occurs......\n");
+	rtc_read(fd, &buf, RTC_DATA_BYTES);
+	// test close
+	printf("Wait for RTC closes......\n");
+	test = rtc_close(fd);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	return result;
+}
+
+/* rtc_write_test()
+ * Inputs: none
+ * Return Value: test result
+ * Function: test the write for rtc
+ */
+int rtc_write_test() {
+	TEST_HEADER;
+	int result = PASS;
+	int test = RTC_TEST_VALUS;
+	uint8_t filename = RTC_TEST_VALUS;
+	uint32_t fd = RTC_TEST_VALUS;
+	uint32_t frequency = RTC_OPEN_DEFAULT_FREQ;
+	clear();
+	rtc_init();
+	// the parameters of the open,read and close are not used in the function during the CP2
+	printf("Wait for RTC opens......\n");
+	test = rtc_open(&filename);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+	printf("current frequency is %d Hz\n", frequency);
+	// using a counter to change the rate
+	while (frequency <= RTC_INIT_DEFAULT_FREQ) { // <= 1024 //TODO: the range of rtc frequency?
+		// for each frequency, there are total 32 times rtc interrupt
+		if (rtc_counter >= RTC_TEST_COUNTER) {
+			// change to the next ferquency
+			clear();
+			// go to the next reasonable frequency
+			frequency *= 2;
+			if (frequency <= RTC_INIT_DEFAULT_FREQ) {
+				printf("current frequency is %d Hz\n", frequency);
+			}
+			// pass the new frequency into the rtc
+			rtc_write(fd, &frequency, RTC_DATA_BYTES);
+			// reset the counter
+			rtc_counter = 0;
+		}
+	}
+	// after test, reset the frequency back to the 2 Hz
+	frequency = RTC_OPEN_DEFAULT_FREQ;
+	rtc_write(fd, &frequency, RTC_DATA_BYTES);
+
+	printf("Wait for RTC closes......\n");
+	rtc_close(fd);
+	test = rtc_close(fd);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	return result;
+}
+
+/* rtc_valid_input_frequency_test(uint32_t freq)
+ * Inputs: uint32_t freq -- the input frequency
+ * Return Value: test result
+ * Function: test the invalid input frequency for rtc
+ */
+int rtc_invalid_input_frequency_test(uint32_t freq) {
+	TEST_HEADER;
+	int result = PASS;
+	// give the test values
+	int test = RTC_TEST_VALUS;
+	uint8_t filename = RTC_TEST_VALUS;
+	uint32_t fd = RTC_TEST_VALUS;
+	uint32_t current_freq = RTC_OPEN_DEFAULT_FREQ;
+	clear();
+	rtc_init();
+	// the parameters of the open,read and close are not used in the function during the CP2
+	printf("Wait for RTC opens......\n");
+	test = rtc_open(&filename);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	printf("current frequency is %d Hz\n", current_freq);
+	// write the invalid frequency into the rtc
+	rtc_write(fd, &freq, RTC_DATA_BYTES);
+
+	printf("Wait for RTC closes......\n");
+	rtc_close(fd);
+	test = rtc_close(fd);
+	if (test != RTC_SUCCESS) {
+		return FAIL;
+	}
+
+	return result;
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -333,8 +639,37 @@ void rtc_set_freq_test() {
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
-	printf("---------------TEST CP1 START--------------\n");	
-	TEST_OUTPUT("idt_test", idt_test());
+
+	/***** CP2 TESTS *****/
+	printf("---------------TEST CP2 START--------------\n");	
+	terminal_mode = 1; // The control boolean to set the termianl output mode
+
+	/*Test for rtc_driver*/
+	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
+	// TEST_OUTPUT("rtc_write_test", rtc_write_test());
+	// TEST_OUTPUT("rtc_invalid_input_frequency_test", rtc_invalid_input_frequency_test(3));
+
+	/* File System Tests */
+	// filesys_ls_test();			// list all files and their file types and sizes
+	// filesys_frame0_test();		// read a normal text file
+	// filesys_cat_test();			// read an executable file
+	// filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
+	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
+	// filesys_file_open_failed_test();
+	// filesys_file_read_half_test();
+	// filesys_dir_read_test();
+	/* Terminal Tests */
+	fully_functional_keyboard_test();
+	terminal_test();
+
+
+	// printf("---------------TEST CP2 END--------------\n");
+
+
+
+
+	// printf("---------------TEST CP1 START--------------\n");	
+	// TEST_OUTPUT("idt_test", idt_test());
 	// TEST_OUTPUT("div_by_zero_test", div_by_zero_test());
 	// TEST_OUTPUT("deref_null_pointer_test", deref_null_pointer_test());
 	// TEST_OUTPUT("seg_not_present_test", seg_not_present_test());
@@ -358,6 +693,7 @@ void launch_tests(){
 	// TEST_OUTPUT("page_test_kernal_valid", page_test_kernal_valid());
 	// TEST_OUTPUT("page_test_kernal_invalid_top", page_test_kernal_invalid_top());
 	// TEST_OUTPUT("page_test_kernal_invalid_bottom", page_test_kernal_invalid_bottom());
-	printf("---------------TEST CP1 END--------------\n");
+	// printf("---------------TEST CP1 END--------------\n");
 	
 }
+
