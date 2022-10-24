@@ -31,7 +31,7 @@ void file_system_init(uint32_t* fs_start) {
 
     // point the data block to the head of data block array using the similar
     // method to inode_ptr
-    data_block_ptr = (data_block_t *) (inode_ptr + 64);
+    data_block_ptr = (data_block_t *) (inode_ptr + DENTRY_SIZE + 1);
 }
 
 /* 
@@ -83,7 +83,7 @@ int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry){
 int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
     dentry_t tmp_dentry;
     // check if the index is inside the range
-    if (index < 0 || index > 62) return -1;
+    if (index < 0 || index > (DENTRY_SIZE - 1)) return -1;
     // 
     if (dentry == NULL) return -1;
     tmp_dentry = boot_block_ptr -> dir_entries[index];
@@ -293,7 +293,7 @@ uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
     // if (fd < 2 || fd > 7) return -1;
-    strncpy_unsigned(buf, boot_block_ptr->dir_entries[temp_position].filename, 32);
+    strncpy_unsigned(buf, boot_block_ptr->dir_entries[temp_position].filename, FILENAME_LEN);
     bytes_copied = strlen_unsigned(buf);
 
     if (temp_position < boot_block_ptr->dentry_count)
@@ -363,9 +363,9 @@ void files_ls(){
         printf("  ");
 
         len = inode_ptr[tmp_dentry.inode_num].length;
-        
-        space_len = 4;
-        for (i = 10; space_len >= 0; i = i * 10) {
+
+        space_len = MAX_SPACE_LEN;
+        for (i = DIGIT_SPACE; space_len >= 0; i = i * DIGIT_SPACE) {
             if (len >= i) {
                 space_len--;
             } else {

@@ -8,6 +8,13 @@
 #define DENTRY_RESERVED         24
 #define BOOT_BLOCK_RESERVED     52
 #define DENTRY_SIZE             63
+#define DIGIT_SPACE             10
+#define MAX_SPACE_LEN           4
+#define LARGE_BUF_SIZE          9999
+#define LONG_FILE_SIZE          5277
+#define HALF_FRAME0             93
+#define FILENAME_LEN            32
+#define FILE_COUNT              17
 
 typedef struct data_block {
     uint8_t entry[DATA_BLOCK_ENTRY_SIZE];  // *** changed size to 4096

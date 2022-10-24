@@ -6,6 +6,7 @@
 #include "i8259.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
+#include "file_system.h"
 
 #define PASS 1
 #define FAIL 0
@@ -339,59 +340,99 @@ void rtc_set_freq_test() {
 
 /* File System Tests */
 
+/* filesys_ls_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test file list function
+ */
 void filesys_ls_test() {
 	clear();
     dir_open();
     files_ls();
 }
 
+/* filesys_frame0_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test displaying frame0 of fish
+ */
 void filesys_frame0_test() {
-	uint8_t temp_buf[9999];
+	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
     file_open((uint8_t *) "frame0.txt");
-    file_read(2, temp_buf, 9999);
+    file_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
+/* filesys_cat_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test displaying executable cat
+ */
 void filesys_cat_test() {
-	uint8_t temp_buf[9999];
+	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
     file_open((uint8_t *) "cat");
-    file_read(2, temp_buf, 9999);
+    file_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
+/* filesys_long_name_fail_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test opening a file with name exceeding 32B; should fail
+ */
 void filesys_long_name_fail_test() {
-	uint8_t temp_buf[9999];
+	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
     file_open((uint8_t *)  "verylargetextwithverylongname.txt");
-    file_read((uint32_t) 2, temp_buf, 9999);
+    file_read((uint32_t) 2, temp_buf, LARGE_BUF_SIZE);
 }
 
+/* filesys_long_name_success_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test reading a file with exactly 32B in name
+ */
 void filesys_long_name_success_test() {
-	uint8_t temp_buf[9999];
+	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
     file_open((uint8_t *)  "verylargetextwithverylongname.tx");
-    file_read((uint32_t) 2, temp_buf, (uint32_t) 5277);
+    file_read((uint32_t) 2, temp_buf, (uint32_t) LONG_FILE_SIZE);
 }
 
+/* filesys_file_open_failed_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test reading a non-existing file with a really long name
+ */
 void filesys_file_open_failed_test(){
 	clear();
 	file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
 }
 
+/* filesys_file_read_half_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test reading half of a text file
+ */
 void filesys_file_read_half_test(){
-	uint8_t temp_buf[9999];
+	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
 	file_open((uint8_t *) "frame0.txt");
-	file_read((uint32_t) 0, temp_buf, (uint32_t) 93);
+	file_read((uint32_t) 0, temp_buf, (uint32_t) HALF_FRAME0);
 }
 
+/* filesys_dir_read_test()
+ * Inputs: none
+ * Return Value: none
+ * Function: test dir_read that read file names one by one in the directory
+ */
 void filesys_dir_read_test(){
 	clear();
 	uint32_t idx;
-	uint8_t temp_buf[9999];
+	uint8_t temp_buf[LARGE_BUF_SIZE];
 	dir_open();
-	for (idx = 0; idx < 17; idx++){
-		dir_read((uint32_t) 0, temp_buf, (uint32_t) 32);
+	for (idx = 0; idx < FILE_COUNT; idx++){
+		dir_read((uint32_t) 0, temp_buf, (uint32_t) FILENAME_LEN);
 		printf("file name: %s\n", temp_buf);
 	}
 }
@@ -438,11 +479,11 @@ void launch_tests(){
 	// filesys_ls_test();			// list all files and their file types and sizes
 	// filesys_frame0_test();		// read a normal text file
 	// filesys_cat_test();			// read an executable file
-	// filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
+	filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
 	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
 	// filesys_file_open_failed_test();
 	// filesys_file_read_half_test();
-	filesys_dir_read_test();
+	// filesys_dir_read_test();
 
 
 	// printf("---------------TEST CP2 END--------------\n");
