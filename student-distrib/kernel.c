@@ -10,6 +10,7 @@
 #include "tests.h"
 #include "devices/keyboard.h"
 #include "devices/RTC.h"
+#include "devices/terminal.h"
 #include "paging.h"
 
 #define RUN_TESTS
@@ -139,13 +140,19 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    module_t* mod = (module_t*)mbi->mods_addr;
+    /* initialize file system */
+    file_system_init ((uint32_t *) mod -> mod_start);
+
     /* Init the PIC */
     i8259_init();
     
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     paging_init();
+    terminal_init();
     keyboard_init();
+
     rtc_init();
     rtc_set_freq(2);
     /* Enable interrupts */
