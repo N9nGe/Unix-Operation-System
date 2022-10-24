@@ -345,13 +345,13 @@ void terminal_test(){
 		printf("Can't open terminal here\n");
 	}
 	if (0 == terminal_read(fd,(void*)test_str,strlen(test_str))){
-		printf("test case 1: ");
+		printf("test case 1: \n");
 		puts(test_str);
-		printf("\nterminal output is: ");
+		printf("\nterminal output is: \n");
 		terminal_write(fd,main_terminal.buf,sizeof(main_terminal.buf)/sizeof(unsigned int));
 	}
 	// Loop to test the input case
-	printf("start testing keyboard interrupt case");
+	printf("start testing keyboard interrupt case\n");
 	while (1){
 		
 		printf("[user@localhost]$ ");
@@ -376,7 +376,7 @@ void launch_tests(){
 	printf("---------------TEST CP2 START--------------\n");	
 	TEST_OUTPUT("idt_test", idt_test());
 
-	// terminal_test();
+	terminal_test();
 
 	printf("---------------TEST CP2 END--------------\n");
 	

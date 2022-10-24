@@ -2,6 +2,7 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
+#include "devices/keyboard.h"
 // The text mode video is simply 80 * 25, very small size, hum?
 #define VIDEO       0xB8000
 #define NUM_COLS    80
@@ -240,6 +241,8 @@ void putc_advanced(uint8_t c) {
     if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
         screen_x = 0; //TODO
         screen_y +=1 ; 
+        keyboard_buf[keybuf_count] = '\n';
+        keybuf_count++;
     }
 
     // When the cursor is at the bottom of terminal

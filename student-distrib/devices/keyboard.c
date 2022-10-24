@@ -136,7 +136,7 @@ void keyboard_interrupt_handler(){
         sti();
         return;
     }
-    if (keybuf_count == 126){
+    if (keybuf_count != 126){
         // key   = 0x1C; // set as enter
         // value = '\n'; // set as enter for 127
     }
@@ -151,6 +151,8 @@ void keyboard_interrupt_handler(){
                     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
                     keybuf_count = 0;
                     kb_flag = 1;            // interrupt the terminal 
+                    putc_advanced(value);
+                    return;
                 }
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
@@ -185,10 +187,13 @@ void keyboard_interrupt_handler(){
                 if ((value >= 'a' && value <= 'z') && caps_lock == 1){
                     value = scancode[key][1]; // check if caps_lock is on
                 }
-               
-                putc_advanced(value);
-                keybuf_count++;
-                keyboard_buf[keybuf_count] = value;
+                
+                    putc_advanced(value);
+                    keyboard_buf[keybuf_count] = value;
+                    keybuf_count++;
+                
+                
+                
             // printf("] ");  // used for testing
     }
     
