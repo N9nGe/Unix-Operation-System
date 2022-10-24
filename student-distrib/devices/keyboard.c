@@ -27,6 +27,7 @@ int alt_buf = 0;      // Alt buf, do nothing now
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
 int     kb_flag = 0;                // flag used to open the terminal read 
+int terminal_mode = 0;              // For termial mode
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -137,10 +138,17 @@ void keyboard_interrupt_handler(){
         return;
     }
     // TODO: After considering the real design of terminal, we change our design method here
-    // if (keybuf_count != 126){
+    if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) && terminal_mode == 1 ){ // leave the last bit for \n or \b
+        if( value == '\n' || value == '\b'){
+            // let it go
+        }else{
+            // printf("  [MAX]");
+            return; // Reject further input
+        }
+    }
     //     // key   = 0x1C; // set as enter
     //     // value = '\n'; // set as enter for 127
-    // }
+
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
         if( shift_buf == 1){// decide the scancode
@@ -206,11 +214,11 @@ void keyboard_interrupt_handler(){
 
 /* 
  * backspace_handler
- *  DESCRIPTION: a helper function port for further CP usage 
+ *  DESCRIPTION: call backspace to delete the specific char loaded in the kb_buf
  *  INPUTS:  none
  *  OUTPUTS: none
  *  RETURN VALUE: none
- *  SIDE EFFECTS: none
+ *  SIDE EFFECTS: delete a char on the screen
  */
 void backspace_handler(){
     if (keyboard_buf[keybuf_count] == '\t'){
@@ -304,13 +312,14 @@ int function_key_handle(unsigned int key){
  *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: none
- *  SIDE EFFECTS: reset two global variable i and pre
+ *  SIDE EFFECTS: reset two global variable 
  */
 void reset_keyboard_buffer(){
     i = 0;
     ctrl_buf = 0;
     shift_buf = 0;
     caps_lock = 0;
+    alt_buf = 0;
 }
 
 /* 

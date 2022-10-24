@@ -345,6 +345,17 @@ void rtc_set_freq_test() {
 
 /****** Terminal TESTS ******/
 //CP2:
+void fully_functional_keyboard_test(){
+	printf("\n\n\n=== Keyboard Test===\n");
+	printf("0. There is another fully functional terminal test\n");
+	printf("1. For keyboard input, there is two kind of ideas on the input limit \n");
+	printf("2. And we designed both, selected by a control unit terminal_mode:\n");
+	printf("     -- terminal_mode == 0, unlimited keyboard input \n");
+	printf("     -- terminal_mode == 1, limited to 127 keyboard input \n");
+	printf("     -- Defaultly set as 1\n");
+	printf("3. Please enter any value within the standard 58 keyboard scanset below:\n");
+
+}
 void terminal_test(){
 	
 	const int8_t test_str[] = "DID MP3 ANNOYS YOU? SIGH!\n";
@@ -630,7 +641,9 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 void launch_tests(){
 
 	/***** CP2 TESTS *****/
-	// printf("---------------TEST CP2 START--------------\n");	
+	printf("---------------TEST CP2 START--------------\n");	
+	terminal_mode = 1; // The control boolean to set the termianl output mode
+
 	/*Test for rtc_driver*/
 	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
 	// TEST_OUTPUT("rtc_write_test", rtc_write_test());
@@ -645,8 +658,10 @@ void launch_tests(){
 	// filesys_file_open_failed_test();
 	// filesys_file_read_half_test();
 	// filesys_dir_read_test();
-
+	/* Terminal Tests */
+	fully_functional_keyboard_test();
 	// terminal_test();
+
 
 	// printf("---------------TEST CP2 END--------------\n");
 

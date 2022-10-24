@@ -7,8 +7,12 @@
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
-// Font color 0x7 == black, 0x2 == green 
-#define ATTRIB      0x3
+// [Font color]  
+// 0x1 == dark blue 0x2 == green 0x3 == light blue 0x4 == red 0x5 == purple 
+// 0x6 ~= orange 0x7 == black (but font is white), 0x8 == grey 0x9 ~= light purple
+
+#define ATTRIB      0x2
+// 0x0 == empty black
 // 0x11 == blue screen
 
 static int screen_x;
