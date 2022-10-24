@@ -114,19 +114,24 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     int32_t index;
     // Output charcter
     int8_t  c;
+    int32_t buf_length = strlen(buf);
     const char* char_buf = buf; 
     // copy nbytes from the buffer to the terminal 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
-        if( c != '\b') // ignore the backspace
-                putc_advanced(c);
+        if( c != '\b' ) {// ignore the backspace
+            if (c == '\n') {
+                buf_length--;
+            }
+            putc_advanced(c);
+        }
     }
     // choose the return n bytes  
-    if (nbytes <= strlen(buf)) {
+    if (nbytes <= buf_length) {
         copy_byte = nbytes;
     } else {
-        copy_byte = strlen(buf);
+        copy_byte = buf_length;
     }
     // copy_byte = index;
     return copy_byte;// return number of bytes successfully copied
