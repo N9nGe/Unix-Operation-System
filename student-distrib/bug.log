@@ -151,7 +151,7 @@ Solution:
     CreateTime:
         2022.10.20
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 0                          
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -166,7 +166,7 @@ Solution:
     set successfully.
 
 <--------------------------------------------------------->
-                          BUG X                         
+                          BUG 1                         
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -185,7 +185,7 @@ Solution:
 
 
 <--------------------------------------------------------->
-                          BUG X                         
+                          BUG 2                         
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -200,7 +200,7 @@ Solution:
     - change the data_block_ptr from inode_ptr + 63 to inode_ptr + 64
 
 <--------------------------------------------------------->
-                          BUG X                         
+                          BUG 3                         
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -217,7 +217,7 @@ Solution:
 
 
 <--------------------------------------------------------->
-                          BUG X                         
+                          BUG 4                         
 <--------------------------------------------------------->
 Time:
     2022.10.21.
@@ -231,7 +231,7 @@ Solution:
     - use boot_block_ptr + 1 instead of fs_start + 4096
 
 <--------------------------------------------------------->
-                          BUG X                         
+                          BUG 5                         
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -245,7 +245,7 @@ Solution:
 
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 6                          
 <--------------------------------------------------------->
 Time:
     2022.10.21.
@@ -259,7 +259,7 @@ Solution:
     - I modify the putc logic, develop it into putc_advance
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 7                          
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -271,10 +271,10 @@ Description:
     a \b instead
 Solution:
     - The order between screen_x-- and backspacee() is wrong, I exchange them, and it's fine
-    - 
+    - The original putc can't deal with '\b', after adding a if-statment in putc_advance, fine
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 8                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
@@ -288,19 +288,23 @@ Solution:
     misunderstanding on it.
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 9                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
 Creator:
     Tony.
 Description:
-    
+    The terminal test will generate some random mystery character
+    after terminal_write    
 Solution:
-    ....
+    That is because we use a buffer without initialize it to
+    memset NULL_array, that will makes the content in it very
+    unpredicatable. We use another test string to hold the buffer,
+    and memset if necessary.
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 10                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
@@ -315,7 +319,7 @@ Solution:
     buffer.
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 11                          
 <--------------------------------------------------------->
 Time:
     2022.10.24.
@@ -325,3 +329,16 @@ Description:
     For print the string, there is a '\0' existing. We need to ignore this case by using putc
 Solution:
     Just add if statement to jump over this case.
+
+<--------------------------------------------------------->
+                          BUG 12                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Tony & Gabriel.
+Description:
+    When extermely test the keyboard input, the cursor will go to the place it shouldn't be.
+Solution:
+    It is a complex bug related to backspace(), putc_advanced() and keyboard_interrupt_handler()
+    After carefully examine the edge case, it is fine

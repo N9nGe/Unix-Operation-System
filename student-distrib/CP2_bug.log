@@ -6,10 +6,104 @@ Assignment:
 CheckPoint:
     CP2
 CreateTime:
-    2022.10.21
+    2022.10.20
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 0                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Gabriel Gao
+Description:
+    The variable used to store the current frequency of the rtc is not the actural frequency. It is the temp rate
+    used to convert the frequency to the rate.
+Solution:
+    Use a global variable of the current_freq and use the freq directly to check whether it belongs to the the power of 
+    2. And only change the current_freq when initializing the rtc or giving a valid input rtc frequency (2~8126Hz) and 
+    set successfully.
+
+<--------------------------------------------------------->
+                          BUG 1                         
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jerry Wang.
+Description:
+    - read data shows garbage characters on the screen
+    Why:
+    - I changed the entry array in data block to size 4096 but I forgot
+    to change the size of each entry
+    - thus when I indexed into the data block it indexed to a random address
+    that stores garbage values
+Solution:
+    - changed the size of each entry in the entry array from uint32_t to uint8_t
+
+
+
+<--------------------------------------------------------->
+                          BUG 2                         
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jerry Wang.
+Description:
+    - read data displayed nothing on the screen after I fixed the previous bug
+    Why:
+    - the index of the data_block_ptr was incorrect
+    - the correct index is actually the index plus 1
+Solution:
+    - change the data_block_ptr from inode_ptr + 63 to inode_ptr + 64
+
+<--------------------------------------------------------->
+                          BUG 3                         
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jerry Wang.
+Description:
+    - a strange character is displayed at the end of the file name of
+    verylargetextwithverylongname.txt
+    Why:
+    - I created a buffer of 32B for the file name, but there should be
+    an extra byte for '\0' to indicate the end of the string
+Solution:
+    - set the size of the buffer to 33B so there is an extra byte for '\0'
+
+
+<--------------------------------------------------------->
+                          BUG 4                         
+<--------------------------------------------------------->
+Time:
+    2022.10.21.
+Creator:
+    Yiming Zhao.
+Description:
+    - inode number derived from boot_block is +3 larger than the actual
+      index in the inode array
+    - 
+Solution:
+    - use boot_block_ptr + 1 instead of fs_start + 4096
+
+<--------------------------------------------------------->
+                          BUG 5                         
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Yiming Zhao.
+Description:
+    - terminal ls output an incorrect file name string
+    due to incorrect use string copy
+Solution:
+    - use boot_block_ptr + 1 instead of fs_start + 4096
+
+
+<--------------------------------------------------------->
+                          BUG 6                          
 <--------------------------------------------------------->
 Time:
     2022.10.21.
@@ -23,7 +117,7 @@ Solution:
     - I modify the putc logic, develop it into putc_advance
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 7                          
 <--------------------------------------------------------->
 Time:
     2022.10.22.
@@ -35,10 +129,10 @@ Description:
     a \b instead
 Solution:
     - The order between screen_x-- and backspacee() is wrong, I exchange them, and it's fine
-    - 
+    - The original putc can't deal with '\b', after adding a if-statment in putc_advance, fine
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 8                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
@@ -52,19 +146,23 @@ Solution:
     misunderstanding on it.
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 9                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
 Creator:
     Tony.
 Description:
-    
+    The terminal test will generate some random mystery character
+    after terminal_write    
 Solution:
-    ....
+    That is because we use a buffer without initialize it to
+    memset NULL_array, that will makes the content in it very
+    unpredicatable. We use another test string to hold the buffer,
+    and memset if necessary.
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 10                          
 <--------------------------------------------------------->
 Time:
     2022.10.23.
@@ -79,7 +177,7 @@ Solution:
     buffer.
 
 <--------------------------------------------------------->
-                          BUG X                          
+                          BUG 11                          
 <--------------------------------------------------------->
 Time:
     2022.10.24.
@@ -90,4 +188,15 @@ Description:
 Solution:
     Just add if statement to jump over this case.
 
-
+<--------------------------------------------------------->
+                          BUG 12                          
+<--------------------------------------------------------->
+Time:
+    2022.10.23.
+Creator:
+    Tony & Gabriel.
+Description:
+    When extermely test the keyboard input, the cursor will go to the place it shouldn't be.
+Solution:
+    It is a complex bug related to backspace(), putc_advanced() and keyboard_interrupt_handler()
+    After carefully examine the edge case, it is fine
