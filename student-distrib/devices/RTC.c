@@ -94,18 +94,20 @@ void rtc_interrupt() {
     rtc_counter += 1;
     // rtc interrupt occurs -> set the flag to 1
     rtc_interrupt_occurred = 1;
-    if (rtc_counter == 1) {
-        printf("RTC interrupt occured: %d\n", rtc_interrupt_occurred);
-    }
+    // used for rtc test 
+    // if (rtc_counter == 1) {
+    //     printf("RTC interrupt occured: %d\n", rtc_interrupt_occurred);
+    // }
     // read register C to ensure interrupt happen again
     outb(RTC_C_OFFSET, RTC_PORT_INDEX); // select register C
     inb(RTC_PORT_CMOS);                 // just throw away contents
     send_eoi(RTC_IRQ);
-
-    printf("%d", rtc_counter);
-    if (rtc_counter == RTC_TEST_COUNTER){
-        printf("\n");
-    }
+    
+    // used for rtc test 
+    // printf("%d", rtc_counter);
+    // if (rtc_counter == RTC_TEST_COUNTER){
+    //     printf("\n");
+    // }
     sti();
 }
 
@@ -118,8 +120,9 @@ uint32_t log_2(uint32_t freq) {
     // freq should be power of two
     // invalid input freq, no change for the rtc frequency
     if ((freq & (freq - 1)) != 0) {
+        printf("invalid input frequency: %d\n", freq);
         freq = current_freq;
-        printf("invalid input frequency!\nUse the previous frequency: %d!\n", freq);
+        printf("Use the previous frequency: %d!\n", freq);
     }
 
     uint32_t result = 0;    // result of log_2(freq)
