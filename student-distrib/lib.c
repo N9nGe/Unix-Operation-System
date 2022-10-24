@@ -2,7 +2,7 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
-
+// The text mode video is simply 80 * 25, very small size, hum?
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -11,6 +11,34 @@
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
+
+
+/* void update_cursor(x,y);
+ * Author: Tony 10.20
+ * Inputs: 
+ *      x -- cursor x location on the screen
+ *      y -- cursor y location on the screen
+ * Return Value: none
+ * Function: update the cursor to given location */
+void update_cursor(int x, int y){
+    int pos = y * NUM_COLS + x;
+    // notice the sequence is inverse of linux code
+    // that's because our outb functionality is different
+    outb(0x0F,0x3D4);
+    outb((uint8_t)(pos & 0xFF),0x3D5);
+    outb(0x0E,0x3D4);
+    outb((uint8_t)( (pos >> 8 ) & 0xFF),0x3D5);
+}
+/* the linux code from https://wiki.osdev.org/Text_Mode_Cursor
+My comment: magic x86
+void update_cursor(int x, int y){
+	uint16_t pos = y * VGA_WIDTH + x;
+ 
+	outb(0x3D4, 0x0F);
+	outb(0x3D5, (uint8_t) (pos & 0xFF));
+	outb(0x3D4, 0x0E);
+	outb(0x3D5, (uint8_t) ((pos >> 8) & 0xFF));
+}*/
 
 /* void clear(void);
  * Inputs: void
@@ -22,6 +50,9 @@ void clear(void) {
         *(uint8_t *)(video_mem + (i << 1)) = ' ';
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    screen_x = 0;
+    screen_y = 0;
+    update_cursor(screen_x,screen_y);
 }
 
 /* Standard printf().
@@ -173,12 +204,100 @@ void putc(uint8_t c) {
         screen_x = 0;
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB; 
+        screen_x++;
+        screen_x %= NUM_COLS;
+        screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+    }
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
+    update_cursor(screen_x,screen_y);
+
+}
+
+/* void putc_advanced(uint8_t c);
+ * Author : Tony 1 10.22.2022
+ * Inputs: uint_8* c = character to print
+ * Return Value: void
+ *  Function: Output a character to the console */
+void putc_advanced(uint8_t c) {
+    if(c == '\n' || c == '\r') { // TODO: \r in terminal?
+        screen_y++;
+        screen_x = 0;
+    } else{// First detect backspace 
+        if ( c == '\b'){
+            backspace();
+            return;
+        }
+
+    // common case
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
+    update_cursor(screen_x,screen_y);
 }
+
+/* void backspace();
+ * Author : Tony 1 10.22.2022
+ * Inputs: none
+ * Return Value: void
+ * Function: delete last charcter  */
+void backspace(){
+    if(screen_x == 0 || screen_y == 0){ 
+        return;// if it is at the (0,0), can't backspace
+    }
+    if (screen_x == 0){ // At the left end
+        screen_y--;
+        screen_x = NUM_COLS - 1;
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+        *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
+        update_cursor(screen_x, screen_y);
+        return;
+    }
+// Else in the middle 
+    screen_x--;
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = ' ';
+    *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;// seems like color ?
+    update_cursor(screen_x,screen_y);
+    return;
+    
+}
+
+/* void scroll_up(char* memory);
+ * Author : Tony 1 10.22.2022
+ * Inputs: char* memory = video_mem, a global variable
+ * Return Value: void
+ * Function: shift up the whole screen by one  */
+void scroll_up(char* memory){
+    uint32_t x,y;
+    uint32_t origin,update;
+    for ( y = 1; y < NUM_ROWS; y++){
+        for (x = 0; x < NUM_COLS; x++){
+        // Here, the first line is naturally deleted
+            origin = NUM_COLS*y + x;
+            update = NUM_COLS*(y-1) + x;
+            *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
+        }
+    }
+    screen_y = NUM_ROWS - 1; // now screen_x is retained, shift up screen_y by one
+    /*Clear the last line*/
+    for(x = 0; x < NUM_COLS; x++){ //  TODO
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
+    }
+}
+
+
+
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert
@@ -242,6 +361,17 @@ int8_t* strrev(int8_t* s) {
  * Return Value: length of string s
  * Function: return length of string s */
 uint32_t strlen(const int8_t* s) {
+    register uint32_t len = 0;
+    while (s[len] != '\0')
+        len++;
+    return len;
+}
+
+/* uint32_t strlen_unsigned(const uint8_t* s);
+ * Inputs: const uint8_t* s = string to take length of
+ * Return Value: length of string s
+ * Function: return length of string s */
+uint32_t strlen_unsigned(const uint8_t* s) {
     register uint32_t len = 0;
     while (s[len] != '\0')
         len++;
@@ -430,12 +560,54 @@ int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n) {
     return 0;
 }
 
+/* int32_t strncmp_unsigned(const uint8_t* s1, const uint8_t* s2, uint32_t n)
+ * Inputs: const uint8_t* s1 = first string to compare
+ *         const uint8_t* s2 = second string to compare
+ *               uint32_t n = number of bytes to compare
+ * Return Value: A zero value indicates that the characters compared
+ *               in both strings form the same string.
+ *               A value greater than zero indicates that the first
+ *               character that does not match has a greater value
+ *               in str1 than in str2; And a value less than zero
+ *               indicates the opposite.
+ * Function: compares string 1 and string 2 for equality */
+int32_t strncmp_unsigned(const uint8_t* s1, const uint8_t* s2, uint32_t n) {
+    int32_t i;
+    for (i = 0; i < n; i++) {
+        if ((s1[i] != s2[i]) || (s1[i] == '\0') /* || s2[i] == '\0' */) {
+
+            /* The s2[i] == '\0' is unnecessary because of the short-circuit
+             * semantics of 'if' expressions in C.  If the first expression
+             * (s1[i] != s2[i]) evaluates to false, that is, if s1[i] ==
+             * s2[i], then we only need to test either s1[i] or s2[i] for
+             * '\0', since we know they are equal. */
+            return s1[i] - s2[i];
+        }
+    }
+    return 0;
+}
+
 /* int8_t* strcpy(int8_t* dest, const int8_t* src)
  * Inputs:      int8_t* dest = destination string of copy
  *         const int8_t* src = source string of copy
  * Return Value: pointer to dest
  * Function: copy the source string into the destination string */
 int8_t* strcpy(int8_t* dest, const int8_t* src) {
+    int32_t i = 0;
+    while (src[i] != '\0') {
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '\0';
+    return dest;
+}
+
+/* uint8_t* strcpy_unsigned(uint8_t* dest, const uint8_t* src)
+ * Inputs:      uint8_t* dest = destination string of copy
+ *         const uint8_t* src = source string of copy
+ * Return Value: pointer to dest
+ * Function: copy the source string into the destination string */
+uint8_t* strcpy_unsigned(uint8_t* dest, const uint8_t* src) {
     int32_t i = 0;
     while (src[i] != '\0') {
         dest[i] = src[i];
@@ -452,6 +624,25 @@ int8_t* strcpy(int8_t* dest, const int8_t* src) {
  * Return Value: pointer to dest
  * Function: copy n bytes of the source string into the destination string */
 int8_t* strncpy(int8_t* dest, const int8_t* src, uint32_t n) {
+    int32_t i = 0;
+    while (src[i] != '\0' && i < n) {
+        dest[i] = src[i];
+        i++;
+    }
+    while (i < n) {
+        dest[i] = '\0';
+        i++;
+    }
+    return dest;
+}
+
+/* uint8_t* strncpy_unsigned(uint8_t* dest, const uint8_t* src, uint32_t n)
+ * Inputs:      uint8_t* dest = destination string of copy
+ *         const uint8_t* src = source string of copy
+ *                uint32_t n = number of bytes to copy
+ * Return Value: pointer to dest
+ * Function: copy n bytes of the source string into the destination string */
+uint8_t* strncpy_unsigned(uint8_t* dest, const uint8_t* src, uint32_t n) {
     int32_t i = 0;
     while (src[i] != '\0' && i < n) {
         dest[i] = src[i];
