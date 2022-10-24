@@ -201,6 +201,7 @@ int32_t puts(int8_t* s) {
     return index;
 }
 
+
 /* void putc(uint8_t c);
  * Inputs: uint_8* c = character to print
  * Return Value: void
@@ -249,7 +250,9 @@ void putc_advanced(uint8_t c) {
     if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
         screen_x = 0; 
         screen_y +=1 ; 
-        keyboard_buf[keybuf_count] = '\n';
+        if (keyboard_buf[keybuf_count]!= '\t'){
+            keyboard_buf[keybuf_count] = '\n';
+        }
         keybuf_count++;
     }
 

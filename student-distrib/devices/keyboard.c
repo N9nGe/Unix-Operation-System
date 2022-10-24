@@ -143,6 +143,7 @@ void keyboard_interrupt_handler(){
             // let it go
         }else{
             // printf("  [MAX]");
+            sti();
             return; // Reject further input
         }
     }
@@ -227,7 +228,8 @@ void backspace_handler(){
         backspace();
         backspace();
         keyboard_buf[keybuf_count] = '\b';
-        
+
+        // keybuf_count++;
     }else{
         backspace();
     }
