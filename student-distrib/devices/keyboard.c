@@ -168,6 +168,8 @@ void keyboard_interrupt_handler(){
                 }
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
+                    memset(keyboard_buf,NULL,sizeof(keyboard_buf));
+                    keybuf_count = 0;
                     // printf("Cleared the screen: "); // TEST
                     sti();
                     return;

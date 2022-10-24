@@ -84,7 +84,6 @@ Creator:
 Description:
     - inode number derived from boot_block is +3 larger than the actual
       index in the inode array
-    - 
 Solution:
     - use boot_block_ptr + 1 instead of fs_start + 4096
 
@@ -98,9 +97,11 @@ Creator:
 Description:
     - terminal ls output an incorrect file name string
     due to incorrect use string copy
+    - Some strings are showing random characters
 Solution:
-    - use boot_block_ptr + 1 instead of fs_start + 4096
-
+    - use a loop to print specific number of space first, then
+    print the string instead of adding space and the old string to
+    a new bigger string
 
 <--------------------------------------------------------->
                           BUG 6                          
@@ -202,33 +203,29 @@ Solution:
     After carefully examine the edge case, it is fine
 
 <--------------------------------------------------------->
-                          BUG 13                         
+                          BUG 13                          
 <--------------------------------------------------------->
 Time:
-    2022.10.21.
+    2022.10.24.
 Creator:
-    Yiming Zhao.
+    Tim & Gabriel.
 Description:
-    - inode number derived from boot_block is +3 larger than the actual
-      index in the inode array
-    - 
+    When we enter the Tab and then backspace the Tab, it cannot delete all stuff in the buffer
 Solution:
-    - use boot_block_ptr + 1 instead of fs_start + 4096
+    For the Tab case, the order of refresh the buffer is incorrect, we should add '\t' in to the buffer then
+    increment the buffer index
 
 <--------------------------------------------------------->
-                          BUG 14                         
+                          BUG 14                          
 <--------------------------------------------------------->
 Time:
-    2022.10.22.
+    2022.10.24.
 Creator:
-    Yiming Zhao.
+    Tim & Gabriel.
 Description:
-    - terminal ls output an incorrect file name string
-    due to incorrect use string copy
-    - Some strings are showing random characters
+    After we clean the screen, the buffer is not be cleared.
 Solution:
-    - use a loop to print specific number of space first, then
-    print the string instead of adding space and the old string to
-    a new bigger string
+    Just use the memset to clean all stuff and reset the index back to 0;
+
 
 
