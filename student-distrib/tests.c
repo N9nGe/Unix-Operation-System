@@ -655,12 +655,13 @@ void launch_tests(){
 	// filesys_cat_test();			// read an executable file
 	// filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
 	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
-	// filesys_file_open_failed_test();
-	// filesys_file_read_half_test();
-	// filesys_dir_read_test();
+	// filesys_file_open_failed_test();		// read a non-existent file; should fail
+	// filesys_file_read_half_test();		// read half of a file
+	// filesys_dir_read_test();				// test directory read
+
 	/* Terminal Tests */
-	fully_functional_keyboard_test();
-	terminal_test();
+	// fully_functional_keyboard_test();
+	// terminal_test();
 
 
 	// printf("---------------TEST CP2 END--------------\n");

@@ -12,6 +12,7 @@
 #include "devices/RTC.h"
 #include "devices/terminal.h"
 #include "paging.h"
+#include "file_system.h"
 
 #define RUN_TESTS
 

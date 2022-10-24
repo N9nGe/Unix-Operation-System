@@ -93,7 +93,7 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry){
         return -1;
     }
 
-    //printf("%u",inode_ptr[0].length);
+    // fill the temp dentry 
     strcpy_unsigned(dentry -> filename, tmp_dentry.filename);
     dentry -> filetype = tmp_dentry.filetype;
     dentry -> inode_num = tmp_dentry.inode_num;
@@ -203,22 +203,13 @@ int file_open(const uint8_t* fname) {
         return -1;
     }
     dentry_t tmp_dentry;
-    if (read_dentry_by_name (fname, &tmp_dentry) != 0){
+    if (read_dentry_by_name (fname, &tmp_dentry) != 0){     // check if read dentry succeeded
         return -1;
     }
     
     temp_pcb.inode_num = tmp_dentry.inode_num; 
     temp_pcb.flag = 1;     // set to in-use
 
-    return 0;
-}
-
-int test_readdentrybyidx(const uint32_t idx) { 
-    dentry_t tmp_dentry;
-    read_dentry_by_index (idx, &tmp_dentry); 
-    printf("%s",tmp_dentry.filename);
-    temp_pcb.inode_num = tmp_dentry.inode_num; 
-    temp_pcb.flag = 1;     // set to in-use
     return 0;
 }
 
@@ -289,6 +280,16 @@ int dir_open() {
     return 0;
 }
 
+/* 
+ *  dir_read
+ *  DESCRIPTION: read the name of a directory one at a time
+ *  INPUTS: int32_t fd -- file descriptor 
+            uint8_t* buf -- buffer to store the file name into
+            int32_t nbytes -- number of bytes to read
+ *  OUTPUTS: none
+ *  RETURN VALUE: number of bytes copied
+ *  SIDE EFFECTS: read the directory entry name into buf
+ */
 uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
@@ -341,10 +342,12 @@ void files_ls(){
     dentry_t tmp_dentry;
     uint32_t len;
 
+    // loop through every dentry in the current directory
     for (idx = 0; idx < boot_block_ptr -> dentry_count; idx++){
         dir_read(0, fname, 0);
-        read_dentry_by_name(fname, &tmp_dentry);
+        read_dentry_by_name(fname, &tmp_dentry);    // find the dentry by name
 
+        // calculate number of space to put
         if (strlen_unsigned(tmp_dentry.filename) > FILENAME_LEN)
             space_len = 0;
         else
@@ -353,17 +356,18 @@ void files_ls(){
         i = 0;
         strncpy_unsigned(fname, tmp_dentry.filename, FILENAME_LEN);
 
-        printf("file_name:");
+        printf("file_name:");   // print file name
         for (i = 0; i < space_len; i++) {
             printf(" ");
         }
         printf(" ");
-        printf("%s, file_type: %d, file_size:", 
+        printf("%s, file_type: %d, file_size:",     // print file type and size
             fname, tmp_dentry.filetype); 
         printf("  ");
 
-        len = inode_ptr[tmp_dentry.inode_num].length;
+        len = inode_ptr[tmp_dentry.inode_num].length;   
 
+        // calculate the number of space before the file size string
         space_len = MAX_SPACE_LEN;
         for (i = DIGIT_SPACE; space_len >= 0; i = i * DIGIT_SPACE) {
             if (len >= i) {
@@ -373,6 +377,7 @@ void files_ls(){
             }
         }
 
+        // put space onto screen
         for (i = 0; i < space_len; i++) {
             printf(" ");
         }
