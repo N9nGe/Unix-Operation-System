@@ -367,8 +367,8 @@ uint32_t strlen(const int8_t* s) {
     return len;
 }
 
-/* uint32_t strlen(const int8_t* s);
- * Inputs: const int8_t* s = string to take length of
+/* uint32_t strlen_unsigned(const uint8_t* s);
+ * Inputs: const uint8_t* s = string to take length of
  * Return Value: length of string s
  * Function: return length of string s */
 uint32_t strlen_unsigned(const uint8_t* s) {
@@ -602,7 +602,7 @@ int8_t* strcpy(int8_t* dest, const int8_t* src) {
     return dest;
 }
 
-/* int8_t* strcpy_unsigned(uint8_t* dest, const uint8_t* src)
+/* uint8_t* strcpy_unsigned(uint8_t* dest, const uint8_t* src)
  * Inputs:      uint8_t* dest = destination string of copy
  *         const uint8_t* src = source string of copy
  * Return Value: pointer to dest
@@ -636,6 +636,12 @@ int8_t* strncpy(int8_t* dest, const int8_t* src, uint32_t n) {
     return dest;
 }
 
+/* uint8_t* strncpy_unsigned(uint8_t* dest, const uint8_t* src, uint32_t n)
+ * Inputs:      uint8_t* dest = destination string of copy
+ *         const uint8_t* src = source string of copy
+ *                uint32_t n = number of bytes to copy
+ * Return Value: pointer to dest
+ * Function: copy n bytes of the source string into the destination string */
 uint8_t* strncpy_unsigned(uint8_t* dest, const uint8_t* src, uint32_t n) {
     int32_t i = 0;
     while (src[i] != '\0' && i < n) {
