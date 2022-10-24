@@ -367,7 +367,7 @@ void terminal_test(){
 
 	// Loop to test the input case
 	printf("[TEST terminal_read() and write()]$\n");
-	printf(" Start testing terminal-keyboard interrupt\n");
+	printf("Start testing terminal-keyboard interrupt\n");
 	while (1){
 		
 		printf("[user@localhost]$ ");
@@ -391,7 +391,7 @@ void launch_tests(){
 	printf("---------------TEST CP2 START--------------\n");	
 	TEST_OUTPUT("idt_test", idt_test());
 
-	// terminal_test();
+	terminal_test();
 
 	printf("---------------TEST CP2 END--------------\n");
 	

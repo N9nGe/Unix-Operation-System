@@ -124,7 +124,11 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
             if (c == '\n') {
                 buf_length--;
             }
+            if (c == '\0') {
+                continue;
+            }
             putc_advanced(c);
+            
         }
     }
     // choose the return n bytes  

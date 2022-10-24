@@ -78,5 +78,16 @@ Solution:
     but we have no need to consider backspace this case. Because after press the \n we should clear all stuff in the 
     buffer.
 
-    
+<--------------------------------------------------------->
+                          BUG X                          
+<--------------------------------------------------------->
+Time:
+    2022.10.24.
+Creator:
+    Gabriel Gao
+Description:
+    For print the string, there is a '\0' existing. We need to ignore this case by using putc
+Solution:
+    Just add if statement to jump over this case.
+
 
