@@ -363,17 +363,16 @@ void files_ls(){
         printf("  ");
 
         len = inode_ptr[tmp_dentry.inode_num].length;
-        if (len < 10000 && len >= 1000) {
-            space_len = 1;
-        } else if (len < 1000 && len >= 100) {
-            space_len = 2;
-        } else if (len < 100 && len >= 10) {
-            space_len = 3;
-        } else if (len < 10 && len >= 0) {
-            space_len = 4;
-        } else {
-            space_len = 0;
+        
+        space_len = 4;
+        for (i = 10; space_len >= 0; i = i * 10) {
+            if (len >= i) {
+                space_len--;
+            } else {
+                break;
+            }
         }
+
         for (i = 0; i < space_len; i++) {
             printf(" ");
         }
