@@ -4,7 +4,7 @@
 #include "idt.h"
 #include "devices/RTC.h"
 #include "devices/keyboard.h"
-#include "interrupts/interrupt_link.h"
+#include "linkage/interrupt_link.h"
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler

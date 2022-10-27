@@ -1,4 +1,4 @@
-/* interrupt_link.h - Assambly linkage for device and idt
+/* interrupt_link.h - Assembly linkage for device and idt
  * vim:ts=4 noexpandtab
  */
 #ifndef _INTERRUPT_LINK_H_
