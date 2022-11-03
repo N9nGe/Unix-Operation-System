@@ -639,9 +639,13 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
+	/***** CP3 TESTS *****/
+	//printf("---------------TEST CP3 START--------------\n");
+	// printf("---------------TEST CP3 END--------------\n");
+
 
 	/***** CP2 TESTS *****/
-	printf("---------------TEST CP2 START--------------\n");	
+	//printf("---------------TEST CP2 START--------------\n");	
 	terminal_mode = 1; // The control boolean to set the termianl output mode
 
 	/*Test for rtc_driver*/
