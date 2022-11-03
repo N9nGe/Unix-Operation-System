@@ -1,6 +1,6 @@
 # ECE391: MentOS
 
---- 
+---
 
 By Team09
 - Gabriel Gao
@@ -19,8 +19,46 @@ By Team09
 	- not okey:
 		- a start up screen
 		- fancy BSOD( Blue screen of death) 
-		-   	
-2. 3.2 Overview
+
+
+
+2. ## 3.3 Overview: System Calling: MP3 Checkpoint 3
+
+Q1. What is the usage of Syscall folder outside the student-distrib?
+Prof's Ans: It's empty architecture prepared to help you 
+
+Paging: Start to think in terms of x86 instructions !
+
+CP3: all are shell instructions!
+
+execute(hardest):
+halt ~= RETURN, stop the program process
+	- never return?
+	- delete everything
+open,close, read,write
+
+CP4: rest 4
+
+System call has its convention!
+
+- EAX: # of call
+- EBX: 1st arg
+- ECX: 2nd arg
+- EDX: 3rd arg
+- Return value -> EAX
+
+
+file position: offset, a book mark
+
+MMU: Memory Management Unit
+https://zh.wikipedia.org/wiki/%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E5%8D%95%E5%85%83
+V.A. -> [CPU | MMU] -> P.A.
+Flush TLB: if not, security problems, can't access other 
+TLB: done by hardware, but need to take care when and where to flush it
+https://zh.wikipedia.org/wiki/%E8%BD%89%E8%AD%AF%E5%BE%8C%E5%82%99%E7%B7%A9%E8%A1%9D%E5%8D%80
+
+3. 3.2 Overview
+
 - Keyboard driver ~= ECE385's keyboard
 	- 1 people
 	- all alphnumeric keys and symbols
@@ -48,5 +86,5 @@ By Team09
 		- hardware, more in ECE385
 - Read Only File System Driver !!!
 	- 2 people, hard 
-	- [ ] lecture review
+	- [x] lecture review
 	-  
