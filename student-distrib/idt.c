@@ -184,6 +184,7 @@ void add_intr_handler_setup (unsigned int n) {
     // at this IDT position
     idt[n].present = 1;
     idt[n].dpl = 0;
+    idt[n].reserved3 = 0;
     // change reserved3 to 0 to prevent general protection error
 }
 
@@ -223,6 +224,7 @@ void idt_init () {
         // at this IDT position
         idt[i].dpl = 0;
         idt[i].present = 1;
+        idt[i].reserved3 = 1;
         // change reserved3 to 0 to prevent general protection error
     }
 
@@ -262,5 +264,7 @@ void idt_init () {
     SET_IDT_ENTRY(idt[SYS_CALL_NUM], system_call_handler);
     idt[SYS_CALL_NUM].dpl = 3;
     idt[SYS_CALL_NUM].present = 1;
+    idt[SYS_CALL_NUM].reserved3 = 1;
+    
     return;
 }
