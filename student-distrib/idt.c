@@ -5,6 +5,7 @@
 #include "devices/RTC.h"
 #include "devices/keyboard.h"
 #include "linkage/interrupt_link.h"
+#include "linkage/syscall_link.h"
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
@@ -153,19 +154,7 @@ void simd_floating_point_exception () {
 
 /*__________________________________________________________________*/
 
-/*
- * system_call_handler ()
- * DESCRIPTION: Doesn't have other functionality yet.
- * Only prints system call. Located at 0x80 in the IDT
- * INPUT: none
- * OUTPUT: none
- * RETURN VALUE: none
- * SIDE EFFECTS: none
- */
 
-void system_call_handler () {
-    printf("system call");
-}
 
 /*
  * add_intr_handler_setup (unsigned int n)
@@ -261,7 +250,7 @@ void idt_init () {
     add_intr_handler_setup(RTC_INTR_NUM);
 
     // add system call to the IDT at 0x80
-    SET_IDT_ENTRY(idt[SYS_CALL_NUM], system_call_handler);
+    SET_IDT_ENTRY(idt[SYS_CALL_NUM], syscall_handler);
     idt[SYS_CALL_NUM].dpl = 3;
     idt[SYS_CALL_NUM].present = 1;
     idt[SYS_CALL_NUM].reserved3 = 1;
