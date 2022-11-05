@@ -1,3 +1,6 @@
+#ifndef FS_H
+#define FS_H
+
 #include "x86_desc.h"
 #include "lib.h"
 #include "types.h"
@@ -40,12 +43,13 @@ typedef struct boot_block {
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
 
-typedef struct pcb {
-    uint32_t fot_ptr;       // file operations jump table pointer
+
+typedef struct fd_entry_t {
+    //file_ops_t* fot_ptr;       // file operations jump table pointer
     uint32_t inode_num;     // inode number for this file
     uint32_t file_pos;      // position within the file
     uint32_t flag;         // 1 indicates in-use; 0 indicates unused
-} pcb_t;
+} fd_entry_t;
 
 void file_system_init(uint32_t* fs_start);
 
@@ -55,7 +59,7 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry);
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
-int file_open(const uint8_t* fname);
+int file_open(const uint8_t* fname, fd_entry_t * fd_entry);
 
 uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
 
@@ -72,4 +76,6 @@ int dir_write();
 int dir_close();
 
 void files_ls();
+
+#endif /*FS_H*/
 

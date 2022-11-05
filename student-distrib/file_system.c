@@ -4,7 +4,6 @@ static data_block_t * data_block_ptr;
 static inode_t * inode_ptr;
 static dentry_t * dentry_ptr;
 static boot_block_t * boot_block_ptr; 
-static pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
 /* 
@@ -197,7 +196,8 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *  RETURN VALUE: -1 if failed. Otherwise, return 0
  *  SIDE EFFECTS: none
  */
-int file_open(const uint8_t* fname) { 
+int file_open(const uint8_t* fname, fd_entry_t * fd_entry) { 
+    // if( fname == NULL || fd_entry == NULL) { return -1;}
     if (strlen_unsigned(fname) > FILENAME_LEN){    // return failed if file name is larger than 32B
         printf("File open failed!");
         return -1;
@@ -207,8 +207,8 @@ int file_open(const uint8_t* fname) {
         return -1;
     }
     
-    temp_pcb.inode_num = tmp_dentry.inode_num; 
-    temp_pcb.flag = 1;     // set to in-use
+    fd_entry -> inode_num = tmp_dentry.inode_num; 
+    fd_entry -> flag = 1;     // set to in-use
 
     return 0;
 }
@@ -228,8 +228,8 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     unsigned length;
     uint32_t bytes_read;
     // if (fd < 2 || fd > 7) return -1;
-    bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
-    length = inode_ptr[temp_pcb.inode_num].length;
+    // bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
+    // length = inode_ptr[temp_pcb.inode_num].length;
     if ((unsigned) nbytes > length) {
         nbytes = length;
     }
@@ -262,7 +262,6 @@ int file_write() {
  *  SIDE EFFECTS: none
  */
 int file_close(int32_t fd) {
-    temp_pcb.flag = 0;     // set to unused
     return 0;
 }
 
