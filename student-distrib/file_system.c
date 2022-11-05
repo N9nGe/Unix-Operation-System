@@ -1,9 +1,9 @@
 #include "file_system.h"
 
-static data_block_t * data_block_ptr;
-static inode_t * inode_ptr;
-static dentry_t * dentry_ptr;
-static boot_block_t * boot_block_ptr; 
+data_block_t * data_block_ptr;
+inode_t * inode_ptr;
+dentry_t * dentry_ptr;
+boot_block_t * boot_block_ptr; 
 static pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 

@@ -47,6 +47,11 @@ typedef struct pcb {
     uint32_t flag;         // 1 indicates in-use; 0 indicates unused
 } pcb_t;
 
+extern data_block_t * data_block_ptr;
+extern inode_t * inode_ptr;
+extern dentry_t * dentry_ptr;
+extern boot_block_t * boot_block_ptr; 
+
 void file_system_init(uint32_t* fs_start);
 
 int32_t read_dentry_by_name(const uint8_t* fname, dentry_t* dentry);

@@ -1,12 +1,20 @@
 #ifndef SYSCALL_H
 #define SYSCALL_H
 
-void sys_open (void);
+#include "lib.h"
+#include "file_system.h"
+#include "x86_desc.h"
+#include "paging.h"
 
-void sys_close (void);
+#define USER_PROGRAM_IMAGE_START     0x08048000
+// system execute
+int32_t execute (const uint8_t* command);
 
-void sys_read (void);
+// system halt
+int32_t halt(uint8_t status);
 
-void sys_write (void);
+// helper function
+void parse_arg(uint8_t* command, uint8_t* filename);
+void paging_execute();
 
 #endif /* TESTS_H */
