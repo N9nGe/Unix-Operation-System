@@ -7,19 +7,6 @@
 
 #include"../types.h"
 
-// type size?
-// clearify everything in it
-typedef struct pcb {
-    int pid;
-    int parent_id;
-    int fd;
-    int saved_esp;
-    int saved_ebp;
-    int active;
-
-} pcb_t;
-
-// 
-int32_t syscall_handler();
+void syscall_handler();
 
 #endif

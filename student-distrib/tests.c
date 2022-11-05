@@ -8,6 +8,7 @@
 #include "devices/RTC.h"
 #include "devices/terminal.h"
 #include "file_system.h"
+#include "syscall.h"
 
 #define PASS 1
 #define FAIL 0
@@ -31,16 +32,16 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
-void file_system_init(uint32_t* fs_start);
-int file_open(const uint8_t* fname);
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
-int file_write();
-int file_close(int32_t fd);
-int dir_open();
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
-int dir_write();
-int dir_close();
-void files_ls();
+// void file_system_init(uint32_t* fs_start);
+// int file_open(const uint8_t* fname);
+// uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+// int file_write();
+// int file_close(int32_t fd);
+// int dir_open();
+// uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+// int dir_write();
+// int dir_close();
+// void files_ls();
 
 
 /* Checkpoint 1 tests */
@@ -428,7 +429,7 @@ void filesys_ls_test() {
 void filesys_frame0_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *) "frame0.txt");
+    //file_open((uint8_t *) "frame0.txt");
     file_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
@@ -440,7 +441,7 @@ void filesys_frame0_test() {
 void filesys_cat_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *) "cat");
+    //((uint8_t *) "cat");
     file_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
@@ -452,7 +453,7 @@ void filesys_cat_test() {
 void filesys_long_name_fail_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *)  "verylargetextwithverylongname.txt");
+    //file_open((uint8_t *)  "verylargetextwithverylongname.txt");
     file_read((uint32_t) 2, temp_buf, LARGE_BUF_SIZE);
 }
 
@@ -464,7 +465,7 @@ void filesys_long_name_fail_test() {
 void filesys_long_name_success_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *)  "verylargetextwithverylongname.tx");
+    //file_open((uint8_t *)  "verylargetextwithverylongname.tx");
     file_read((uint32_t) 2, temp_buf, (uint32_t) LONG_FILE_SIZE);
 }
 
@@ -475,7 +476,7 @@ void filesys_long_name_success_test() {
  */
 void filesys_file_open_failed_test(){
 	clear();
-	file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
+	//file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
 }
 
 /* filesys_file_read_half_test()
@@ -486,7 +487,7 @@ void filesys_file_open_failed_test(){
 void filesys_file_read_half_test(){
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-	file_open((uint8_t *) "frame0.txt");
+	//file_open((uint8_t *) "frame0.txt");
 	file_read((uint32_t) 0, temp_buf, (uint32_t) HALF_FRAME0);
 }
 
@@ -632,6 +633,12 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 	return result;
 }
 /* Checkpoint 3 tests */
+
+void test_sys_open() {
+	sys_open ("cat");
+	sys_open ("ls");
+}
+
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
@@ -641,6 +648,8 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 void launch_tests(){
 	/***** CP3 TESTS *****/
 	//printf("---------------TEST CP3 START--------------\n");
+
+	test_sys_open();
 	// printf("---------------TEST CP3 END--------------\n");
 
 
