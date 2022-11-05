@@ -232,19 +232,20 @@ int test_readdentrybyidx(const uint32_t idx) {
  *  RETURN VALUE: number of bytes read; 0 if no byte is read
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
+uint32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     unsigned i;
     unsigned length;
     uint32_t bytes_read;
+    // (uint8_t*) buf;
     // if (fd < 2 || fd > 7) return -1;
-    bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
+    bytes_read = read_data (temp_pcb.inode_num, 0, (uint8_t*) buf, nbytes);
     length = inode_ptr[temp_pcb.inode_num].length;
     if ((unsigned) nbytes > length) {
         nbytes = length;
     }
     //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
     for (i = 0; i < nbytes; i++) {
-        printf("%c", buf[i]);
+        printf("%c", ((uint8_t*) buf)[i]);
     }
     
     return bytes_read;
@@ -289,12 +290,12 @@ int dir_open() {
     return 0;
 }
 
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
+uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
     // if (fd < 2 || fd > 7) return -1;
-    strncpy_unsigned(buf, boot_block_ptr->dir_entries[temp_position].filename, FILENAME_LEN);
-    bytes_copied = strlen_unsigned(buf);
+    strncpy_unsigned((uint8_t*) buf, boot_block_ptr->dir_entries[temp_position].filename, FILENAME_LEN);
+    bytes_copied = strlen_unsigned((uint8_t*) buf);
 
     if (temp_position < boot_block_ptr->dentry_count)
         temp_position++;

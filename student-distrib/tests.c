@@ -29,11 +29,11 @@ static inline void assertion_failure(){
 
 void file_system_init(uint32_t* fs_start);
 int file_open(const uint8_t* fname);
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+uint32_t file_read(int32_t fd, void* buf, int32_t nbytes);
 int file_write();
 int file_close(int32_t fd);
 int dir_open();
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
 int dir_write();
 int dir_close();
 void files_ls();
@@ -476,10 +476,10 @@ void launch_tests(){
 	/***** CP2 TESTS *****/
 	// printf("---------------TEST CP2 START--------------\n");	
 	/* File System Tests */
-	// filesys_ls_test();			// list all files and their file types and sizes
+	filesys_ls_test();			// list all files and their file types and sizes
 	// filesys_frame0_test();		// read a normal text file
 	// filesys_cat_test();			// read an executable file
-	filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
+	// filesys_long_name_fail_test();	// reading a file with name exceeding 32B; should fail
 	// filesys_long_name_success_test();	// reading a file with name exactly 32B; should succeed
 	// filesys_file_open_failed_test();
 	// filesys_file_read_half_test();
