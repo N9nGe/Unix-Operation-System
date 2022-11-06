@@ -14,7 +14,7 @@
 // file_ops_t file_operations = {file_open, file_close, file_read, file_write};
 // file_ops_t rtc_operations = {rtc_open, rtc_close, rtc_read, rtc_write};
 
-pcb_t pcb_1;
+pcb_t pcb_1; // modify to the 
 
 void pcb_init (){
     int i;
@@ -35,7 +35,8 @@ void pcb_init (){
     }
     
 }
-
+int32_t sys_execute();
+int32_t sys_halt();
 /* 
  * sys_open
  *  DESCRIPTION: Find the file in the file system and assign an unused file descriptor
@@ -160,7 +161,7 @@ file_op_t set_rtc_fop(){
     new_fop.write = rtc_write;
     return new_fop;
 }
-j
+
 file_op_t set_terminal_fop(){
     file_op_t new_fop;
     new_fop.close = terminal_close;

@@ -36,12 +36,7 @@ typedef struct pcb_t {
 // fd entry is in filesystem 
 // int pcb_array[6] = {0,0,0,0,0,0}; // Useless for now, but may need to check status of each pcb?
 // 
-typedef struct file_op_t{
-    int32_t (*open)(const uint8_t* filename);
-    int32_t (*close)(int32_t fd);
-    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
-    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
-}file_op_t;
+
 
 void pcb_init (void);
 

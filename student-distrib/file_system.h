@@ -4,7 +4,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "types.h"
-#include "syscall.h"
+
 
 #define FILENAME_LEN            32
 #define DATA_BLOCK_SIZE         1023
@@ -45,7 +45,12 @@ typedef struct boot_block {
 } boot_block_t;
 
 /*Checkpoint 3*/
-
+typedef struct file_op_t{
+    int32_t (*open)(const uint8_t* filename);
+    int32_t (*close)(int32_t fd);
+    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
+    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
+}file_op_t;
 
 typedef struct fd_entry_t {
     file_op_t* fot_ptr;      // file operations jump table pointer
