@@ -95,6 +95,7 @@ int32_t execute (const uint8_t* command){
         return -1;
     }
 
+    cli();
     // paging the new memory
     paging_execute();
     // load the file into USER_PROGRAM_IMAGE_START(virtual memory)
@@ -119,7 +120,7 @@ int32_t execute (const uint8_t* command){
     // USER_DS, ESP, EFLAG, CS, EIP
     uint32_t user_data_segment = USER_DS;
     // get byte 24-28 in EXE
-    uint32_t eip = *(uint32_t*)((uint8_t*) USER_PROGRAM_IMAGE_START + 24);
+    uint32_t eip = *(uint32_t*)(((uint8_t*) USER_PROGRAM_IMAGE_START) + 24);
     uint32_t user_code_segment = USER_CS;
     uint32_t esp = (USER_PROGRAM_IMAGE_START - 0x48000 + 0x400000 - 4); // -4 because dereference is 4 byte value(avoid page fault)
     
@@ -127,6 +128,7 @@ int32_t execute (const uint8_t* command){
     // no need to change ss0 because kernel using the same kernel stack(initilize at booting)
     // get the current stack address
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter - 1) - 4);
+    sti();
 
     // context switch && IRET
     asm volatile(
