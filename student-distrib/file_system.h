@@ -4,6 +4,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "types.h"
+#include "syscall.h"
 
 #define FILENAME_LEN            32
 #define DATA_BLOCK_SIZE         1023
@@ -43,13 +44,17 @@ typedef struct boot_block {
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
 
+/*Checkpoint 3*/
+
 
 typedef struct fd_entry_t {
-    //file_ops_t* fot_ptr;       // file operations jump table pointer
-    uint32_t inode_num;     // inode number for this file
-    uint32_t file_pos;      // position within the file
-    uint32_t flag;         // 1 indicates in-use; 0 indicates unused
+    file_op_t* fot_ptr;      // file operations jump table pointer
+    uint32_t inode_num;         // inode number for this file
+    uint32_t file_pos;          // position within the file
+    uint32_t flag;              // 1 indicates in-use; 0 indicates 
+    uint8_t* filename;          // file name, maybe deleted
 } fd_entry_t;
+
 
 void file_system_init(uint32_t* fs_start);
 

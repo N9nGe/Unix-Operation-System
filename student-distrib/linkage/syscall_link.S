@@ -23,16 +23,14 @@ syscall_handler:                            \
     ja    INVALID_SYS                       ;\
 
     call *jump_table(,%ebx,4)               ;\
+    jmp  VALID_SYS
+INVALID_SYS:
+        movl    $FAIL, %eax                 ;\
+VALID_SYS:
     popfl                                   ;\
     popal                                   ;\
 
-    iret                                    
-
-    INVALID_SYS:
-        movl    $FAIL, %eax
-        popfl
-        popal
-        iret
+    iret                                    ;\
 
 
 # 0 -> dummy jump? sequence matters!

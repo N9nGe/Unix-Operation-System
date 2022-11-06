@@ -41,4 +41,9 @@ jump_table:
 ; movl	8(%esp), %ebx   #  cmd -> ebx   ;\
 	; cmpl	$0, %ebx            
 
-3. 
+3. how to connect the fd entry and pcb?
+
+
+4. 清理keyboard 的open close
+
+5. 
