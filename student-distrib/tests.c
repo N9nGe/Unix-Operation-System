@@ -347,7 +347,7 @@ void rtc_set_freq_test() {
 /****** Terminal TESTS ******/
 //CP2:
 void fully_functional_keyboard_test(){
-	int terminal_mode = 1; // The control boolean to set the termianl output mode
+	// int terminal_mode = 1; // The control boolean to set the termianl output mode
 
 	printf("\n\n\n=== Keyboard Test===\n");
 	printf("0. There is another fully functional terminal test\n");
@@ -637,13 +637,20 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 /* Checkpoint 3 tests */
 
 void test_sys_open() {
-	sys_open ("rtc");
-	sys_open ("cat");
-	sys_open ("fsdir");
-	sys_open("frame0.txt");
+	int ret;
+	ret = sys_open ("rtc");
+	ret = sys_open ("cat");
+	ret = sys_open ("fsdir");
+	ret = sys_open("frame0.txt");
 
-	// uint8_t temp_buf[LARGE_BUF_SIZE];
+
+	uint8_t temp_buf[1000];
 	// sys_read(0, temp_buf, LARGE_BUF_SIZE);
+	sys_read(test_fd,temp_buf,1000);
+}
+
+void test_sys_handler(){
+	
 }
 
 /* Checkpoint 4 tests */
@@ -657,6 +664,9 @@ void launch_tests(){
 	//printf("---------------TEST CP3 START--------------\n");
 
 	test_sys_open();
+	// test_sys_read();
+	// test_sys_write();
+	
 	// printf("---------------TEST CP3 END--------------\n");
 
 

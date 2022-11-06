@@ -4,20 +4,6 @@
 #include"file_system.h"
 #include"types.h"
 
-/*Local variable*/
-#define FAIL        -1
-#define SUCCESS     0
-#define FD_MIN      2
-#define FD_MAX      7
-
-#define USER_SPACE_START 0x8000000
-#define USER_SPACE_END   0x8400000
-
-#define RTC_INDEX   0
-#define DIR_INDEX   1
-#define FILE_INDEX  2
-
-
 
 //jump table file_ops struct
 // typedef struct file_ops{
@@ -40,10 +26,9 @@ typedef struct pcb_t {
     fd_entry_t fd_entry[6];
 } pcb_t;
 // fd entry is in filesystem 
-// int pcb_array[6] = {0,0,0,0,0,0}; // Useless for now, but may need to check status of each pcb?
-// 
+// fop: also in filesystem
 
-
+extern int test_fd;
 void pcb_init (void);
 
 int32_t find_next_fd(void);
@@ -61,9 +46,5 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes);
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes);
 
 
-// file_op_t set_rtc_fop();
-// file_op_t set_terminal_fop();
-// file_op_t set_file_fop();
-// file_op_t set_dir_fop();
-// int32_t fop_init();
+
 #endif /* TESTS_H */

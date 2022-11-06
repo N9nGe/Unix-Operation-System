@@ -47,7 +47,7 @@ jump_table:
 4. 清理keyboard 的open close
 
 5. 
-
+|| filename < USER_SPACE_START || filename > USER_SPACE_END - 32
         for (i = 0; i < 6; i++) { // is this for loop necessary?
             if (pcb_1.fd_entry[i].flag == 0) {
                 // set function operation table pointer
