@@ -187,6 +187,7 @@ void paging_execute() {
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
     page_directory[index].pd_mb.present = 1;
     page_directory[index].pd_mb.read_write = 1;
+    page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + task_counter + 1); // give the address of the process
     task_counter++; // increment the counter
