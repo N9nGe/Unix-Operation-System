@@ -35,8 +35,17 @@ void pcb_init (){
     }
     
 }
-int32_t sys_execute();
-int32_t sys_halt();
+
+int32_t find_next_fd() {
+    int i;
+    for (i = 0; i < 6; i++) {
+        if (pcb_1.fd_entry[i].flag == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 /* 
  * sys_open
  *  DESCRIPTION: Find the file in the file system and assign an unused file descriptor
@@ -57,20 +66,24 @@ int32_t sys_open (const uint8_t* filename) {
     new_fd_entry.flag = 0;
     if (file_open (filename, &new_fd_entry) == 0) {
         //TODO: add the fd_entry to pcb
+        int idx;
         for (i = 0; i < 6; i++) {
             if (pcb_1.fd_entry[i].flag == 0) {
-                if (strncmp_unsigned(filename, "rtc", 32) == 0) {
-                    new_fd_entry.fot_ptr = set_rtc_fop;
-                } else if (strncmp_unsigned(filename, "rtc", 32) == 0) {
-
+                // set function operation table pointer
+                if (find_next_fd() < 0) {
+                    return -1;
                 }
-                pcb_1.fd_entry[i] = new_fd_entry;
-                
+                idx = find_next_fd();
+                file_op_t tmp_file_opt = set_rtc_fop();
+                new_fd_entry.fot_ptr = (&tmp_file_opt);
+                pcb_1.fd_entry[idx] = new_fd_entry;
+
                 break;
             }
             // if no fd left,  what to do ?
         }
         printf (" %s found, inode number is %u\n", filename, pcb_1.fd_entry[i].inode_num); // debug usage
+
         return 0;
     }
     return -1;
@@ -111,17 +124,18 @@ int32_t sys_close (int32_t fd) {
  */
 int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     printf ("sys_read called\n");
-    if((fd < FD_MIN || fd > FD_MAX ) ||
-       (buf == NULL || nbytes < 0  ) ||
-       ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
-       (pcb_1.fd_entry[fd].flag == 0 ) ||
-       (pcb_1.fd_entry[fd].file_pos.read == NULL)
-    ){
-        return FAIL;
-    }
+    return 0;
+    // if((fd < FD_MIN || fd > FD_MAX ) ||
+    //    (buf == NULL || nbytes < 0  ) ||
+    //    ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
+    //    (pcb_1.fd_entry[fd].flag == 0 ) ||
+    //    (pcb_1.fd_entry[fd].file_pos.read == NULL)
+    // ){
+    //     return FAIL;
+    // }
   /*Function code is one line the return value */
-    int32_t ret = (pcb_1.fd_entry[fd].file_pos.read)(fd,buf,nbytes);
-    return ret;
+    // int32_t ret = (pcb_1.fd_entry[fd].file_pos.read)(fd,buf,nbytes);
+    // return ret;
 }
 /* 
  * sys_write
@@ -135,18 +149,19 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  */
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     printf ("sys_write called\n");
-   if((fd < FD_MIN || fd > FD_MAX ) ||
-       (buf == NULL || nbytes < 0  ) ||
-       ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
-       (pcb_1.fd_entry[fd].flag == 0 ) ||
-       (pcb_1.fd_entry[fd].file_pos.write == NULL)
-    ){
-        return FAIL;
-    }
+    return 0;
+//     if((fd < FD_MIN || fd > FD_MAX ) ||
+//        (buf == NULL || nbytes < 0  ) ||
+//        ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
+//        (pcb_1.fd_entry[fd].flag == 0 ) ||
+//        (pcb_1.fd_entry[fd].file_pos.write == NULL)
+//     ){
+//         return FAIL;
+//     }
 
-  /*Function code is one line the return value */
-    int32_t ret = (pcb_1.fd_entry[fd].file_pos.write)(fd,buf,nbytes);
-    return ret;
+//   /*Function code is one line the return value */
+//     int32_t ret = (pcb_1.fd_entry[fd].file_pos.write)(fd,buf,nbytes);
+//     return ret;
 }
 
 /*file operation table pointer */
@@ -162,7 +177,7 @@ file_op_t set_rtc_fop(){
     return new_fop;
 }
 
-file_op_t set_terminal_fop(){
+/*file_op_t set_terminal_fop(){
     file_op_t new_fop;
     new_fop.close = terminal_close;
     new_fop.open  = terminal_open;
@@ -187,5 +202,5 @@ file_op_t set_dir_fop(){
     new_fop.read  = dir_read;
     new_fop.write = dir_write;
     return new_fop;
-}
+}*/
 

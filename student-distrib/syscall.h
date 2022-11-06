@@ -40,7 +40,11 @@ typedef struct pcb_t {
 
 void pcb_init (void);
 
+int32_t find_next_fd(void);
 
+int32_t sys_execute(void);
+
+int32_t sys_halt(void);
 
 int32_t sys_open (const uint8_t* filename);
 
