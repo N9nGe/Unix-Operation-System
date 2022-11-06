@@ -163,6 +163,7 @@ int32_t execute (const uint8_t* command){
         "movw %%ax, %%ds;"
         "pushl %0;" 
         "pushl %1;"
+        "orl  $0x200, %%eflag;"
         "pushfl;"
         "pushl %2;"
         "pushl %3;"
@@ -191,7 +192,7 @@ int32_t halt(uint8_t status){
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); 
     // restore parent paging
     page_halt(pcb->parent_id);
-    // close the fd
+    // TODO: using system call close (close the fd)
     for (i = 0; i < 8; i++) {
         // need file close
         pcb->fd_entry[i].flag = 0;
