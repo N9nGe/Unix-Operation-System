@@ -40,12 +40,20 @@ typedef struct boot_block {
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
 
-typedef struct pcb {
-    uint32_t fot_ptr;       // file operations jump table pointer
-    uint32_t inode_num;     // inode number for this file
-    uint32_t file_pos;      // position within the file
-    uint32_t flag;         // 1 indicates in-use; 0 indicates unused
-} pcb_t;
+typedef struct fd_entry_t {
+    file_op_t* fot_ptr;      // file operations jump table pointer
+    uint32_t inode_num;         // inode number for this file
+    uint32_t file_pos;          // position within the file
+    uint32_t flag;              // 1 indicates in-use; 0 indicates 
+} fd_entry_t;
+
+typedef struct file_op_t{
+    int32_t (*open)(const uint8_t* filename);
+    int32_t (*close)(int32_t fd);
+    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
+    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
+}file_op_t;
+
 
 extern data_block_t * data_block_ptr;
 extern inode_t * inode_ptr;

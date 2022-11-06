@@ -1,8 +1,72 @@
 #include "syscall.h"
-#include "file_system.h"
+
+// no need linkage include
+// jump tables for open, close, read, write
 
 // process counter
-static int process_counter = 0;
+static uint32_t process_counter = 0;
+// static uint32_t parent_id = -1;
+
+// // inilize all pcb(total 6 pcb)
+// void pcb_init () {
+//     uint8_t* pcb_top = (uint8_t*) KERNEL_BOTTOM - PROCESS_SIZE * MAX_PCB_NUM;
+//     memset(pcb_top, 0, PROCESS_SIZE * MAX_PCB_NUM);
+// }
+
+// pcb_t* find_pcb(uint32_t pid) {
+//     pcb_t* current_pcb = (pcb_t*) KERNEL_BOTTOM - PROCESS_SIZE;
+//     if (current_pcb->active == 0) {
+//         current_pcb->pid = pid;
+
+//         return current_pcb;
+//     } else {
+//         current_pcb -= PROCESS_SIZE;
+//     }
+//     return NULL;
+// }
+file_op_t terminal_stdin = {
+    .open = terminal_open,
+    .read = terminal_read,
+    .write = NULL,
+    .close = NULL,
+};
+
+file_op_t terminal_stdout = {
+    .open = terminal_open,
+    .read = NULL,
+    .write = terminal_write,
+    .close = NULL,
+};
+
+int32_t fd_entry_init(fd_entry_t* fd_entry) {
+    if (fd_entry == NULL) {
+        return -1;
+    }
+    uint8_t i;
+    for (i= 0; i < 8; i++) {
+        fd_entry->file_pos = 0;
+        fd_entry->flag = 0;
+        fd_entry->fot_ptr = NULL;
+        fd_entry->inode_num = 0;
+    }
+    fd_entry[0].flag = 1;
+    fd_entry[0].fot_ptr = &terminal_stdin;
+    fd_entry[1].flag = 1;
+    fd_entry[1].fot_ptr = &terminal_stdout;
+
+    return 0;
+}
+
+pcb_t* find_pcb() {
+    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * process_counter));
+}
+
+pcb_t* pcb_initilize() {
+    pcb_t* pcb = find_pcb();
+    pcb->active = 1;
+    fd_entry_init(pcb->fd_entry);
+    return pcb;
+}
 
 // system execute
 int32_t execute (const uint8_t* command){
@@ -35,11 +99,18 @@ int32_t execute (const uint8_t* command){
         return -1;
     }
     
-    // create new pcb!!!
-    
+    // create new pcb
+    pcb_t* new_pcb = pcb_initilize();
+    // update pid and parent_id
+    new_pcb->pid = process_counter;
+    new_pcb->parent_id = process_counter - 1;
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
     register uint32_t saved_esp asm("esp");
+
+    // store ebp && esp in the pcb
+    new_pcb->saved_ebp = saved_ebp;
+    new_pcb->saved_esp = saved_esp;
     
     // prepare for context switch(from kernel to usermode)
     // USER_DS, ESP, EFLAG, CS, EIP
@@ -47,8 +118,13 @@ int32_t execute (const uint8_t* command){
     // get byte 24-28 in EXE
     uint32_t eip = *(uint32_t*)((uint8_t*) USER_PROGRAM_IMAGE_START + 24);
     uint32_t user_code_segment = USER_CS;
-    uint32_t esp = USER_PROGRAM_IMAGE_START + 0x400000 - 4; // -4 because dereference is 4 byte value
+    uint32_t esp = USER_PROGRAM_IMAGE_START + 0x400000 - 4; // -4 because dereference is 4 byte value(avoid page fault)
     
+    // TSS
+    // no need to change ss0 because kernel using the same kernel stack(initilize at booting)
+    // get the current stack address
+    tss.esp0 = KERNEL_BOTTOM - PROCESS_SIZE * (process_counter - 1) - 4;
+
     // context switch && IRET
     asm volatile(
         "xorl %%eax, %%eax;"
