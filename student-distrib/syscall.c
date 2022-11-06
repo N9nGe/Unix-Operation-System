@@ -24,6 +24,8 @@ static uint32_t task_counter = 0;
 //     }
 //     return NULL;
 // }
+
+// stdin file operation (using terminal stuff)
 file_op_t terminal_stdin = {
     .open = terminal_open,
     .read = terminal_read,
@@ -31,6 +33,7 @@ file_op_t terminal_stdin = {
     .close = NULL,
 };
 
+// stdout file operation (using terminal stuff)
 file_op_t terminal_stdout = {
     .open = terminal_open,
     .read = NULL,
@@ -38,6 +41,12 @@ file_op_t terminal_stdout = {
     .close = NULL,
 };
 
+/* fd_entry_init(fd_entry_t* fd_entry)
+ * Description: initilize the given fd array and fill the stdin, stdout stuff
+ * Inputs: fd_entry_t* fd_entry -- the fd array need to be initilize
+ * Return Value: 0 - success; -1 - fail
+ * Function: initilize the given fd array and fill the stdin, stdout stuff
+ */
 int32_t fd_entry_init(fd_entry_t* fd_entry) {
     if (fd_entry == NULL) {
         return -1;
@@ -57,10 +66,22 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
     return 0;
 }
 
+/* find_pcb()
+ * Description: get the current pcb
+ * Inputs: none
+ * Return Value: current pcb pointer
+ * Function: get the current pcb by the task counter
+ */
 pcb_t* find_pcb() {
     return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter)));
 }
 
+/* pcb_initilize()
+ * Description: initilize the given pcb and set it active
+ * Inputs: none
+ * Return Value: initialized pcb
+ * Function: initilize the given pcb and set it active, also initialize the fd array
+ */
 pcb_t* pcb_initilize() {
     pcb_t* pcb = find_pcb();
     pcb->active = 1;
@@ -68,7 +89,12 @@ pcb_t* pcb_initilize() {
     return pcb;
 }
 
-// system execute
+/* execute (const uint8_t* command)
+ * Description: system call execute
+ * Inputs: const uint8_t* command
+ * Return Value: 0 succeff; -1 fail
+ * Function: do the execute based on the command
+ */
 int32_t execute (const uint8_t* command){
     if (command == NULL) {
         return -1;
@@ -149,10 +175,16 @@ int32_t execute (const uint8_t* command){
     return 0;
 }
 
-// system halt
+/* halt(uint8_t status)
+ * Description: system call halt
+ * Inputs: uint8_t status
+ * Return Value: 0 - succeff; 256 - exception 
+ * Function: halt the process and check the causing of the halt
+ */
 int32_t halt(uint8_t status){
     // get current pcb
     int i;
+    cli();
     pcb_t* pcb = find_pcb();
     pcb->active = 0;
     // point to the parent kernel stack
@@ -186,7 +218,7 @@ int32_t halt(uint8_t status){
             : "esp", "ebp", "eax"
         );
     } 
-
+    sti();
     return 0;
 }
 
@@ -232,6 +264,12 @@ void paging_execute() {
     );
 }
 
+/* page_halt(uint32_t parent_id)
+ * Description: unmap the child process, map to the parent
+ * Inputs: parent_id - map the memory to the parent memory
+ * Return Value: none
+ * Function: map to the parent
+ */
 void page_halt(uint32_t parent_id) {
     // allocate the 4mb page for each process
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
@@ -240,7 +278,7 @@ void page_halt(uint32_t parent_id) {
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id + 1); // give the address of the process
-    task_counter--; // increment the counter
+    task_counter--; // decrement the counter
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 

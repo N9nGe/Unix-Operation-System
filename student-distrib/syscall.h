@@ -23,8 +23,8 @@ int32_t halt(uint8_t status);
 // helper function
 void parse_arg(const uint8_t* command, uint8_t* filename);
 void paging_execute();
+void page_halt(uint32_t parent_id);
 
-// type size?
 // clearify everything in it
 typedef struct pcb_t {
     uint32_t pid;         // Current Process id
