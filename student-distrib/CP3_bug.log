@@ -24,3 +24,16 @@ Description:
     .
 Solution:
     ....
+
+<--------------------------------------------------------->
+                          BUG x                          
+<--------------------------------------------------------->
+Time:
+    2022.11.06.
+Creator:
+    Gabriel Gao && Jerry Wang.
+Description:
+    Page Fault by access the incorrect user program memory
+Solution:
+    for esp we push on the stack, the old address we push is the start of the video image(0x08048000) + 4mb - 4. However,
+    the actural address should be the last address in the page start from 0x08000000 + 4mb - 4

@@ -4,7 +4,7 @@
 // jump tables for open, close, read, write
 
 // process counter
-static uint32_t process_counter = 0;
+static uint32_t task_counter = 0;
 // static uint32_t parent_id = -1;
 
 // // inilize all pcb(total 6 pcb)
@@ -58,7 +58,7 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
 }
 
 pcb_t* find_pcb() {
-    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * process_counter));
+    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter)));
 }
 
 pcb_t* pcb_initilize() {
@@ -70,6 +70,9 @@ pcb_t* pcb_initilize() {
 
 // system execute
 int32_t execute (const uint8_t* command){
+    if (command == NULL) {
+        return -1;
+    }
     // filename buffer used by parse the command
     uint8_t filename[FILENAME_LEN];
     // initialize the filename buffer
@@ -102,8 +105,8 @@ int32_t execute (const uint8_t* command){
     // create new pcb
     pcb_t* new_pcb = pcb_initilize();
     // update pid and parent_id
-    new_pcb->pid = process_counter;
-    new_pcb->parent_id = process_counter - 1;
+    new_pcb->pid = task_counter;
+    new_pcb->parent_id = task_counter - 1;
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
     register uint32_t saved_esp asm("esp");
@@ -118,12 +121,12 @@ int32_t execute (const uint8_t* command){
     // get byte 24-28 in EXE
     uint32_t eip = *(uint32_t*)((uint8_t*) USER_PROGRAM_IMAGE_START + 24);
     uint32_t user_code_segment = USER_CS;
-    uint32_t esp = USER_PROGRAM_IMAGE_START + 0x400000 - 4; // -4 because dereference is 4 byte value(avoid page fault)
+    uint32_t esp = (USER_PROGRAM_IMAGE_START - 0x48000 + 0x400000 - 4); // -4 because dereference is 4 byte value(avoid page fault)
     
     // TSS
     // no need to change ss0 because kernel using the same kernel stack(initilize at booting)
     // get the current stack address
-    tss.esp0 = KERNEL_BOTTOM - PROCESS_SIZE * (process_counter - 1) - 4;
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter - 1) - 4);
 
     // context switch && IRET
     asm volatile(
@@ -181,8 +184,8 @@ void paging_execute() {
     page_directory[index].pd_mb.present = 1;
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + process_counter + 1); // give the address of the process
-    process_counter++; // increment the counter
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + task_counter + 1); // give the address of the process
+    task_counter++; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 

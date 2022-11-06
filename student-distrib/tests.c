@@ -635,7 +635,7 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 /* Checkpoint 3 tests */
 
 void execute_test() {
-	execute((uint8_t*)"shell");
+	execute((uint8_t*)"shell ");
 }
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
