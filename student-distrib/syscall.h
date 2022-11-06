@@ -13,6 +13,12 @@
 #define USER_SPACE_START 0x8000000
 #define USER_SPACE_END   0x8400000
 
+#define RTC_INDEX   0
+#define DIR_INDEX   1
+#define FILE_INDEX  2
+
+
+
 //jump table file_ops struct
 // typedef struct file_ops{
 //   open_fn open_op;
@@ -59,5 +65,5 @@ file_op_t set_rtc_fop();
 file_op_t set_terminal_fop();
 file_op_t set_file_fop();
 file_op_t set_dir_fop();
-
+int32_t init_fop_table(void);
 #endif /* TESTS_H */

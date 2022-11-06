@@ -6,7 +6,11 @@
 #define _SYSCALL_LINK_H_
 
 #include"../types.h"
+#include"../syscall.h"
 
-void syscall_handler();
+    #ifndef ASM_SL
 
-#endif
+    extern void syscall_handler();
+    #endif
+
+#endif /* _SYSCALL_LINK_H_*/

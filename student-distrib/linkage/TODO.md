@@ -47,3 +47,20 @@ jump_table:
 4. 清理keyboard 的open close
 
 5. 
+
+        for (i = 0; i < 6; i++) { // is this for loop necessary?
+            if (pcb_1.fd_entry[i].flag == 0) {
+                // set function operation table pointer
+                if (find_next_fd() < 0) {
+                    return -1;
+                }
+                idx = find_next_fd();
+                
+                new_fd_entry.file_pos = fop_table[file_type];
+
+                pcb_1.fd_entry[idx] = new_fd_entry;
+
+                break;
+            }
+            // if no fd left,  what to do ?
+        }

@@ -31,7 +31,7 @@ typedef struct inode {
 
 typedef struct dentry {
     uint8_t filename[FILENAME_LEN];
-    uint32_t filetype;
+    uint32_t filetype;      // 0 for 
     uint32_t inode_num;     // inode number
     uint8_t reserved[DENTRY_RESERVED];
 } dentry_t;
@@ -53,11 +53,11 @@ typedef struct file_op_t{
 }file_op_t;
 
 typedef struct fd_entry_t {
-    file_op_t* fot_ptr;      // file operations jump table pointer
+    file_op_t fot_ptr;          // file operations jump table pointer
     uint32_t inode_num;         // inode number for this file
     uint32_t file_pos;          // position within the file
     uint32_t flag;              // 1 indicates in-use; 0 indicates 
-    uint8_t* filename;          // file name, maybe deleted
+    int  filetype;          // file , used for selecting specific type
 } fd_entry_t;
 
 

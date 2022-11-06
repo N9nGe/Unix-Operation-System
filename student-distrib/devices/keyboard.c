@@ -27,7 +27,6 @@ int alt_buf = 0;      // Alt buf, do nothing now
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
 int     kb_flag = 0;                // flag used to open the terminal read 
-int terminal_mode = 0;              // For termial mode
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -138,7 +137,7 @@ void keyboard_interrupt_handler(){
         return;
     }
     // TODO: After considering the real design of terminal, we change our design method here
-    if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) && terminal_mode == 1 ){ // leave the last bit for \n or \b
+    if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) ){ // leave the last bit for \n or \b
         if( value == '\n' || value == '\b'){
             // let it go
         }else{

@@ -209,7 +209,7 @@ int file_open(const uint8_t* fname, fd_entry_t * fd_entry) {
     
     fd_entry -> inode_num = tmp_dentry.inode_num; 
     fd_entry -> flag = 1;     // set to in-use
-
+    fd_entry -> filetype = tmp_dentry.filetype;
     return 0;
 }
 

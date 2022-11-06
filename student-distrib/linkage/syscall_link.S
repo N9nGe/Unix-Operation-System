@@ -1,4 +1,5 @@
-/*# syscall_link.h - Assembly linkage for device and idt
+#define ASM_SL 1         
+# syscall_link.h - Assembly linkage for device and idt
 .data
     SYS_MIN  =  1
     SYS_MAX  =  6
@@ -26,4 +27,4 @@ INVALID_SYS:
 VALID_SYS:
     popfl                                   
     popal                                   
-    iret          */                          
+    iret                                  
