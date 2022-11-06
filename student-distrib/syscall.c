@@ -27,8 +27,6 @@ int32_t execute (const uint8_t* command){
         execute_code_buf[2] != 0x4c || execute_code_buf[3] != 0x46) {
         return -1;
     }
-    
-    // check whether the file is valid(???)
 
     // paging the new memory
     paging_execute();
@@ -38,14 +36,34 @@ int32_t execute (const uint8_t* command){
     }
     
     // create new pcb!!!
-
+    
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
     register uint32_t saved_esp asm("esp");
     
-    // prepare for context switch!!!
-
-    // IRET
+    // prepare for context switch(from kernel to usermode)
+    // USER_DS, ESP, EFLAG, CS, EIP
+    uint32_t user_data_segment = USER_DS;
+    // get byte 24-28 in EXE
+    uint32_t eip = *(uint32_t*)((uint8_t*) USER_PROGRAM_IMAGE_START + 24);
+    uint32_t user_code_segment = USER_CS;
+    uint32_t esp = USER_PROGRAM_IMAGE_START + 0x400000 - 4; // -4 because dereference is 4 byte value
+    
+    // context switch && IRET
+    asm volatile(
+        "xorl %%eax, %%eax;"
+        "movl %0, %%eax;"
+        "movw %%ax, %%ds;"
+        "pushl %0;" 
+        "pushl %1;"
+        "pushfl;"
+        "pushl %2;"
+        "pushl %3;"
+        "IRET;"
+        :
+        : "r" (user_data_segment), "r" (esp), "r" (user_code_segment), "r" (eip)
+        : "cc", "memory", "eax"
+    );
 
     return 0;
 }
