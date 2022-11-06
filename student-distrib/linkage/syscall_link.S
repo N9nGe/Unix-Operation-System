@@ -1,11 +1,12 @@
 # syscall_link.h - Assembly linkage for device and idt
 .data
     SYS_MIN  =  1
-    SYS_MAX  =  10
+    SYS_MAX  =  6
     FAIL     =  -1
     SUCCESS  =  0
+# leave other 4 in CP4
 jump_table:
-		.long sys_open, sys_close, sys_read, sys_write
+		.long 0x0 sys_halt, sys_execute, sys_read, sys_write, sys_open, sys_close
 
 .text
 
@@ -13,19 +14,19 @@ jump_table:
 # return value: none
 syscall_handler:                            \
     pushal                                  ;\
-    pushfl                                  ;\
-	              ;\
+    pushfl                                  ;\ 
+# Is it necessary to push flag?	              
 # if eax < min                  
-    cmpl   $SYS_MIN, %eax
-    jb    INVALID_SYS
-    cmpl   $SYS_MAX, %eax
-    ja    INVALID_SYS
+    cmpl   $SYS_MIN, %eax                   ;\
+    jb    INVALID_SYS                       ;\
+    cmpl   $SYS_MAX, %eax                   ;\
+    ja    INVALID_SYS                       ;\
 
     call *jump_table(,%ebx,4)               ;\
     popfl                                   ;\
     popal                                   ;\
 
-    iret
+    iret                                    
 
     INVALID_SYS:
         movl    $FAIL, %eax
