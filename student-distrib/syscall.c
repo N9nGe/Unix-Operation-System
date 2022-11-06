@@ -151,8 +151,41 @@ int32_t execute (const uint8_t* command){
 
 // system halt
 int32_t halt(uint8_t status){
+    // get current pcb
+    int i;
     pcb_t* pcb = find_pcb();
-    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); // return to the parent kernel stack
+    pcb->active = 0;
+    // point to the parent kernel stack
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); 
+    // restore parent paging
+    page_halt(pcb->parent_id);
+    // close the fd
+    for (i = 0; i < 8; i++) {
+        // need file close
+        pcb->fd_entry[i].flag = 0;
+    }
+
+    // TODO: check halt reason 
+    if (status == 0) {
+        status = 256;
+    }  
+
+    // jump to execute return
+    // there is no program -> need to rerun shell
+    if (task_counter == 0) {
+        execute((uint8_t*)"shell");
+    } else {
+        asm volatile (
+            "movl %0, %%eax;"
+            "movl %1, %%ebp;" 
+            "movl %2, %%esp;"
+            "leave;"
+            "ret;"
+            :
+            : "r" (status), "r" (pcb->saved_ebp), "r" (pcb->saved_esp)
+            : "esp", "ebp", "eax"
+        );
+    } 
 
     return 0;
 }
@@ -199,14 +232,15 @@ void paging_execute() {
     );
 }
 
-void page_halt() {
+void page_halt(uint32_t parent_id) {
     // allocate the 4mb page for each process
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
     page_directory[index].pd_mb.present = 1;
     page_directory[index].pd_mb.read_write = 1;
+    page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + (task_counter - 1) + 1); // give the address of the process
-    task_counter++; // increment the counter
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id + 1); // give the address of the process
+    task_counter--; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 
