@@ -37,3 +37,15 @@ Description:
 Solution:
     for esp we push on the stack, the old address we push is the start of the video image(0x08048000) + 4mb - 4. However,
     the actural address should be the last address in the page start from 0x08000000 + 4mb - 4
+
+<--------------------------------------------------------->
+                          BUG x                          
+<--------------------------------------------------------->
+Time:
+    2022.11.06.
+Creator:
+    Gabriel Gao && Jerry Wang.
+Description:
+    Page Fault by not give the user_supervisor flag
+Solution:
+    when we doing paging we need to give the user and supervisor flag to the page becuase syscall's PL is 3
