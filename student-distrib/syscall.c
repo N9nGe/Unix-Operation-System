@@ -151,6 +151,8 @@ int32_t execute (const uint8_t* command){
 
 // system halt
 int32_t halt(uint8_t status){
+    pcb_t* pcb = find_pcb();
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); // return to the parent kernel stack
 
     return 0;
 }
@@ -187,6 +189,22 @@ void paging_execute() {
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + task_counter + 1); // give the address of the process
+    task_counter++; // increment the counter
+    // flush the TLB (OSdev)
+    asm volatile(
+        "movl %%cr3, %%eax;" 
+        "movl %%eax, %%cr3;"
+        : : : "eax", "cc"
+    );
+}
+
+void page_halt() {
+    // allocate the 4mb page for each process
+    uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
+    page_directory[index].pd_mb.present = 1;
+    page_directory[index].pd_mb.read_write = 1;
+    page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + (task_counter - 1) + 1); // give the address of the process
     task_counter++; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(
