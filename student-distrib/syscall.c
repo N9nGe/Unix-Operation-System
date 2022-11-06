@@ -16,6 +16,22 @@
 
 pcb_t pcb_1; // modify to the 
 
+
+file_op_t rtc_op = {
+    .open = rtc_open,
+    .read = rtc_read,
+    .write = rtc_write,
+    .close = rtc_close,
+};
+
+file_op_t file_op = {
+    .open = file_open,
+    .read = file_read,
+    .write = file_write,
+    .close = file_close,
+};
+
+
 void pcb_init (){
     int i;
     pcb_1.pid = 0;         // Current Process id
@@ -74,8 +90,11 @@ int32_t sys_open (const uint8_t* filename) {
                     return -1;
                 }
                 idx = find_next_fd();
-                file_op_t tmp_file_opt = set_rtc_fop();
-                new_fd_entry.fot_ptr = (&tmp_file_opt);
+                if (strncmp_unsigned("rtc", filename, 32) == 0) {
+                    new_fd_entry.fot_ptr = (&rtc_op);
+                } else {                    
+                    new_fd_entry.fot_ptr = (&file_op);
+                }
                 pcb_1.fd_entry[idx] = new_fd_entry;
 
                 break;
@@ -88,6 +107,7 @@ int32_t sys_open (const uint8_t* filename) {
     }
     return -1;
 }
+
 /* 
  * sys_close
  *  DESCRIPTION: clear the file descripter passed by the argument
@@ -124,18 +144,17 @@ int32_t sys_close (int32_t fd) {
  */
 int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     printf ("sys_read called\n");
-    return 0;
     // if((fd < FD_MIN || fd > FD_MAX ) ||
     //    (buf == NULL || nbytes < 0  ) ||
     //    ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
     //    (pcb_1.fd_entry[fd].flag == 0 ) ||
-    //    (pcb_1.fd_entry[fd].file_pos.read == NULL)
+    //    (pcb_1.fd_entry[fd].fot_ptr->read == NULL)
     // ){
     //     return FAIL;
     // }
   /*Function code is one line the return value */
-    // int32_t ret = (pcb_1.fd_entry[fd].file_pos.read)(fd,buf,nbytes);
-    // return ret;
+    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->read))(fd + 2, buf, nbytes); ;
+    return ret;
 }
 /* 
  * sys_write

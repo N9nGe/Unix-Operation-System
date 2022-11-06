@@ -635,8 +635,9 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 /* Checkpoint 3 tests */
 
 void test_sys_open() {
-	sys_open ("cat");
-	sys_open ("ls");
+	sys_open ("rtc");
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	sys_read(0, temp_buf, LARGE_BUF_SIZE);
 }
 
 /* Checkpoint 4 tests */
