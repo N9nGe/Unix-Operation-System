@@ -7,6 +7,11 @@
 /*Local variable*/
 #define FAIL        -1
 #define SUCCESS     0
+#define FD_MIN      2
+#define FD_MAX      7
+
+#define USER_SPACE_START 0x8000000
+#define USER_SPACE_END   0x8400000
 
 //jump table file_ops struct
 // typedef struct file_ops{

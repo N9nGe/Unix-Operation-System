@@ -3,6 +3,8 @@
 #include "types.h"
 #include "devices/RTC.h"
 #include "devices/terminal.h"
+#include "file_system.h"
+
 // no need linkage include
 //jump tables for open, close, read, write
 
@@ -97,25 +99,34 @@ int32_t sys_close (int32_t fd) {
 }
 /* 
  * sys_read
- *  DESCRIPTION: enable the specific port on i8259,
- *       accept the interrup specified by irq_num
- *  INPUTS: irq_num -- interrupt request id, 0 - 15
+ *  DESCRIPTION: Use file operations jump table to 
+ *  call the corresponding read function
+ *  INPUTS: fd
  *  OUTPUTS: none
- *  RETURN VALUE: none
+ *  RETURN VALUE: 
+ *        - -1 for fail
+ *        - returns the number of bytes read.
  *  SIDE EFFECTS: Enable (unmask) the specified IRQ
  */
 int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     printf ("sys_read called\n");
-
-    // check a lot of || , and simply return 
-
-
-    return 0;
+    if((fd < FD_MIN || fd > FD_MAX ) ||
+       (buf == NULL || nbytes < 0  ) ||
+       ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
+       (pcb_1.fd_entry[fd].flag == 0 ) ||
+       (pcb_1.fd_entry[fd].file_pos.read == NULL)
+    ){
+        return FAIL;
+    }
+  /*Function code is one line the return value */
+    int32_t ret = (pcb_1.fd_entry[fd].file_pos.read)(fd,buf,nbytes);
+    return ret;
 }
 /* 
  * sys_write
- *  DESCRIPTION: enable the specific port on i8259,
- *       accept the interrup specified by irq_num
+ *  DESCRIPTION: Use file operations jump table to 
+ *  call the corresponding write function
+
  *  INPUTS: irq_num -- interrupt request id, 0 - 15
  *  OUTPUTS: none
  *  RETURN VALUE: none
@@ -123,8 +134,18 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  */
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     printf ("sys_write called\n");
-    // connect to the terminal and filesystem?
-    return 0;
+   if((fd < FD_MIN || fd > FD_MAX ) ||
+       (buf == NULL || nbytes < 0  ) ||
+       ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
+       (pcb_1.fd_entry[fd].flag == 0 ) ||
+       (pcb_1.fd_entry[fd].file_pos.write == NULL)
+    ){
+        return FAIL;
+    }
+
+  /*Function code is one line the return value */
+    int32_t ret = (pcb_1.fd_entry[fd].file_pos.write)(fd,buf,nbytes);
+    return ret;
 }
 
 /*file operation table pointer */
