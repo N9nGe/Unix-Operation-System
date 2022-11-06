@@ -21,7 +21,7 @@ int32_t execute (const uint8_t* command);
 int32_t halt(uint8_t status);
 
 // helper function
-void parse_arg(uint8_t* command, uint8_t* filename);
+void parse_arg(const uint8_t* command, uint8_t* filename);
 void paging_execute();
 
 // type size?

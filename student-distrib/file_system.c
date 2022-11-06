@@ -4,7 +4,6 @@ data_block_t * data_block_ptr;
 inode_t * inode_ptr;
 dentry_t * dentry_ptr;
 boot_block_t * boot_block_ptr; 
-static pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
 /* 
@@ -206,10 +205,6 @@ int file_open(const uint8_t* fname) {
     if (read_dentry_by_name (fname, &tmp_dentry) != 0){     // check if read dentry succeeded
         return -1;
     }
-    
-    temp_pcb.inode_num = tmp_dentry.inode_num; 
-    temp_pcb.flag = 1;     // set to in-use
-
     return 0;
 }
 
@@ -223,23 +218,23 @@ int file_open(const uint8_t* fname) {
  *  RETURN VALUE: number of bytes read; 0 if no byte is read
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
-    unsigned i;
-    unsigned length;
-    uint32_t bytes_read;
-    // if (fd < 2 || fd > 7) return -1;
-    bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
-    length = inode_ptr[temp_pcb.inode_num].length;
-    if ((unsigned) nbytes > length) {
-        nbytes = length;
-    }
-    //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
-    for (i = 0; i < nbytes; i++) {
-        printf("%c", buf[i]);
-    }
+// uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
+//     unsigned i;
+//     unsigned length;
+//     uint32_t bytes_read;
+//     // if (fd < 2 || fd > 7) return -1;
+//     bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
+//     length = inode_ptr[temp_pcb.inode_num].length;
+//     if ((unsigned) nbytes > length) {
+//         nbytes = length;
+//     }
+//     //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
+//     for (i = 0; i < nbytes; i++) {
+//         printf("%c", buf[i]);
+//     }
     
-    return bytes_read;
-}
+//     return bytes_read;
+// }
 
 /* 
  *  file_write
@@ -262,7 +257,6 @@ int file_write() {
  *  SIDE EFFECTS: none
  */
 int file_close(int32_t fd) {
-    temp_pcb.flag = 0;     // set to unused
     return 0;
 }
 

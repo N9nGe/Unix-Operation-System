@@ -1,27 +1,27 @@
-# syscall_link.h - Assembly linkage for device and idt
-.data
+# # syscall_link.h - Assembly linkage for device and idt
+# .data
 
-.text
+# .text
 
-.globl syscall_handler
-# return value?
-syscall_handler:                            \
-    pushal                                  ;\
-    pushfl                                  ;\
-	movl	8(%esp), %ebx   #  cmd -> ebx   ;\
-	cmpl	$0, %ebx                        ;\
-# if ebx 0                  
+# .globl syscall_handler
+# # return value?
+# syscall_handler:                            \
+#     pushal                                  ;\
+#     pushfl                                  ;\
+# 	movl	8(%esp), %ebx   #  cmd -> ebx   ;\
+# 	cmpl	$0, %ebx                        ;\
+# # if ebx 0                  
 
-    call *jump_table(,%ebx,4)               ;\
-    popfl                                   ;\
-    popal                                   ;\
+#     call *jump_table(,%ebx,4)               ;\
+#     popfl                                   ;\
+#     popal                                   ;\
 
-    iret
-
-
-
-jump_table:
-		.long sys_open, sys_close, sys_read, sys_write
+#     iret
 
 
-# 0 -> dummy jump? sequence matters!
+
+# jump_table:
+# 		.long sys_open, sys_close, sys_read, sys_write
+
+
+# # 0 -> dummy jump? sequence matters!

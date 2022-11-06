@@ -157,11 +157,11 @@ int32_t halt(uint8_t status){
  * Return Value: none
  * Function: copy the argument into the filename buffer to use later
  */
-void parse_arg(uint8_t* command, uint8_t* filename){
+void parse_arg(const uint8_t* command, uint8_t* filename){
     uint8_t i;
     for (i = 0; i < FILENAME_LEN; i++) {
         // stop at the first space
-        if (command[i] != " ") {
+        if (command[i] != 0x20) {
             filename[i] = command[i];
         } else {
             return;
@@ -181,7 +181,7 @@ void paging_execute() {
     page_directory[index].pd_mb.present = 1;
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = KERNEL_POSITION + 1 + process_counter; // give the address of the process
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + process_counter + 1); // give the address of the process
     process_counter++; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(

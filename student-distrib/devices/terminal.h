@@ -26,7 +26,7 @@ void terminal_init();
 // reset the specific terminal structure 
 void terminal_reset(terminal_t terminal);
 // Load kb_buf -> buf specificed
-int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes);
+int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes);
 // Load buf -> screen
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes);
 // Open the file, uselss for CP2

@@ -1,3 +1,6 @@
+#ifndef FILE_SYSTEM_H
+#define FILE_SYSTEM_H
+
 #include "x86_desc.h"
 #include "lib.h"
 #include "types.h"
@@ -40,6 +43,13 @@ typedef struct boot_block {
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
 
+typedef struct file_op_t{
+    int32_t (*open)(const uint8_t* filename);
+    int32_t (*close)(int32_t fd);
+    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
+    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
+}file_op_t;
+
 typedef struct fd_entry_t {
     file_op_t* fot_ptr;      // file operations jump table pointer
     uint32_t inode_num;         // inode number for this file
@@ -47,12 +57,7 @@ typedef struct fd_entry_t {
     uint32_t flag;              // 1 indicates in-use; 0 indicates 
 } fd_entry_t;
 
-typedef struct file_op_t{
-    int32_t (*open)(const uint8_t* filename);
-    int32_t (*close)(int32_t fd);
-    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
-    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
-}file_op_t;
+
 
 
 extern data_block_t * data_block_ptr;
@@ -86,3 +91,4 @@ int dir_close();
 
 void files_ls();
 
+#endif /* FILE_SYSTEM_H */
