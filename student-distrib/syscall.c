@@ -163,7 +163,7 @@ int32_t execute (const uint8_t* command){
         "movw %%ax, %%ds;"
         "pushl %0;" 
         "pushl %1;"
-        "orl  $0x200, %%eflag;"
+        "orl  $0x200, %%eflags;"
         "pushfl;"
         "pushl %2;"
         "pushl %3;"
