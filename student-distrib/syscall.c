@@ -5,9 +5,22 @@
 #include "devices/terminal.h"
 #include "file_system.h"
 
+file_op_t rtc_op = {
+    .open = rtc_open,
+    .read = rtc_read,
+    .write = rtc_write,
+    .close = rtc_close,
+};
+
+file_op_t file_op = {
+    .open = file_open,
+    .read = file_read,
+    .write = file_write,
+    .close = file_close,
+};
 
 pcb_t pcb_1; // modify to the 
-file_op_t fop_table[2];  //
+// file_op_t fop_table[2];  //
 
 // TODO:  delete it 
 int32_t sys_execute(void){
@@ -63,14 +76,16 @@ int32_t sys_open (const uint8_t* filename) {
     
     printf ("sys_open called\n");
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
-    if(filename == NULL || filename < USER_SPACE_START || filename > USER_SPACE_END - 32){
+    if(filename == NULL ){
+        printf("1 failed to open %s\n",filename);
         return FAIL;
     }
+    // BUG: Always null filename
 
     int i,idx;  // Loop index
-    int fd; 
+    int fd = -1; 
     /* select bit */
-    int file_type; // 0 for RTC, 1 for dir, 2 for regular file (including terminal)
+    // int file_type; // 0 for RTC, 1 for dir, 2 for regular file (including terminal)
     fd_entry_t new_fd_entry;
     //new_fd_entry.fot_ptr = 0;
     new_fd_entry.inode_num = 0;
@@ -81,14 +96,33 @@ int32_t sys_open (const uint8_t* filename) {
     if (fd <0) return FAIL;
 
     // If failed to open the file, quit it
-    if (file_open (filename, &new_fd_entry) == -1) {
+    if (file_open (filename, &new_fd_entry) != 0) {
+        printf("2 failed to open %s\n",filename);
         return FAIL;
     }else{
+        int idx;
+        for (i = 0; i < 6; i++) {
+            if (pcb_1.fd_entry[i].flag == 0) {
+                // set function operation table pointer
+                idx = find_next_fd();
+                if (strncmp_unsigned("rtc", filename, 32) == 0) {
+                    new_fd_entry.fot_ptr = (&rtc_op);
+                } else {                    
+                    new_fd_entry.fot_ptr = (&file_op);
+                }
+                pcb_1.fd_entry[idx] = new_fd_entry;
+
+                break;
+            }
+            // if no fd left,  what to do ?
+        }
+
+        
         printf (" %s found, inode number is %u\n", filename, pcb_1.fd_entry[i].inode_num); // debug usage
 
-        file_type = new_fd_entry.filetype;
-        new_fd_entry.fot_ptr = fop_table[file_type];
-        pcb_1.fd_entry[fd] = new_fd_entry;
+        // file_type = new_fd_entry.filetype;
+        // new_fd_entry.fot_ptr = fop_table[file_type];
+        // pcb_1.fd_entry[fd] = new_fd_entry;
         
 
         return 0;
@@ -140,7 +174,7 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //     return FAIL;
     // }
   /*Function code is one line the return value */
-    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr.read))(fd + 2, buf, nbytes); ;
+    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->read))(fd + 2, buf, nbytes); ;
     return ret;
 }
 /* 
@@ -174,14 +208,14 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
 /*The following are a series of device-speific
   setup helper function */
 
-file_op_t set_rtc_fop(){
-    file_op_t new_fop;
-    new_fop.close = rtc_close;
-    new_fop.open  = rtc_open;
-    new_fop.read  = rtc_read;
-    new_fop.write = rtc_write;
-    return new_fop;
-}
+// file_op_t set_rtc_fop(){
+//     file_op_t new_fop;
+//     new_fop.close = rtc_close;
+//     new_fop.open  = rtc_open;
+//     new_fop.read  = rtc_read;
+//     new_fop.write = rtc_write;
+//     return new_fop;
+// }
 
 // file_op_t set_terminal_fop(){
 //     file_op_t new_fop;
@@ -192,38 +226,38 @@ file_op_t set_rtc_fop(){
 //     return new_fop;
 // }
 
-file_op_t set_file_fop(){
-    file_op_t new_fop;
-    new_fop.close = file_close;
-    new_fop.open  = file_open;
-    new_fop.read  = file_read;
-    new_fop.write = file_write;
-    return new_fop;
-}
+// file_op_t set_file_fop(){
+//     file_op_t new_fop;
+//     new_fop.close = file_close;
+//     new_fop.open  = file_open;
+//     new_fop.read  = file_read;
+//     new_fop.write = file_write;
+//     return new_fop;
+// }
 
-file_op_t set_dir_fop(){
-        file_op_t new_fop;
-    new_fop.close = dir_close;
-    new_fop.open  = dir_open;
-    new_fop.read  = dir_read;
-    new_fop.write = dir_write;
-    return new_fop;
-}
+// file_op_t set_dir_fop(){
+//         file_op_t new_fop;
+//     new_fop.close = dir_close;
+//     new_fop.open  = dir_open;
+//     new_fop.read  = dir_read;
+//     new_fop.write = dir_write;
+//     return new_fop;
+// }
 
-/* 
- * init_fop_table(void)
- *   Description: init the fop table which should contain the open, close, read, write funcitons of all drivers
- *        Inputs: None
- *        Output: None
- *        Return: SUCCESS (0)
- */
+// /* 
+//  * init_fop_table(void)
+//  *   Description: init the fop table which should contain the open, close, read, write funcitons of all drivers
+//  *        Inputs: None
+//  *        Output: None
+//  *        Return: SUCCESS (0)
+//  */
 
-int32_t init_fop_table(void){
-    printf("Init FOP TABLE...\n");
-    //fop_table[TEMINAL_INDEX] = get_terminal_fop();
-    fop_table[RTC_INDEX] = set_rtc_fop();   // RTC  0, leave a special type for it
-    fop_table[DIR_INDEX] = set_dir_fop();   // directory 1
-    fop_table[FILE_INDEX] = set_file_fop(); // Regular file 2 
+// int32_t fop_init(){
+//     printf("Init FOP TABLE...\n");
+//     //fop_table[TEMINAL_INDEX] = get_terminal_fop();
+//     fop_table[RTC_INDEX] = set_rtc_fop();   // RTC  0, leave a special type for it
+//     fop_table[DIR_INDEX] = set_dir_fop();   // directory 1
+//     fop_table[FILE_INDEX] = set_file_fop(); // Regular file 2 
     
-    return SUCCESS;
-}
+//     return SUCCESS;
+// }

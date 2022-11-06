@@ -638,6 +638,10 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 
 void test_sys_open() {
 	sys_open ("rtc");
+	sys_open ("cat");
+	sys_open ("fsdir");
+	sys_open("frame0.txt");
+
 	// uint8_t temp_buf[LARGE_BUF_SIZE];
 	// sys_read(0, temp_buf, LARGE_BUF_SIZE);
 }

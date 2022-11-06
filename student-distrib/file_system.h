@@ -53,10 +53,10 @@ typedef struct file_op_t{
 }file_op_t;
 
 typedef struct fd_entry_t {
-    file_op_t fot_ptr;          // file operations jump table pointer
+    file_op_t* fot_ptr;          // file operations jump table pointer
     uint32_t inode_num;         // inode number for this file
     uint32_t file_pos;          // position within the file
-    uint32_t flag;              // 1 indicates in-use; 0 indicates 
+    uint32_t flag;              // 1 indicates in-use; 0 indicates  unused
     int  filetype;          // file , used for selecting specific type
 } fd_entry_t;
 

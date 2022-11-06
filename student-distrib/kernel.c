@@ -154,7 +154,7 @@ void entry(unsigned long magic, unsigned long addr) {
     paging_init();
 
     pcb_init();
-
+    // fop_init();
     terminal_init();
     keyboard_init();
     

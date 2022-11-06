@@ -61,9 +61,9 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes);
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes);
 
 
-file_op_t set_rtc_fop();
-file_op_t set_terminal_fop();
-file_op_t set_file_fop();
-file_op_t set_dir_fop();
-int32_t init_fop_table(void);
+// file_op_t set_rtc_fop();
+// file_op_t set_terminal_fop();
+// file_op_t set_file_fop();
+// file_op_t set_dir_fop();
+// int32_t fop_init();
 #endif /* TESTS_H */
