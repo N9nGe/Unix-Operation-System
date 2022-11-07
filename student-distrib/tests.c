@@ -642,26 +642,32 @@ void test_syscall_linkage() {
 	"INT $0x80				;"
 	);
 } 
-
+/* test_sys_open
+ * - this test function is used for early test 
+ * - Since we improves pcb from local static to dynamic generated,
+ * - This test function can't be used anymore
+ * - Please don't try to use it!
+ */
 void test_sys_open() {
-	int ret;
+	printf("start testing open\n");
+	// int ret;
 	// ret = sys_open ("rtc");
 	// ret = sys_open ("cat");
 	// ret = sys_open ("fsdir");
-	ret = sys_open ("rtc");
-	ret = sys_open("frame0.txt");
+	// ret = sys_open ("rtc");
+	// ret = sys_open("frame0.txt");
 
-	uint8_t temp_buf[LARGE_BUF_SIZE];
-	sys_read(2, temp_buf, LARGE_BUF_SIZE);
+	// uint8_t temp_buf[LARGE_BUF_SIZE];
+	// sys_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
 
 
 void execute_test() {
 	printf("start testing execute\n");
-	sys_execute((uint8_t*)"testprint");
-	// sys_execute((uint8_t*)"ls");
 	// sys_execute((uint8_t*)"shell");
+	sys_execute((uint8_t*)"testprint");
+
 }
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -672,11 +678,9 @@ void execute_test() {
 void launch_tests(){
 	/***** CP3 TESTS *****/
 	//printf("---------------TEST CP3 START--------------\n");
-
-	// test_sys_open();
-	// test_sys_read();
-	// test_sys_write();
+	// Here we delete those out of used test, leaving the excute along
 	execute_test();
+
 	// printf("---------------TEST CP3 END--------------\n");
 
 

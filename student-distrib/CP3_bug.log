@@ -4,12 +4,9 @@
 Assignment:
     MP3
 CheckPoint:
-    CP3
+    CP3: System is Calling!
 CreateTime:
     2022.10.26
-
-Work Split
-
 
 
 
@@ -17,13 +14,13 @@ Work Split
                           BUG 0                          
 <--------------------------------------------------------->
 Time:
-    2022.10.26.
+    2022.10.30.
 Creator:
     Tony.
 Description:
-    .
+    sys_open can't connect to the file operation table
 Solution:
-    ....
+    boundary check is wrong
 
 <--------------------------------------------------------->
                           BUG x                          
@@ -49,3 +46,4 @@ Description:
     Page Fault by not give the user_supervisor flag
 Solution:
     when we doing paging we need to give the user and supervisor flag to the page becuase syscall's PL is 3
+

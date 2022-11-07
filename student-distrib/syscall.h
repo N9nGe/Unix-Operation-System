@@ -9,21 +9,23 @@
 #include "devices/RTC.h"
 #include "devices/terminal.h"
 
+
 #define USER_PROGRAM_IMAGE_START     0x08048000
 #define KERNEL_BOTTOM                0x00800000
 #define PROCESS_SIZE                 0X2000
 #define MAX_PCB_NUM     6
 
-//jump table file_ops struct
-// typedef struct file_ops{
-//   open_fn open_op;
-//   close_fn close_op;
-//   read_fn read_op;
-//   write_fn write_op;
-// }file_ops_t;
 
-// type size?
-// clearify everything in it
+//jump table file_ops struct
+/*
+typedef struct file_op_t{
+    int32_t (*open)(const uint8_t* filename);
+    int32_t (*close)(int32_t fd);
+    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
+    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
+}file_op_t;
+*/
+
 /*typedef struct pcb_t {
     uint32_t pid;         // Current Process id
     uint32_t parent_id;   // Father process
@@ -60,7 +62,6 @@ typedef struct pcb_t {
 // fd entry is in filesystem 
 // fop: also in filesystem
 
-extern int test_fd;
 
 pcb_t* find_pcb(void);
 

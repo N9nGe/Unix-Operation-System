@@ -9,29 +9,29 @@
 #define USER_SPACE_START 0x8000000
 #define USER_SPACE_END   0x8400000
 
-#define RTC_INDEX   0
-#define DIR_INDEX   1
-#define FILE_INDEX  2
+
+
 
 static uint32_t task_counter = 0;
 
 /*file operation table pointer */
 /*The following are a series of device-speific
   setup helper variable */
+// RTC ORWC
 file_op_t rtc_op = {
     .open = rtc_open,
     .read = rtc_read,
     .write = rtc_write,
     .close = rtc_close,
 };
-
+// Regular file ORWC
 file_op_t file_op = {
     .open = file_open,
     .read = file_read,
     .write = file_write,
     .close = file_close,
 };
-
+// Directory File ORWC
 file_op_t dir_op = {
     .open = dir_open,
     .read = dir_read,
@@ -56,14 +56,17 @@ file_op_t terminal_stdout = {
 };
 
 
-//pcb_t pcb_1; // modify to the 
-// file_op_t fop_table[2];  // Whether to use 
-int test_fd;
-
-//TODO: bug in it, I guess initialization wrong
-void pcb_init (){
-    pcb_t * pcb_1 = find_pcb();
-    fd_entry_init(pcb_1 -> fd_entry);
+/* pcb_initilize()
+ * Description: initilize the given pcb and set it active
+ * Inputs: none
+ * Return Value: initialized pcb
+ * Function: initilize the given pcb and set it active, also initialize the fd array
+ */
+pcb_t* pcb_initilize() {
+    pcb_t* pcb = find_pcb();
+    pcb->active = 1;
+    fd_entry_init(pcb->fd_entry);
+    return pcb;
 }
 
 /* fd_entry_init(fd_entry_t* fd_entry)
@@ -129,7 +132,7 @@ int32_t find_next_fd() {
 int32_t sys_open (const uint8_t* filename) {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    //printf ("sys_open called\n");
+    printf ("sys_open called\n");
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
         //printf("1 failed to open %s\n",filename);
@@ -142,7 +145,7 @@ int32_t sys_open (const uint8_t* filename) {
     /* select bit */
     // int file_type; // 0 for RTC, 1 for dir, 2 for regular file (including terminal)
     fd_entry_t new_fd_entry;
-    //new_fd_entry.fot_ptr = 0;
+
     new_fd_entry.inode_num = 0;
     new_fd_entry.file_pos = 0;
     new_fd_entry.flag = 1;
@@ -172,20 +175,16 @@ int32_t sys_open (const uint8_t* filename) {
                     new_fd_entry.fot_ptr = (&file_op);
                     //printf("file\n");
                     break;
+                default:
+                    new_fd_entry.fot_ptr = (&file_op);
+                    //printf("file\n");
+                    break;
             }
             pcb_1 -> fd_entry[fd] = new_fd_entry;
+            //printf (" %s found, inode number is %u\n", filename, pcb_1->fd_entry[fd].inode_num); // debug usage
+
         } 
     }
-
-    
-    //printf (" %s found, inode number is %u\n", filename, pcb_1.fd_entry[fd].inode_num); // debug usage
-    //printf (" %u\n", fd); // debug usage
-
-    // file_type = new_fd_entry.filetype;
-    // new_fd_entry.fot_ptr = fop_table[file_type];
-    // pcb_1.fd_entry[fd] = new_fd_entry;
-    
-
     return 0;
     
 }
@@ -260,32 +259,21 @@ int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     // return 0;
-//     if((fd < FD_MIN || fd > FD_MAX ) ||
-//        (buf == NULL || nbytes < 0  ) ||
-//        ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
-//        (pcb_1.fd_entry[fd].flag == 0 ) ||
-//        (pcb_1.fd_entry[fd].file_pos.write == NULL)
-//     ){
-//         return FAIL;
-//     }
+    if((fd < FD_MIN || fd > FD_MAX ) ||
+       (buf == NULL || nbytes < 0  ) ||
+    //    ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
+       (pcb_1->fd_entry[fd].flag == 0 ) ||
+       (pcb_1->fd_entry[fd].fot_ptr -> write == NULL)
+    ){
+        return FAIL;
+    }
 
 //   /*Function code is one line the return value */
-    int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->write))(fd, buf, nbytes); 
+    int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr -> write))(fd, buf, nbytes); 
     return ret;
 }
 
-/* pcb_initilize()
- * Description: initilize the given pcb and set it active
- * Inputs: none
- * Return Value: initialized pcb
- * Function: initilize the given pcb and set it active, also initialize the fd array
- */
-pcb_t* pcb_initilize() {
-    pcb_t* pcb = find_pcb();
-    pcb->active = 1;
-    fd_entry_init(pcb->fd_entry);
-    return pcb;
-}
+
 
 /* execute (const uint8_t* command)
  * Description: system call execute
@@ -356,9 +344,6 @@ int32_t sys_execute (const uint8_t* command){
 
     // context switch && IRET
     asm volatile(
-        "xorl %%eax, %%eax;"
-        "movl %0, %%eax;"
-        "movw %%ax, %%ds;"
         "pushl %0;" 
         "pushl %1;"
         "pushfl;"
@@ -374,7 +359,7 @@ int32_t sys_execute (const uint8_t* command){
 }
 
 /* asm voliate workable:
-
+TODO: 11.6 DEBUG
    asm volatile(
         "pushl %0;" 
         "pushl %1;"
@@ -411,13 +396,13 @@ int32_t sys_halt(uint8_t status){
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); 
     // restore parent paging
     page_halt(pcb->parent_id);
-    // TODO: using system call close (close the fd)
-    for (i = 0; i < 8; i++) {
+    for (i = 2; i < 8; i++) {
         // need file close
-        pcb->fd_entry[i].flag = 0;
-    
+        sys_close(i);
     }
-
+    pcb->fd_entry[0].flag = 0;
+    pcb->fd_entry[1].flag = 0;
+    
     // jump to execute return
     // there is no program -> need to rerun shell
     if (task_counter == 0) {
