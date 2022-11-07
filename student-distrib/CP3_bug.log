@@ -16,14 +16,15 @@ CreateTime:
 Time:
     2022.10.30.
 Creator:
-    Tony.
+    Tony Wang.
 Description:
     sys_open can't connect to the file operation table
 Solution:
-    boundary check is wrong
+    boundary check is wrong, I misunderstand the scope of
+    user program.
 
 <--------------------------------------------------------->
-                          BUG x                          
+                          BUG 1                          
 <--------------------------------------------------------->
 Time:
     2022.11.06.
@@ -36,7 +37,7 @@ Solution:
     the actural address should be the last address in the page start from 0x08000000 + 4mb - 4
 
 <--------------------------------------------------------->
-                          BUG x                          
+                          BUG 2                          
 <--------------------------------------------------------->
 Time:
     2022.11.06.
@@ -47,3 +48,53 @@ Description:
 Solution:
     when we doing paging we need to give the user and supervisor flag to the page becuase syscall's PL is 3
 
+<--------------------------------------------------------->
+                          BUG 3                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07
+Creator:
+    Tony Wang && Tim Zhao, && Jerry Wang && Gabriel Gao
+Description:
+    - We can write on the screen, and we can run the shell function. 
+    But shell function can't read the instruction.
+    - Our program can't pass hello test
+    - The sys_open function can pass the static pcb test alone, but
+    when test together in sys_execute, it meets with page fault
+Solution:
+    - First we found the terminal_read is wrong, it didn't 
+    record the buffer from keyboard actually. (Gabriel)
+    - Second, we found each time we press \n, it will firstly clear
+    the keyboard buffer, and terminal can't read from it. (Tony)
+    - Thirdly, our file_system's file_open takes multiple parameters
+    from the system, which doesn't follow the syscall routine. (Jerry)
+    - the file Descriptor isn't consist, when open pingpong, it will open
+    fd of RTC
+
+<--------------------------------------------------------->
+                          BUG 4                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07.
+Creator:
+    Gabriel Gao 
+Description:
+    Page Fault by halt function. When I halt the program and remap to the parent program, 
+    because I use task counter to represent the id of the process, I using the wrong offset to map to the
+    parent program page.
+Solution:
+    we have no need to +1 in the base_addr of the page because, I want to retrun to the parent program.
+    old: page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id + 1);
+    new: page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id);
+
+<--------------------------------------------------------->
+                          BUG 5                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07.
+Creator:
+    Gabriel Gao && Jerry Wang
+Description:
+    page fault by sys_open. The return value is incorrect.
+Solution:
+    The return value should not be 0, it should be the available fd(file descriptor index).

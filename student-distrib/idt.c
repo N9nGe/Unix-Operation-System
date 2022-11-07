@@ -6,6 +6,7 @@
 #include "devices/keyboard.h"
 #include "linkage/interrupt_link.h"
 #include "linkage/syscall_link.h"
+#include "syscall.h"
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
@@ -54,7 +55,7 @@ char * exception_output[EXCEPTION_19 + 1] = {
 void exception_handler_n (unsigned int n) {
     clear();
     printf ("===============   %s    ===============\n  ",exception_output[n]);
-    while (1);
+    sys_halt(256);
     
 }
 
@@ -130,7 +131,6 @@ void general_protection_fault_exception () {
 
 void page_fault_exception () {
     exception_handler_n (EXCEPTION_14);
-    // printf("page fault || ");
 }
 
 void reserved1_exception () {
@@ -157,6 +157,7 @@ void simd_floating_point_exception () {
 
 void system_call_handler () {
     printf("system call");
+
 }
 
 /*

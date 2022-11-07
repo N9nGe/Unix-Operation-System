@@ -1,13 +1,10 @@
 #include "syscall.h"
 
 /*Local constant*/
-#define FAIL        -1
-#define SUCCESS     0
+#define SYSCALL_FAIL        -1
+#define SYSCALL_SUCCESS     0
 #define FD_MIN      2
 #define FD_MAX      7
-
-#define USER_SPACE_START 0x8000000
-#define USER_SPACE_END   0x8400000
 
 static uint32_t task_counter = 0;
 pcb_t * current_pcb_pointer;
@@ -75,7 +72,7 @@ pcb_t* pcb_initilize() {
  */
 int32_t fd_entry_init(fd_entry_t* fd_entry) {
     if (fd_entry == NULL) {
-        return -1;
+        return SYSCALL_FAIL;
     }
     uint8_t i;
     for (i= 0; i < 8; i++) {
@@ -108,7 +105,7 @@ int32_t find_next_fd() {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     int i;
-    for (i = 2; i < 8; i++) {
+    for (i = FD_MIN; i < FD_MAX + 1; i++) {
         if (pcb_1 -> fd_entry[i].flag == 0) {
             return i;
         }
@@ -130,11 +127,10 @@ int32_t find_next_fd() {
 int32_t sys_open (const uint8_t* filename) {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    printf ("sys_open called\n");
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
         printf("1 failed to open %s\n",filename);
-        return FAIL;
+        return SYSCALL_FAIL;
     }
     // BUG: Always null filename
 
@@ -152,12 +148,12 @@ int32_t sys_open (const uint8_t* filename) {
 
     // printf("current fd is %d || ",fd);
     /*test function used for read and close*/  
-    if (fd < 2 || fd > 7) return FAIL;
+    if (fd < FD_MIN || fd > FD_MAX) return SYSCALL_FAIL;
 
     // If failed to open the file, quit it
     if (file_open (filename) != 0) {
         //printf("2 failed to open %s\n",filename);
-        return FAIL;
+        return SYSCALL_FAIL;
     } else {
         // dentry_t tmp_dentry;
         // if (read_dentry_by_name (filename, &tmp_dentry) != 0){     // check if read dentry succeeded
@@ -174,28 +170,22 @@ int32_t sys_open (const uint8_t* filename) {
         pcb_1->fd_entry[fd].flag = 1;
         pcb_1->fd_entry[fd].filetype =temp_dentry.filetype;
 
-        if (fd >= 2) {
+        if (fd >= FD_MIN) {
             //printf("%u x\n", new_fd_entry.filetype);
             switch (pcb_1->fd_entry[fd].filetype) {
                 case 0:
                     pcb_1->fd_entry[fd].fot_ptr = (&rtc_op);
-                    printf("rtc\n");
                     break;
                 case 1:
                     pcb_1->fd_entry[fd].fot_ptr = (&dir_op);
-                    printf("dir\n");
                     break;
                 case 2:
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
-                    printf("file\n");
                     break;
                 default: //TODO
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
-                    printf("file2\n");
                     break;
             }
-            // pcb_1 -> fd_entry[fd] = new_fd_entry;
-            printf (" %s found, inode number is %u\n", filename, pcb_1->fd_entry[fd].inode_num); // debug usage
 
         } 
     }
@@ -215,8 +205,8 @@ int32_t sys_close (int32_t fd) {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     //printf ("sys_close called\n");
-    if (fd < 2 || fd > 7) {
-        return -1;
+    if (fd < FD_MIN || fd > FD_MAX) {
+        return SYSCALL_FAIL;
     }
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return 0;
@@ -297,7 +287,7 @@ int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
  */
 int32_t sys_execute (const uint8_t* command){
     if (command == NULL) {
-        return -1;
+        return SYSCALL_FAIL;
     }
     // filename buffer used by parse the command
     uint8_t filename[FILENAME_LEN];
@@ -309,16 +299,16 @@ int32_t sys_execute (const uint8_t* command){
     dentry_t execute_file;
     memset(&execute_file, 0, sizeof(execute_file));
     // check whether file exist
-    if (read_dentry_by_name(filename, &execute_file) == -1) {
-        return -1;
+    if (read_dentry_by_name(filename, &execute_file) == SYSCALL_FAIL) {
+        return SYSCALL_FAIL;
     }
 
     // check whether the file is an EXE
-    uint8_t execute_code_buf[4];
-    read_data(execute_file.inode_num, 0, execute_code_buf, 4);
-    if (execute_code_buf[0] != 0x7f || execute_code_buf[1] != 0x45 || 
-        execute_code_buf[2] != 0x4c || execute_code_buf[3] != 0x46) {
-        return -1;
+    uint8_t execute_code_buf[EXE_CODE_BUF];
+    read_data(execute_file.inode_num, 0, execute_code_buf, EXE_CODE_BUF);
+    if (execute_code_buf[0] != EXE_MAGIC_1 || execute_code_buf[1] != EXE_MAGIC_2 || 
+        execute_code_buf[2] != EXE_MAGIC_3 || execute_code_buf[3] != EXE_MAGIC_4) {
+        return SYSCALL_FAIL;
     }
 
     cli();
@@ -326,7 +316,7 @@ int32_t sys_execute (const uint8_t* command){
     paging_execute();
     // load the file into USER_PROGRAM_IMAGE_START(virtual memory)
     if (read_data(execute_file.inode_num, 0, (uint8_t*) USER_PROGRAM_IMAGE_START, inode_ptr[execute_file.inode_num].length) == 0) {
-        return -1;
+        return SYSCALL_FAIL;
     }
     
     // create new pcb
@@ -348,14 +338,14 @@ int32_t sys_execute (const uint8_t* command){
     // USER_DS, ESP, EFLAG, CS, EIP
     uint32_t user_data_segment = USER_DS;
     // get byte 24-28 in EXE
-    uint32_t eip = *(uint32_t*)(((uint8_t*) USER_PROGRAM_IMAGE_START) + 24);
+    uint32_t eip = *(uint32_t*)(((uint8_t*) USER_PROGRAM_IMAGE_START) + TWENTY_FOUR_OFFSET);
     uint32_t user_code_segment = USER_CS;
-    uint32_t esp = (USER_PROGRAM_IMAGE_START - 0x48000 + 0x400000 - 4); // -4 because dereference is 4 byte value(avoid page fault)
+    uint32_t esp = (USER_PROGRAM_IMAGE_START - USER_PROGRAM_IMAGE_OFFSET + BIG_PAGE_SIZE - AVOID_PAGE_FAULT); // -4 because dereference is 4 byte value(avoid page fault)
     
     // TSS
     // no need to change ss0 because kernel using the same kernel stack(initilize at booting)
     // get the current stack address
-    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter - 1) - 4);
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter - 1) - AVOID_PAGE_FAULT);
     sti();
 
     // context switch && IRET
@@ -374,7 +364,7 @@ int32_t sys_execute (const uint8_t* command){
         : "cc", "memory", "eax"
     );
 
-    return 0;
+    return SYSCALL_SUCCESS;
 }
 
 
@@ -392,12 +382,14 @@ int32_t sys_halt(uint8_t status){
     pcb_t* pcb = find_pcb();
     
     // point to the parent kernel stack
-    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); 
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - AVOID_PAGE_FAULT); 
     
-    for (i = 2; i < 8; i++) {
+    // close the fd
+    for (i = FD_MIN; i < FD_MAX+1; i++) {
         // need file close
         sys_close(i);
     }
+    // close stdin and stdout
     pcb->fd_entry[0].flag = 0;
     pcb->fd_entry[1].flag = 0;
     pcb->active = 0;
@@ -422,7 +414,7 @@ int32_t sys_halt(uint8_t status){
         );
     } 
     
-    return 0;
+    return SYSCALL_SUCCESS;
 }
 
 /* parse_arg(uint8_t* command, uint8_t* filename)
@@ -436,7 +428,7 @@ void parse_arg(const uint8_t* command, uint8_t* filename){
     uint8_t i;
     for (i = 0; i < FILENAME_LEN; i++) {
         // stop at the first space
-        if (command[i] != 0x20) {
+        if (command[i] != SPACE) {
             filename[i] = command[i];
         } else {
             return;
@@ -463,7 +455,9 @@ void paging_execute() {
     asm volatile(
         "movl %%cr3, %%eax;" 
         "movl %%eax, %%cr3;"
-        : : : "eax", "cc"
+        : 
+        : 
+        : "eax", "cc"
     );
 }
 
@@ -480,13 +474,15 @@ void page_halt(uint32_t parent_id) {
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id ); // give the address of the process
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id); // give the address of the process
     task_counter--; // decrement the counter
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 
         "movl %%eax, %%cr3;"
-        : : : "eax", "cc"
+        : 
+        : 
+        : "eax", "cc"
     );
 }
 

@@ -10,6 +10,7 @@
 #define PD_SHIFT            22
 #define VIDEO_MEMORY        0xB8000
 #define R_W_PRESENT         3
+#define BIG_PAGE_SIZE       0x400000  
 
 page_directory_t page_directory[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
 page_table_entry_t page_table[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));

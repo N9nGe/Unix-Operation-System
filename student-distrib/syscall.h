@@ -13,28 +13,16 @@
 #define USER_PROGRAM_IMAGE_START     0x08048000
 #define KERNEL_BOTTOM                0x00800000
 #define PROCESS_SIZE                 0X2000
-#define MAX_PCB_NUM     6
-
-//jump table file_ops struct
-/*
-typedef struct file_op_t{
-    int32_t (*open)(const uint8_t* filename);
-    int32_t (*close)(int32_t fd);
-    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
-    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
-}file_op_t;
-*/
-
-/*typedef struct pcb_t {
-    uint32_t pid;         // Current Process id
-    uint32_t parent_id;   // Father process
-    int32_t fd;          // File descriptor, a integer index into PCB array
-                     // Used for user-level programs to identify opened file
-    uint32_t saved_esp;
-    uint32_t saved_ebp;
-    uint8_t active;
-    fd_entry_t fd_entry[6];
-} pcb_t;*/
+#define MAX_PCB_NUM                  6
+#define EXE_CODE_BUF                 4
+#define EXE_MAGIC_1                  0x7f
+#define EXE_MAGIC_2                  0x45
+#define EXE_MAGIC_3                  0x4c
+#define EXE_MAGIC_4                  0x46
+#define TWENTY_FOUR_OFFSET           24
+#define USER_PROGRAM_IMAGE_OFFSET    0x48000
+#define AVOID_PAGE_FAULT             4
+#define SPACE                        0x20
 
 // system execute
 int32_t sys_execute (const uint8_t* command);

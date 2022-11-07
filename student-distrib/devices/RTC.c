@@ -142,12 +142,12 @@ uint32_t log_2(uint32_t freq) {
 int32_t rtc_open(const uint8_t * filename) {
     // check the whether the input is valid
     if (filename == NULL) {
-        printf("RTC fails to open\n");
+        // printf("RTC fails to open\n");
         return RTC_FAIL;
     }
     // pass the default freq = 2Hz into the rtc
     rtc_set_freq(RTC_OPEN_DEFAULT_FREQ);
-    printf("RTC Successfully opens\n");
+    // printf("RTC Successfully opens\n");
     return RTC_SUCCESS;
 }
 
@@ -167,14 +167,14 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     }
     // check whether fd is reasonable
     if (fd < 2 || fd > 7) {
-        printf("fd is invalid! RTC fails to close\n");
+        // printf("fd is invalid! RTC fails to close\n");
         return RTC_FAIL;
     }
     // set the rtc flag become 0(rtc interrupt not occur -> do not return)
     rtc_interrupt_occurred = 0;
-    printf("Set RTC interrupt to %d\n", rtc_interrupt_occurred);
+    //printf("Set RTC interrupt to %d\n", rtc_interrupt_occurred);
     while(rtc_interrupt_occurred == 0); // if rtc interrupt occur, the flag will be set to one and then break the while loop. 
-    printf("RTC interrupt occurs\n");
+    //printf("RTC interrupt occurs\n");
     return RTC_SUCCESS;
 }
 
@@ -216,7 +216,7 @@ int32_t rtc_close(int32_t fd) {
         printf("fd is invalid! RTC fails to close\n");
         return RTC_FAIL;
     }
-    printf("RTC Successfully closes\n");
+    // printf("RTC Successfully closes\n");
     return RTC_SUCCESS;
 }
 

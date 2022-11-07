@@ -71,7 +71,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
             ((uint8_t*)buf)[index] = 0;
         }
     }
-
+    memset(keyboard_buf,NULL,sizeof(keyboard_buf));
     // choose the return n bytes  
     if (nbytes <= terminal_count) {
         copy_byte = nbytes;

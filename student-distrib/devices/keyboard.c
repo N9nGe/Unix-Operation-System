@@ -157,7 +157,7 @@ void keyboard_interrupt_handler(){
             // printf("KEY pressed ["); // used for testing
             // Clear the screen when necessary
                 if ( value == '\n' ){
-                    // memset(keyboard_buf,NULL,sizeof(keyboard_buf));
+                    // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
                     terminal_count = keybuf_count;
                     keybuf_count = 0;
                     kb_flag = 1;            // interrupt the terminal 
