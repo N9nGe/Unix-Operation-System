@@ -21,15 +21,15 @@ file_op_t rtc_op = {
 };
 // Regular file ORWC
 file_op_t file_op = {
-    .open = file_open,
-    .read = file_read,
+    .open  = file_open,
+    .read  = file_read,
     .write = file_write,
     .close = file_close,
 };
 // Directory File ORWC
 file_op_t dir_op = {
-    .open = dir_open,
-    .read = dir_read,
+    .open  = dir_open,
+    .read  = dir_read,
     .write = dir_write,
     .close = dir_close,
 };
@@ -154,13 +154,13 @@ int32_t sys_open (const uint8_t* filename) {
 
         if (fd >= FD_MIN) {
             switch (pcb_1->fd_entry[fd].filetype) {
-                case 0:
+                case 0: // RTC device type
                     pcb_1->fd_entry[fd].fot_ptr = (&rtc_op);
                     break;
-                case 1:
+                case 1: // directory type
                     pcb_1->fd_entry[fd].fot_ptr = (&dir_op);
                     break;
-                case 2:
+                case 2: // regular file type
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
                 default:

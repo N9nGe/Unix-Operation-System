@@ -5,7 +5,7 @@ data_block_t * data_block_ptr;
 inode_t * inode_ptr;
 dentry_t * dentry_ptr;
 boot_block_t * boot_block_ptr; 
-static tmp_pcb_t temp_pcb;  // create a temporary pcb for 3.2
+// static tmp_pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
 /* 
@@ -199,11 +199,11 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *  SIDE EFFECTS: none
  */
 //int file_open(const uint8_t* fname, fd_entry_t * fd_entry) { 
-int file_open(const uint8_t* fname) {
-    printf("opening %s \n", fname);
+int32_t file_open(const uint8_t* fname) {
+    // printf("opening %s \n", fname);
     // if( fname == NULL || fd_entry == NULL) { return -1;}
     if (strlen_unsigned(fname) > FILENAME_LEN){    // return failed if file name is larger than 32B
-        printf("File open failed!");
+        printf("\n!!!File open failed!\n");
         return -1;
     }
     // dentry_t tmp_dentry;
@@ -227,8 +227,8 @@ int file_open(const uint8_t* fname) {
  *  RETURN VALUE: number of bytes read; 0 if no byte is read
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
-    unsigned i;
+int32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
+    // unsigned i; // not used
     unsigned length;
     uint32_t bytes_read;
     // if (fd < 2 || fd > 7) return -1;
@@ -298,7 +298,7 @@ int dir_open(const uint8_t* fname) {
  *  RETURN VALUE: number of bytes copied
  *  SIDE EFFECTS: read the directory entry name into buf
  */
-uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
+int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
     //printf("dir_read");
@@ -322,7 +322,7 @@ uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
  *  RETURN VALUE: always -1 for now
  *  SIDE EFFECTS: none
  */
-int dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
+int32_t dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
     return -1;
 }
 
@@ -334,7 +334,7 @@ int dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
  *  RETURN VALUE: always 0 for now
  *  SIDE EFFECTS: none
  */
-int dir_close(int32_t fd) {
+int32_t dir_close(int32_t fd) {
     return 0;
 }
 

@@ -55,7 +55,7 @@ char * exception_output[EXCEPTION_19 + 1] = {
 void exception_handler_n (unsigned int n) {
     clear();
     printf ("===============   %s    ===============\n  ",exception_output[n]);
-    sys_halt(256);
+    sys_halt((uint8_t)HANDLER_MAGIC); // Use syshalt to support exception now
     
 }
 

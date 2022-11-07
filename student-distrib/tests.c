@@ -636,6 +636,12 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 }
 /* Checkpoint 3 tests */
 
+/* test_syscall_linkage
+ * - this test function is used for early test 
+ * - Since we improves pcb from local static to dynamic generated,
+ * - This test function can't be used anymore
+ * - Please don't try to use it!
+ */
 void test_syscall_linkage() {
 	asm volatile (
 	"movl $0x01,%eax 		;"
@@ -650,23 +656,28 @@ void test_syscall_linkage() {
  */
 void test_sys_open() {
 	printf("start testing open\n");
-	int ret;
+	// int ret;
 	// sys_execute((uint8_t*)"testprint");
 	// ret = sys_open (".");
-	ret = sys_open ("cat");
+	// ret = sys_open ("cat");
 	// ret = sys_open ("fsdir");
 	// ret = sys_open ("rtc");
 	// ret = sys_open("frame0.txt");
 
-	uint8_t temp_buf[LARGE_BUF_SIZE];
-	sys_read(2, temp_buf, LARGE_BUF_SIZE);
+	// uint8_t temp_buf[LARGE_BUF_SIZE];
+	// sys_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
 
-
+/* execute_test
+ * - test function for Checkpoint 3
+ * - Current "Main" program
+ */
 void execute_test() {
+	clear();
 	printf("start testing execute\n");
 	sys_execute((uint8_t*)"shell");
+	/*Inidivitual test*/
 	// sys_execute((uint8_t*)"testprint");
 	// sys_execute((uint8_t*)"hello ");
 	// sys_execute((uint8_t*)"pingpong ");

@@ -32,15 +32,15 @@ This part is used for testing purpose, here we will follow a routine from most b
 
 - [ ] [MentOS]
 
-### **hello **:  most simple program, needs sys_read & sys_write
+### hello :  most simple program, needs sys_read & sys_write
 
-### **ls**: a simpler version of list function in CP2. show the files line by line
+### ls: a simpler version of list function in CP2. show the files line by line
 
 ### pingpong: endless, used for testing multiple terminals
 
-### cat: ?
+### cat: open file failed this time 
 
-### grep: ?
+### grep: 
 
 ### sigtest: used for CP4
 
@@ -55,6 +55,7 @@ This part is used for testing purpose, here we will follow a routine from most b
    ctrl+C to halt the program?
 
 2. clear the screen
+-  ctrl + l is okey, but maybe more intellgent
 
 3. 
 
@@ -66,7 +67,7 @@ This part is used for testing purpose, here we will follow a routine from most b
 
 ### read:
 
-### write
+### write: 
 
 ### execute: means executing a new user program from shell. 
 

@@ -43,28 +43,29 @@ typedef struct boot_block {
     uint8_t reserved[BOOT_BLOCK_RESERVED];
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
-
+// Checkpoint 3
+/*File Operation Table*/
 typedef struct file_op_t{
     int32_t (*open)(const uint8_t* filename);
     int32_t (*close)(int32_t fd);
     int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
     int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
 }file_op_t;
-
+/*file desctiptor entry*/
 typedef struct fd_entry_t {
-    file_op_t* fot_ptr;          // file operations jump table pointer
+    file_op_t* fot_ptr;         // file operations jump table pointer
     uint32_t inode_num;         // inode number for this file
     uint32_t file_pos;          // position within the file
     uint32_t flag;              // 1 indicates in-use; 0 indicates  unused
-    int  filetype;          // file , used for selecting specific type
+    int  filetype;              // filetype, used for selecting specific type
 } fd_entry_t;
-
-typedef struct tmp_pcb {
-    uint32_t fot_ptr;       // file operations jump table pointer
-    uint32_t inode_num;     // inode number for this file
-    uint32_t file_pos;      // position within the file
-    uint32_t flag;         // 1 indicates in-use; 0 indicates unused
-} tmp_pcb_t;
+/*An old structure used for debug*/
+// typedef struct tmp_pcb {
+//     uint32_t fot_ptr;       // file operations jump table pointer
+//     uint32_t inode_num;     // inode number for this file
+//     uint32_t file_pos;      // position within the file
+//     uint32_t flag;         // 1 indicates in-use; 0 indicates unused
+// } tmp_pcb_t;
 
 
 extern data_block_t * data_block_ptr;
@@ -80,21 +81,21 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry);
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
-int file_open(const uint8_t* fname);
+int32_t file_open(const uint8_t* fname);
 
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+int32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
 
-int file_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
+int32_t file_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
 
-int file_close(int32_t fd);
+int32_t file_close(int32_t fd);
 
-int dir_open(const uint8_t* fname);
+int32_t dir_open(const uint8_t* fname);
 
-uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
+int32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
 
-int dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
+int32_t dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
 
-int dir_close(int32_t fd);
+int32_t dir_close(int32_t fd);
 
 void files_ls();
 

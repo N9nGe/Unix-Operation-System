@@ -24,6 +24,7 @@
 #define AVOID_PAGE_FAULT             4
 #define SPACE                        0x20
 
+
 // system execute
 int32_t sys_execute (const uint8_t* command);
 
@@ -36,18 +37,19 @@ void paging_execute();
 void page_halt(uint32_t parent_id);
 
 
-// clearify everything in it
+// Program Control Block
 typedef struct pcb_t {
-    uint32_t pid;         // Current Process id
-    uint32_t parent_id;   // Father process
-    uint32_t saved_esp;
-    uint32_t saved_ebp;
-    uint8_t active;
-    fd_entry_t fd_entry[8];
+    uint32_t pid;          // Current Process id
+    uint32_t parent_id;    // Father process
+    uint32_t saved_esp;    // stack pointer save
+    uint32_t saved_ebp;    // Base pointer save
+    uint8_t active;        // test bit
+    fd_entry_t fd_entry[8];// file descriptor entry for current pcb
 } pcb_t;
-
+/*Other CP3 structure location*/
 // fd entry is in filesystem 
 // fop: also in filesystem
+/*Local varialbe*/
 extern pcb_t* current_pcb_pointer;
 
 pcb_t* find_pcb(void);
