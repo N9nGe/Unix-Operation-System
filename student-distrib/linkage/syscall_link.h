@@ -13,4 +13,4 @@
     extern void syscall_handler();
     #endif
 
-#endif /* _SYSCALL_LINK_H_*/
+//#endif /* _SYSCALL_LINK_H_*/

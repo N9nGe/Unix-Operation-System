@@ -655,13 +655,12 @@ void test_sys_open() {
 	sys_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
-void test_sys_handler(){
-	
-}
 
 
 void execute_test() {
-	execute((uint8_t*)"shell ");
+	sys_execute((uint8_t*)"testprint");
+	// sys_execute((uint8_t*)"ls");
+	// sys_execute((uint8_t*)"shell");
 }
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -673,7 +672,7 @@ void launch_tests(){
 	/***** CP3 TESTS *****/
 	//printf("---------------TEST CP3 START--------------\n");
 
-	test_sys_open();
+	// test_sys_open();
 	// test_sys_read();
 	// test_sys_write();
 	
@@ -682,8 +681,8 @@ void launch_tests(){
 
 	/***** CP2 TESTS *****/
 	//printf("---------------TEST CP2 START--------------\n");	
-	terminal_mode = 1; // The control boolean to set the termianl output mode
-	execute_test();
+	// terminal_mode = 1; // The control boolean to set the termianl output mode
+	// execute_test();
 	/*Test for rtc_driver*/
 	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
 	// TEST_OUTPUT("rtc_write_test", rtc_write_test());

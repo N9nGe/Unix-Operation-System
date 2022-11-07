@@ -56,22 +56,14 @@ file_op_t terminal_stdout = {
 };
 
 
-pcb_t pcb_1; // modify to the 
+//pcb_t pcb_1; // modify to the 
 // file_op_t fop_table[2];  // Whether to use 
 int test_fd;
 
-
-// TODO:  delete it 
-int32_t sys_execute(void){
-    return 0;
-};
-
-int32_t sys_halt(void){
-    return 0;
-};
-
+//TODO: bug in it, I guess initialization wrong
 void pcb_init (){
-    fd_entry_init(pcb_1.fd_entry);
+    pcb_t * pcb_1 = find_pcb();
+    fd_entry_init(pcb_1 -> fd_entry);
 }
 
 /* fd_entry_init(fd_entry_t* fd_entry)
@@ -101,8 +93,8 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
 }
 
 /* find_pcb()
- * Description: get the current pcb
- * Inputs: none
+ * Description: get the current pcb pointer
+ * Inputs: task_pointer, a global variable used to linearly accumulate the pcb
  * Return Value: current pcb pointer
  * Function: get the current pcb by the task counter
  */
@@ -112,9 +104,11 @@ pcb_t* find_pcb() {
 
 
 int32_t find_next_fd() {
+    pcb_t * pcb_1;
+    pcb_1 = find_pcb();
     int i;
     for (i = 2; i < 8; i++) {
-        if (pcb_1.fd_entry[i].flag == 0) {
+        if (pcb_1 -> fd_entry[i].flag == 0) {
             return i;
         }
     }
@@ -133,7 +127,8 @@ int32_t find_next_fd() {
  *  SIDE EFFECTS: none
  */
 int32_t sys_open (const uint8_t* filename) {
-    
+    pcb_t * pcb_1;
+    pcb_1 = find_pcb();
     printf ("sys_open called\n");
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
@@ -155,7 +150,7 @@ int32_t sys_open (const uint8_t* filename) {
     // int print_fd  = fd+2;
     //printf("current fd is %d || ",print_fd);
     /*test function used for read and close*/  
-    if (fd <2) return FAIL;
+    if (fd <2 || fd > 7) return FAIL;
 
     // If failed to open the file, quit it
     if (file_open (filename, &new_fd_entry) != 0) {
@@ -178,9 +173,8 @@ int32_t sys_open (const uint8_t* filename) {
                     printf("file\n");
                     break;
             }
-            pcb_1.fd_entry[fd] = new_fd_entry;
+            pcb_1 -> fd_entry[fd] = new_fd_entry;
         } 
-        // TODO directory case? file type decision
     }
 
     
@@ -205,17 +199,18 @@ int32_t sys_open (const uint8_t* filename) {
  *  SIDE EFFECTS: Change fd_entry stored in pcb array
  */
 int32_t sys_close (int32_t fd) {
+    pcb_t * pcb_1;
+    pcb_1 = find_pcb();
     printf ("sys_close called\n");
     if (fd < 2 || fd > 7) {
         return -1;
     }
-    int32_t idx = fd;
-    if (pcb_1.fd_entry[idx].flag == 0) {
+    if (pcb_1 -> fd_entry[fd].flag == 0) {
         return 0;
     }
-    pcb_1.fd_entry[idx].inode_num = 0;
-    pcb_1.fd_entry[idx].file_pos = 0;
-    pcb_1.fd_entry[idx].flag = 0;
+    pcb_1 -> fd_entry[fd].inode_num = 0;
+    pcb_1 -> fd_entry[fd].file_pos = 0;
+    pcb_1 -> fd_entry[fd].flag = 0;
     return 0;
 
 }
@@ -232,6 +227,8 @@ int32_t sys_close (int32_t fd) {
  */
 int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
     printf ("sys_read called\n");
+    pcb_t * pcb_1;
+    pcb_1 = find_pcb();
     // if((fd < FD_MIN || fd > FD_MAX ) ||
     //    (buf == NULL || nbytes < 0  ) ||
     //    ((int)buf < USER_SPACE_START  || (int)buf + nbytes > USER_SPACE_END ) ||
@@ -243,7 +240,7 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
     // }
     printf("Reading fd: %d\n",fd);
   /*Function code is one line the return value */
-    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->read))(fd, buf, nbytes); 
+    int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->read))(fd, buf, nbytes); 
     return ret;
 }
 /* 
@@ -260,7 +257,9 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
  */
 int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
     printf ("sys_write called\n");
-    return 0;
+    pcb_t * pcb_1;
+    pcb_1 = find_pcb();
+    // return 0;
 //     if((fd < FD_MIN || fd > FD_MAX ) ||
 //        (buf == NULL || nbytes < 0  ) ||
 //        ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
@@ -271,7 +270,7 @@ int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
 //     }
 
 //   /*Function code is one line the return value */
-    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->write))(fd, buf, nbytes); 
+    int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->write))(fd, buf, nbytes); 
     return ret;
 }
 
@@ -294,7 +293,7 @@ pcb_t* pcb_initilize() {
  * Return Value: 0 succeff; -1 fail
  * Function: do the execute based on the command
  */
-int32_t execute (const uint8_t* command){
+int32_t sys_execute (const uint8_t* command){
     if (command == NULL) {
         return -1;
     }
@@ -362,7 +361,6 @@ int32_t execute (const uint8_t* command){
         "movw %%ax, %%ds;"
         "pushl %0;" 
         "pushl %1;"
-        "orl  $0x200, %%eflags;"
         "pushfl;"
         "pushl %2;"
         "pushl %3;"
@@ -402,9 +400,10 @@ is enough for syscall
  * Return Value: 0 - succeff; 256 - exception 
  * Function: halt the process and check the causing of the halt
  */
-int32_t halt(uint8_t status){
+int32_t sys_halt(uint8_t status){
     // get current pcb
     int i;
+    uint32_t return_status = status;
     cli();
     pcb_t* pcb = find_pcb();
     pcb->active = 0;
@@ -416,17 +415,13 @@ int32_t halt(uint8_t status){
     for (i = 0; i < 8; i++) {
         // need file close
         pcb->fd_entry[i].flag = 0;
+    
     }
-
-    // TODO: check halt reason 
-    if (status == 0) {
-        status = 256;
-    }  
 
     // jump to execute return
     // there is no program -> need to rerun shell
     if (task_counter == 0) {
-        execute((uint8_t*)"shell");
+        sys_execute((uint8_t*)"shell");
     } else {
         asm volatile (
             "movl %0, %%eax;"
@@ -435,7 +430,7 @@ int32_t halt(uint8_t status){
             "leave;"
             "ret;"
             :
-            : "r" (status), "r" (pcb->saved_ebp), "r" (pcb->saved_esp)
+            : "r" (return_status), "r" (pcb->saved_ebp), "r" (pcb->saved_esp)
             : "esp", "ebp", "eax"
         );
     } 

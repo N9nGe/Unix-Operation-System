@@ -153,8 +153,8 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     paging_init();
 
-    pcb_init();
-    // fop_init();
+    pcb_init(); //CP3
+
     terminal_init();
     keyboard_init();
     

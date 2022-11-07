@@ -36,10 +36,10 @@
 } pcb_t;*/
 
 // system execute
-int32_t execute (const uint8_t* command);
+int32_t sys_execute (const uint8_t* command);
 
 // system halt
-int32_t halt(uint8_t status);
+int32_t sys_halt(uint8_t status);
 
 // helper function
 void parse_arg(const uint8_t* command, uint8_t* filename);
@@ -62,15 +62,15 @@ typedef struct pcb_t {
 
 extern int test_fd;
 
+pcb_t* find_pcb(void);
+
 void pcb_init (void);
 
 int32_t fd_entry_init(fd_entry_t* fd_entry);
 
 int32_t find_next_fd(void);
 
-int32_t sys_execute(void);
 
-int32_t sys_halt(void);
 
 int32_t sys_open (const uint8_t* filename);
 

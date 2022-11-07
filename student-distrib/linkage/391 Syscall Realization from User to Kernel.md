@@ -13,7 +13,7 @@
 
 ![image-20221105170022502](C:\Users\everloom\AppData\Roaming\Typora\typora-user-images\image-20221105170022502.png)
 
-- When choosing the specific program, here we always set a basic/**root** **SHELL** program for each terminal. And using this shell, we can excute other user level program.
+- When choosing the specific program, here we always set a basic/**root** **SHELL** program for each terminal. And using this shell, we can execute other user level program.
 - For checkpoint 2&3, there is only: **One terminal == one shell + one user program == Two PCB**
 - [15个cmd命令，每个windows用户都应该知道|服务器|管理器|ipconfig_网易订阅 (163.com)](https://www.163.com/dy/article/HKMMQARI0553X5CR.html)
 - 

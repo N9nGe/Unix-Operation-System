@@ -130,6 +130,7 @@ void general_protection_fault_exception () {
 
 void page_fault_exception () {
     exception_handler_n (EXCEPTION_14);
+    // printf("page fault || ");
 }
 
 void reserved1_exception () {
@@ -252,7 +253,7 @@ void idt_init () {
     add_intr_handler_setup(RTC_INTR_NUM);
 
     // add system call to the IDT at 0x80
-    SET_IDT_ENTRY(idt[SYS_CALL_NUM], system_call_handler);
+    SET_IDT_ENTRY(idt[SYS_CALL_NUM], syscall_handler);
     idt[SYS_CALL_NUM].dpl = 3;
     idt[SYS_CALL_NUM].present = 1;
     idt[SYS_CALL_NUM].reserved3 = 1;

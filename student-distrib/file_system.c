@@ -1,9 +1,9 @@
 #include "file_system.h"
 
-static data_block_t * data_block_ptr;
-static inode_t * inode_ptr;
-static dentry_t * dentry_ptr;
-static boot_block_t * boot_block_ptr; 
+data_block_t * data_block_ptr;
+inode_t * inode_ptr;
+dentry_t * dentry_ptr;
+boot_block_t * boot_block_ptr; 
 static tmp_pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
@@ -245,8 +245,8 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
         printf("%c", buf[i]);
     }
     
-//     return bytes_read;
-// }
+    return bytes_read;
+}
 
 /* 
  *  file_write
