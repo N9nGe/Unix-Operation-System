@@ -176,6 +176,27 @@ int32_t execute (const uint8_t* command){
     return 0;
 }
 
+/* asm voliate workable:
+
+   asm volatile(
+        "pushl %0;" 
+        "pushl %1;"
+        "pushfl;"
+        "pushl %2;"
+        "pushl %3;"
+        "IRET;"
+        :
+        : "r" (user_data_segment), "r" (esp), "r" (user_code_segment), "r" (eip)
+        : "cc", "memory", "eax"
+    );
+is enough for syscall 
+
+
+
+*/
+
+
+
 /* halt(uint8_t status)
  * Description: system call halt
  * Inputs: uint8_t status
