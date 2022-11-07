@@ -7,6 +7,7 @@
 #include "linkage/interrupt_link.h"
 #include "linkage/syscall_link.h"
 #include "syscall.h"
+volatile int exception_flag = 0;
 
 // exceptions provided by https://wiki.osdev.org/Exceptions
 // strings that will be displayed by the exception handler
@@ -55,7 +56,9 @@ char * exception_output[EXCEPTION_19 + 1] = {
 void exception_handler_n (unsigned int n) {
     clear();
     printf ("===============   %s    ===============\n  ",exception_output[n]);
+    exception_flag = 1;
     sys_halt((uint8_t)HANDLER_MAGIC); // Use syshalt to support exception now
+    // while(1); // Previous ending
     
 }
 

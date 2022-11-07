@@ -155,8 +155,8 @@ void keyboard_interrupt_handler(){
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
                     terminal_count = keybuf_count +1;
-                    if(terminal_count == KEY_BUF_SIZE - 1) {
-                        keyboard_buf[keybuf_count+1] = '\n';
+                    if(terminal_count == KEY_BUF_SIZE - 2) {
+                        keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }

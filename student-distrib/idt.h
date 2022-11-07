@@ -28,8 +28,9 @@
 #define RTC_INTR_NUM            0x28
 #define SYS_CALL_NUM            0x80
 
-#define HANDLER_MAGIC 256
+#define HANDLER_MAGIC 255
 
+extern volatile int exception_flag;
 // helper function for exception handler
 void exception_handler_n (unsigned int n);
 

@@ -108,7 +108,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     int32_t buf_length = strlen(buf);
     const char* char_buf = buf; 
     // copy nbytes from the buffer to the terminal 
-    for (index = 0; index < buf_length; index++) {
+    for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
 

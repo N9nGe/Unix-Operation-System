@@ -412,7 +412,7 @@ void terminal_test(){
 		}
 		buf[cnt] = '\0';
     	terminal_write (1, "Hello, ",strlen("Hello, "));
-    	test2 = terminal_write (1, buf,strlen(buf));
+    	test2 = terminal_write (1, buf,1000);
 		printf("The number of bytes is write: %d\n", test2);
 
     }

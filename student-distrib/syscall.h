@@ -8,6 +8,7 @@
 #include "paging.h"
 #include "devices/RTC.h"
 #include "devices/terminal.h"
+#include "idt.h"
 
 
 #define USER_PROGRAM_IMAGE_START     0x08048000
@@ -23,6 +24,7 @@
 #define USER_PROGRAM_IMAGE_OFFSET    0x48000
 #define AVOID_PAGE_FAULT             4
 #define SPACE                        0x20
+
 
 
 // system execute

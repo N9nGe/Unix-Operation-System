@@ -140,6 +140,8 @@ Description:
     Testing hello won't print \n at the end, which cause 
     'name' attached with nextline 391OS>
 Solution:
+    it is a mix problem with sys_execute, terminal_Read and terminal_write
+    We spent a long time but 
     
 
 <--------------------------------------------------------->

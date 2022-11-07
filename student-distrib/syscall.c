@@ -137,7 +137,10 @@ int32_t sys_open (const uint8_t* filename) {
     /* select bit */
     fd = find_next_fd();
     /*test function used for read and close*/  
-    if (fd < FD_MIN || fd > FD_MAX) return SYSCALL_FAIL;
+    if (fd < FD_MIN || fd > FD_MAX){
+        printf("open failed\n");
+        return SYSCALL_FAIL;
+    }
 
     // If failed to open the file, quit it
     if (file_open (filename) != 0) {
@@ -195,6 +198,8 @@ int32_t sys_close (int32_t fd) {
         return 0;
     }
     pcb_1 -> fd_entry[fd].inode_num = 0;
+    pcb_1 -> fd_entry[fd].fot_ptr = NULL;
+    pcb_1 -> fd_entry[fd].filetype = 0;
     pcb_1 -> fd_entry[fd].file_pos = 0;
     pcb_1 -> fd_entry[fd].flag = 0;
     return 0;
@@ -366,6 +371,10 @@ int32_t sys_halt(uint8_t status){
     // get current pcb
     int i;
     uint32_t return_status = (uint32_t) status;
+    if (exception_flag == 1) {
+        return_status = 256;
+        exception_flag = 0;
+    }
     cli();
     pcb_t* pcb = find_pcb();
     
@@ -379,7 +388,13 @@ int32_t sys_halt(uint8_t status){
     }
     // close stdin and stdout
     pcb->fd_entry[0].flag = 0;
+    pcb->fd_entry[0].file_pos = 0;
+    pcb->fd_entry[0].inode_num = 0;
+    pcb->fd_entry[0].fot_ptr = NULL;
     pcb->fd_entry[1].flag = 0;
+    pcb->fd_entry[1].file_pos = 0;
+    pcb->fd_entry[1].inode_num = 0;
+    pcb->fd_entry[1].fot_ptr = NULL;
     pcb->active = 0;
     // restore parent paging
     page_halt(pcb->parent_id);
