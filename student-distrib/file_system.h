@@ -60,6 +60,13 @@ typedef struct fd_entry_t {
     int  filetype;          // file , used for selecting specific type
 } fd_entry_t;
 
+typedef struct tmp_pcb {
+    uint32_t fot_ptr;       // file operations jump table pointer
+    uint32_t inode_num;     // inode number for this file
+    uint32_t file_pos;      // position within the file
+    uint32_t flag;         // 1 indicates in-use; 0 indicates unused
+} tmp_pcb_t;
+
 
 void file_system_init(uint32_t* fs_start);
 

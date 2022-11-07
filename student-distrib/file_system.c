@@ -4,6 +4,7 @@ static data_block_t * data_block_ptr;
 static inode_t * inode_ptr;
 static dentry_t * dentry_ptr;
 static boot_block_t * boot_block_ptr; 
+static tmp_pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
 /* 
@@ -206,10 +207,15 @@ int file_open(const uint8_t* fname, fd_entry_t * fd_entry) {
     if (read_dentry_by_name (fname, &tmp_dentry) != 0){     // check if read dentry succeeded
         return -1;
     }
-    
+    printf("%u\n", tmp_dentry.inode_num);
     fd_entry -> inode_num = tmp_dentry.inode_num; 
     fd_entry -> flag = 1;     // set to in-use
     fd_entry -> filetype = tmp_dentry.filetype;
+    temp_pcb.inode_num = tmp_dentry.inode_num; 
+    temp_pcb.flag = 1;     // set to in-use
+
+    printf("%u\n", fd_entry->inode_num);
+
     return 0;
 }
 
@@ -228,13 +234,14 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     unsigned length;
     uint32_t bytes_read;
     // if (fd < 2 || fd > 7) return -1;
-    // bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
-    // length = inode_ptr[temp_pcb.inode_num].length;
+    //printf("%u", buf[0]);
+    bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
+    length = inode_ptr[temp_pcb.inode_num].length;
     if ((unsigned) nbytes > length) {
         nbytes = length;
     }
     //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
-    for (i = 0; i < nbytes; i++) {
+    for (i = 0; i < 1000; i++) {
         printf("%c", buf[i]);
     }
     
@@ -262,6 +269,7 @@ int file_write() {
  *  SIDE EFFECTS: none
  */
 int file_close(int32_t fd) {
+    temp_pcb.flag = 0;     // set to unused
     return 0;
 }
 
@@ -292,6 +300,7 @@ int dir_open() {
 uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
+    printf("dir_read");
     // if (fd < 2 || fd > 7) return -1;
     strncpy_unsigned(buf, boot_block_ptr->dir_entries[temp_position].filename, FILENAME_LEN);
     bytes_copied = strlen_unsigned(buf);

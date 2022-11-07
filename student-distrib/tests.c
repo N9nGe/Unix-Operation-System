@@ -636,17 +636,23 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 }
 /* Checkpoint 3 tests */
 
+void test_syscall_linkage() {
+	asm volatile (
+	"movl $0x01,%eax 		;"
+	"INT $0x80				;"
+	);
+} 
+
 void test_sys_open() {
 	int ret;
+	// ret = sys_open ("rtc");
+	// ret = sys_open ("cat");
+	// ret = sys_open ("fsdir");
 	ret = sys_open ("rtc");
-	ret = sys_open ("cat");
-	ret = sys_open ("fsdir");
 	ret = sys_open("frame0.txt");
 
-
-	uint8_t temp_buf[1000];
-	// sys_read(0, temp_buf, LARGE_BUF_SIZE);
-	sys_read(test_fd,temp_buf,1000);
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	sys_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
 void test_sys_handler(){

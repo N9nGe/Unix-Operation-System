@@ -1,9 +1,4 @@
 #include "syscall.h"
-#include "lib.h"
-#include "types.h"
-#include "devices/RTC.h"
-#include "devices/terminal.h"
-#include "file_system.h"
 
 /*Local constant*/
 #define FAIL        -1
@@ -42,6 +37,23 @@ file_op_t dir_op = {
     .close = dir_close,
 };
 
+// stdin file operation (using terminal stuff)
+file_op_t terminal_stdin = {
+    .open = terminal_open,
+    .read = terminal_read,
+    .write = NULL,
+    .close = NULL,
+};
+
+// stdout file operation (using terminal stuff)
+file_op_t terminal_stdout = {
+    .open = terminal_open,
+    .read = NULL,
+    .write = terminal_write,
+    .close = NULL,
+};
+
+
 pcb_t pcb_1; // modify to the 
 // file_op_t fop_table[2];  // Whether to use 
 int test_fd;
@@ -57,28 +69,39 @@ int32_t sys_halt(void){
 };
 
 void pcb_init (){
-    int i;
-    pcb_1.pid = 0;         // Current Process id
-    pcb_1.parent_id = 0;   // Father process
-    pcb_1.fd = 0;
-    pcb_1.saved_esp = 0;
-    pcb_1.saved_ebp = 0;
-    pcb_1.active = 0;
-    fd_entry_t default_fd_entry;
-    default_fd_entry.inode_num = 0;
-    default_fd_entry.file_pos = 0;
-    default_fd_entry.flag = 0;
-    for (i = 0; i < 6; i++)
-    {
-        /* code */
-        pcb_1.fd_entry[i] = default_fd_entry;
-    }
-    
+    fd_entry_init(pcb_1.fd_entry);
 }
+
+/* fd_entry_init(fd_entry_t* fd_entry)
+ * Description: initilize the given fd array and fill the stdin, stdout stuff
+ * Inputs: fd_entry_t* fd_entry -- the fd array need to be initilize
+ * Return Value: 0 - success; -1 - fail
+ * Function: initilize the given fd array and fill the stdin, stdout stuff
+ */
+int32_t fd_entry_init(fd_entry_t* fd_entry) {
+    if (fd_entry == NULL) {
+        return -1;
+    }
+    uint8_t i;
+    for (i= 0; i < 8; i++) {
+        fd_entry[i].file_pos = 0;
+        fd_entry[i].flag = 0;
+        fd_entry[i].fot_ptr = NULL;
+        fd_entry[i].inode_num = 0;
+        fd_entry[i].filetype = 0;
+    }
+    fd_entry[0].flag = 1;
+    fd_entry[0].fot_ptr = &terminal_stdin;
+    fd_entry[1].flag = 1;
+    fd_entry[1].fot_ptr = &terminal_stdout;
+
+    return 0;
+}
+
 
 int32_t find_next_fd() {
     int i;
-    for (i = 0; i < 6; i++) {
+    for (i = 2; i < 8; i++) {
         if (pcb_1.fd_entry[i].flag == 0) {
             return i;
         }
@@ -116,48 +139,49 @@ int32_t sys_open (const uint8_t* filename) {
     new_fd_entry.inode_num = 0;
     new_fd_entry.file_pos = 0;
     new_fd_entry.flag = 1;
-
     fd = find_next_fd();
-    int print_fd  = fd+2;
-    printf("current fd is %d || ",print_fd);
-    /*test function used for read and close*/
-    if ( filename == "frame0.txt")
-    {
-        test_fd = fd;
-    }
-    
-    if (fd <0) return FAIL;
+    // int print_fd  = fd+2;
+    //printf("current fd is %d || ",print_fd);
+    /*test function used for read and close*/  
+    if (fd <2) return FAIL;
 
     // If failed to open the file, quit it
     if (file_open (filename, &new_fd_entry) != 0) {
         printf("2 failed to open %s\n",filename);
         return FAIL;
-    }else{
-        for (i = 0; i < 6; i++) {
-            if (pcb_1.fd_entry[i].flag == 0) {
-                // set function operation table pointer
-                if (strncmp_unsigned("rtc", filename, 32) == 0) {
+    } else {
+        if (fd > 0) {
+            //printf("%u x\n", new_fd_entry.filetype);
+            switch (new_fd_entry.filetype) {
+                case 0:
                     new_fd_entry.fot_ptr = (&rtc_op);
-                } else {                    
+                    printf("rtc\n");
+                    break;
+                case 1:
+                    new_fd_entry.fot_ptr = (&dir_op);
+                    printf("dir\n");
+                    break;
+                case 2:
                     new_fd_entry.fot_ptr = (&file_op);
-                }
-                pcb_1.fd_entry[fd] = new_fd_entry;
-
-                break;
+                    printf("file\n");
+                    break;
             }
-            // TODO directory case? file type decision
-        }
-
-        
-        printf (" %s found, inode number is %u\n", filename, pcb_1.fd_entry[i].inode_num); // debug usage
-
-        // file_type = new_fd_entry.filetype;
-        // new_fd_entry.fot_ptr = fop_table[file_type];
-        // pcb_1.fd_entry[fd] = new_fd_entry;
-        
-
-        return 0;
+            pcb_1.fd_entry[fd] = new_fd_entry;
+        } 
+        // TODO directory case? file type decision
     }
+
+    
+    //printf (" %s found, inode number is %u\n", filename, pcb_1.fd_entry[fd].inode_num); // debug usage
+    //printf (" %u\n", fd); // debug usage
+
+    // file_type = new_fd_entry.filetype;
+    // new_fd_entry.fot_ptr = fop_table[file_type];
+    // pcb_1.fd_entry[fd] = new_fd_entry;
+    
+
+    return 0;
+    
 }
 
 /* 
@@ -173,7 +197,7 @@ int32_t sys_close (int32_t fd) {
     if (fd < 2 || fd > 7) {
         return -1;
     }
-    int32_t idx = fd - 2;
+    int32_t idx = fd;
     if (pcb_1.fd_entry[idx].flag == 0) {
         return 0;
     }
@@ -194,7 +218,7 @@ int32_t sys_close (int32_t fd) {
  *        - returns the number of bytes read.
  *  SIDE EFFECTS: none
  */
-int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
+int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
     printf ("sys_read called\n");
     // if((fd < FD_MIN || fd > FD_MAX ) ||
     //    (buf == NULL || nbytes < 0  ) ||
@@ -205,9 +229,9 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //     printf("failed to read fd: %d\n",fd);
     //     return FAIL;
     // }
-    printf("Reading fd: %d\n",fd+2);
+    printf("Reading fd: %d\n",fd);
   /*Function code is one line the return value */
-    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->read))(fd + 2, buf, nbytes); 
+    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->read))(fd, buf, nbytes); 
     return ret;
 }
 /* 
@@ -222,7 +246,7 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  *  RETURN VALUE: none
  *  SIDE EFFECTS:none
  */
-int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
+int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
     printf ("sys_write called\n");
     return 0;
 //     if((fd < FD_MIN || fd > FD_MAX ) ||
@@ -235,7 +259,7 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
 //     }
 
 //   /*Function code is one line the return value */
-    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->write))(fd + 2, buf, nbytes); 
+    int32_t ret = (*(pcb_1.fd_entry[fd].fot_ptr->write))(fd, buf, nbytes); 
     return ret;
 }
 
