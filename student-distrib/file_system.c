@@ -1,10 +1,11 @@
 #include "file_system.h"
+#include "syscall.h"
 
-static data_block_t * data_block_ptr;
-static inode_t * inode_ptr;
-static dentry_t * dentry_ptr;
-static boot_block_t * boot_block_ptr; 
-static pcb_t temp_pcb;  // create a temporary pcb for 3.2
+data_block_t * data_block_ptr;
+inode_t * inode_ptr;
+dentry_t * dentry_ptr;
+boot_block_t * boot_block_ptr; 
+static tmp_pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
 /* 
@@ -197,19 +198,22 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *  RETURN VALUE: -1 if failed. Otherwise, return 0
  *  SIDE EFFECTS: none
  */
-int file_open(const uint8_t* fname) { 
+//int file_open(const uint8_t* fname, fd_entry_t * fd_entry) { 
+int file_open(const uint8_t* fname) {
+    printf("opening %s \n", fname);
+    // if( fname == NULL || fd_entry == NULL) { return -1;}
     if (strlen_unsigned(fname) > FILENAME_LEN){    // return failed if file name is larger than 32B
         printf("File open failed!");
         return -1;
     }
-    dentry_t tmp_dentry;
-    if (read_dentry_by_name (fname, &tmp_dentry) != 0){     // check if read dentry succeeded
-        return -1;
-    }
+    // dentry_t tmp_dentry;
+    // if (read_dentry_by_name (fname, &tmp_dentry) != 0){     // check if read dentry succeeded
+    //     return -1;
+    // }
+    // printf("%u\n", tmp_dentry.inode_num);
     
-    temp_pcb.inode_num = tmp_dentry.inode_num; 
-    temp_pcb.flag = 1;     // set to in-use
-
+    // temp_pcb.inode_num = tmp_dentry.inode_num; 
+    // temp_pcb.flag = 1;     // set to in-use
     return 0;
 }
 
@@ -228,15 +232,19 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
     unsigned length;
     uint32_t bytes_read;
     // if (fd < 2 || fd > 7) return -1;
-    bytes_read = read_data (temp_pcb.inode_num, 0, buf, nbytes);
-    length = inode_ptr[temp_pcb.inode_num].length;
+    fd_entry_t fd_entry = current_pcb_pointer->fd_entry[fd];
+    //printf("%u", buf[0]);
+    length = inode_ptr[fd_entry.inode_num].length;
+    if (fd_entry.file_pos >= length) 
+        return 0;
+    bytes_read = read_data (fd_entry.inode_num, fd_entry.file_pos, buf, nbytes);
     if ((unsigned) nbytes > length) {
         nbytes = length;
     }
     //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
-    for (i = 0; i < nbytes; i++) {
-        printf("%c", buf[i]);
-    }
+    // for (i = 0; i < 1000; i++) {
+    //     printf("%c", buf[i]);
+    // }
     
     return bytes_read;
 }
@@ -249,7 +257,7 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
  *  RETURN VALUE: always -1
  *  SIDE EFFECTS: none
  */
-int file_write() {
+int file_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
     return -1;
 }
 
@@ -262,7 +270,6 @@ int file_write() {
  *  SIDE EFFECTS: none
  */
 int file_close(int32_t fd) {
-    temp_pcb.flag = 0;     // set to unused
     return 0;
 }
 
@@ -274,9 +281,10 @@ int file_close(int32_t fd) {
  *  RETURN VALUE: always 0 for now
  *  SIDE EFFECTS: none
  */
-int dir_open() {
+int dir_open(const uint8_t* fname) {
     // temporary for 3.2
     temp_position = 0;
+    printf("dir open");
     return 0;
 }
 
@@ -290,15 +298,18 @@ int dir_open() {
  *  RETURN VALUE: number of bytes copied
  *  SIDE EFFECTS: read the directory entry name into buf
  */
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
+uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     uint32_t bytes_copied;
+    //printf("dir_read");
     // if (fd < 2 || fd > 7) return -1;
-    strncpy_unsigned(buf, boot_block_ptr->dir_entries[temp_position].filename, FILENAME_LEN);
-    bytes_copied = strlen_unsigned(buf);
+    // copy filename of the current dentry to buffer
+    uint32_t curr_pos = current_pcb_pointer->fd_entry[fd].file_pos;
+    strncpy_unsigned((uint8_t *) buf, boot_block_ptr->dir_entries[curr_pos].filename, FILENAME_LEN);
+    bytes_copied = strlen_unsigned((uint8_t *)buf);
 
-    if (temp_position < boot_block_ptr->dentry_count)
-        temp_position++;
+    if (current_pcb_pointer->fd_entry[fd].file_pos < boot_block_ptr->dentry_count)
+        current_pcb_pointer->fd_entry[fd].file_pos++;
 
     return bytes_copied;   // return bytes copied 
 }
@@ -311,7 +322,7 @@ uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
  *  RETURN VALUE: always -1 for now
  *  SIDE EFFECTS: none
  */
-int dir_write() {
+int dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
     return -1;
 }
 
@@ -323,7 +334,7 @@ int dir_write() {
  *  RETURN VALUE: always 0 for now
  *  SIDE EFFECTS: none
  */
-int dir_close() {
+int dir_close(int32_t fd) {
     return 0;
 }
 

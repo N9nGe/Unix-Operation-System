@@ -26,6 +26,7 @@ void paging_init() {
 
     // set up the read_write, present signal for the second page directory (kernel-4mb page)
     // and give the corresponding page table base address
+    // kernel is in the second entry of the directory
     page_directory[1].pd_mb.present = 1;    
     page_directory[1].pd_mb.read_write = 1;
     page_directory[1].pd_mb.page_size = 1;  // change to 4mb page 
@@ -43,12 +44,12 @@ void paging_init() {
 
         /* allow the 4mb page */
         "movl %%cr4, %%eax;"
-        "orl $0x00000010, %%eax;"
+        "orl $0x00000010, %%eax;" /*PAGE_4MB_ENABLE_MASK*/ 
         "movl %%eax, %%cr4;"
 
         /* enable Paging */
         "movl %%cr0, %%eax;"
-        "orl $0x80000000, %%eax;"
+        "orl $0x80000000, %%eax;" /*PAGING_ENABLE_MASK*/ 
         "movl %%eax, %%cr0;"
         :                            /* output */
         :"r"(page_directory)         /* input */

@@ -1,6 +1,10 @@
+#ifndef FILE_SYSTEM_H
+#define FILE_SYSTEM_H
+
 #include "x86_desc.h"
 #include "lib.h"
 #include "types.h"
+
 
 #define FILENAME_LEN            32
 #define DATA_BLOCK_SIZE         1023
@@ -27,7 +31,7 @@ typedef struct inode {
 
 typedef struct dentry {
     uint8_t filename[FILENAME_LEN];
-    uint32_t filetype;
+    uint32_t filetype;      // 0 for 
     uint32_t inode_num;     // inode number
     uint8_t reserved[DENTRY_RESERVED];
 } dentry_t;
@@ -40,12 +44,33 @@ typedef struct boot_block {
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
 
-typedef struct pcb {
+typedef struct file_op_t{
+    int32_t (*open)(const uint8_t* filename);
+    int32_t (*close)(int32_t fd);
+    int32_t (*read)(int32_t fd, void* buf,  int32_t nbytes);
+    int32_t (*write)(int32_t fd, const void* buf, int32_t nbytes);
+}file_op_t;
+
+typedef struct fd_entry_t {
+    file_op_t* fot_ptr;          // file operations jump table pointer
+    uint32_t inode_num;         // inode number for this file
+    uint32_t file_pos;          // position within the file
+    uint32_t flag;              // 1 indicates in-use; 0 indicates  unused
+    int  filetype;          // file , used for selecting specific type
+} fd_entry_t;
+
+typedef struct tmp_pcb {
     uint32_t fot_ptr;       // file operations jump table pointer
     uint32_t inode_num;     // inode number for this file
     uint32_t file_pos;      // position within the file
     uint32_t flag;         // 1 indicates in-use; 0 indicates unused
-} pcb_t;
+} tmp_pcb_t;
+
+
+extern data_block_t * data_block_ptr;
+extern inode_t * inode_ptr;
+extern dentry_t * dentry_ptr;
+extern boot_block_t * boot_block_ptr; 
 
 void file_system_init(uint32_t* fs_start);
 
@@ -59,17 +84,18 @@ int file_open(const uint8_t* fname);
 
 uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
 
-int file_write();
+int file_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
 
 int file_close(int32_t fd);
 
-int dir_open();
+int dir_open(const uint8_t* fname);
 
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
 
-int dir_write();
+int dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
 
-int dir_close();
+int dir_close(int32_t fd);
 
 void files_ls();
 
+#endif /* FILE_SYSTEM_H */

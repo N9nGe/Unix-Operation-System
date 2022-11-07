@@ -8,6 +8,7 @@
 #include "devices/RTC.h"
 #include "devices/terminal.h"
 #include "file_system.h"
+#include "syscall.h"
 
 #define PASS 1
 #define FAIL 0
@@ -31,16 +32,16 @@ static inline void assertion_failure(){
 	asm volatile("int $15");
 }
 
-void file_system_init(uint32_t* fs_start);
-int file_open(const uint8_t* fname);
-uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
-int file_write();
-int file_close(int32_t fd);
-int dir_open();
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
-int dir_write();
-int dir_close();
-void files_ls();
+// void file_system_init(uint32_t* fs_start);
+// int file_open(const uint8_t* fname);
+// uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+// int file_write();
+// int file_close(int32_t fd);
+// int dir_open();
+// uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+// int dir_write();
+// int dir_close();
+// void files_ls();
 
 
 /* Checkpoint 1 tests */
@@ -346,6 +347,8 @@ void rtc_set_freq_test() {
 /****** Terminal TESTS ******/
 //CP2:
 void fully_functional_keyboard_test(){
+	// int terminal_mode = 1; // The control boolean to set the termianl output mode
+
 	printf("\n\n\n=== Keyboard Test===\n");
 	printf("0. There is another fully functional terminal test\n");
 	printf("1. For keyboard input, there is two kind of ideas on the input limit \n");
@@ -407,18 +410,18 @@ void terminal_test(){
 
 
 
-/* File System Tests */
+// /* File System Tests */
 
-/* filesys_ls_test()
- * Inputs: none
- * Return Value: none
- * Function: test file list function
- */
-void filesys_ls_test() {
-	clear();
-    dir_open();
-    files_ls();
-}
+// /* filesys_ls_test()
+//  * Inputs: none
+//  * Return Value: none
+//  * Function: test file list function
+//  */
+// void filesys_ls_test() {
+// 	clear();
+//     dir_open();
+//     files_ls();
+// }
 
 /* filesys_frame0_test()
  * Inputs: none
@@ -428,7 +431,7 @@ void filesys_ls_test() {
 void filesys_frame0_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *) "frame0.txt");
+    //file_open((uint8_t *) "frame0.txt");
     file_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
@@ -440,7 +443,7 @@ void filesys_frame0_test() {
 void filesys_cat_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *) "cat");
+    //((uint8_t *) "cat");
     file_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
@@ -452,7 +455,7 @@ void filesys_cat_test() {
 void filesys_long_name_fail_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *)  "verylargetextwithverylongname.txt");
+    //file_open((uint8_t *)  "verylargetextwithverylongname.txt");
     file_read((uint32_t) 2, temp_buf, LARGE_BUF_SIZE);
 }
 
@@ -464,7 +467,7 @@ void filesys_long_name_fail_test() {
 void filesys_long_name_success_test() {
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-    file_open((uint8_t *)  "verylargetextwithverylongname.tx");
+    //file_open((uint8_t *)  "verylargetextwithverylongname.tx");
     file_read((uint32_t) 2, temp_buf, (uint32_t) LONG_FILE_SIZE);
 }
 
@@ -475,7 +478,7 @@ void filesys_long_name_success_test() {
  */
 void filesys_file_open_failed_test(){
 	clear();
-	file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
+	//file_open((uint8_t *)  "thisisasuperultrareallyreallylongfilename");
 }
 
 /* filesys_file_read_half_test()
@@ -486,25 +489,25 @@ void filesys_file_open_failed_test(){
 void filesys_file_read_half_test(){
 	uint8_t temp_buf[LARGE_BUF_SIZE];
 	clear();
-	file_open((uint8_t *) "frame0.txt");
+	//file_open((uint8_t *) "frame0.txt");
 	file_read((uint32_t) 0, temp_buf, (uint32_t) HALF_FRAME0);
 }
 
-/* filesys_dir_read_test()
- * Inputs: none
- * Return Value: none
- * Function: test dir_read that read file names one by one in the directory
- */
-void filesys_dir_read_test(){
-	clear();
-	uint32_t idx;
-	uint8_t temp_buf[LARGE_BUF_SIZE];
-	dir_open();
-	for (idx = 0; idx < FILE_COUNT; idx++){
-		dir_read((uint32_t) 0, temp_buf, (uint32_t) FILENAME_LEN);
-		printf("file name: %s\n", temp_buf);
-	}
-}
+// /* filesys_dir_read_test()
+//  * Inputs: none
+//  * Return Value: none
+//  * Function: test dir_read that read file names one by one in the directory
+//  */
+// void filesys_dir_read_test(){
+// 	clear();
+// 	uint32_t idx;
+// 	uint8_t temp_buf[LARGE_BUF_SIZE];
+// 	dir_open();
+// 	for (idx = 0; idx < FILE_COUNT; idx++){
+// 		dir_read((uint32_t) 0, temp_buf, (uint32_t) FILENAME_LEN);
+// 		printf("file name: %s\n", temp_buf);
+// 	}
+// }
 
 
 //  RTC driver test 
@@ -632,6 +635,49 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 	return result;
 }
 /* Checkpoint 3 tests */
+
+void test_syscall_linkage() {
+	asm volatile (
+	"movl $0x01,%eax 		;"
+	"INT $0x80				;"
+	);
+} 
+/* test_sys_open
+ * - this test function is used for early test 
+ * - Since we improves pcb from local static to dynamic generated,
+ * - This test function can't be used anymore
+ * - Please don't try to use it!
+ */
+void test_sys_open() {
+	printf("start testing open\n");
+	int ret;
+	// sys_execute((uint8_t*)"testprint");
+	// ret = sys_open (".");
+	ret = sys_open ("cat");
+	// ret = sys_open ("fsdir");
+	// ret = sys_open ("rtc");
+	// ret = sys_open("frame0.txt");
+
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	sys_read(2, temp_buf, LARGE_BUF_SIZE);
+}
+
+
+
+void execute_test() {
+	printf("start testing execute\n");
+	sys_execute((uint8_t*)"shell");
+	// sys_execute((uint8_t*)"testprint");
+	// sys_execute((uint8_t*)"hello ");
+	// sys_execute((uint8_t*)"pingpong ");
+	// sys_execute((uint8_t*)"fish ");
+	// sys_execute((uint8_t*)"shell ");
+
+
+}
+
+
+
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
@@ -639,11 +685,18 @@ int rtc_invalid_input_frequency_test(uint32_t freq) {
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
+	/***** CP3 TESTS *****/
+	//printf("---------------TEST CP3 START--------------\n");
+	// Here we delete those out of used test, leaving the excute along
+	execute_test();
+
+	// printf("---------------TEST CP3 END--------------\n");
+
 
 	/***** CP2 TESTS *****/
-	printf("---------------TEST CP2 START--------------\n");	
-	terminal_mode = 1; // The control boolean to set the termianl output mode
-
+	//printf("---------------TEST CP2 START--------------\n");	
+	// terminal_mode = 1; // The control boolean to set the termianl output mode
+	// execute_test();
 	/*Test for rtc_driver*/
 	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
 	// TEST_OUTPUT("rtc_write_test", rtc_write_test());

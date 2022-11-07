@@ -1,11 +1,16 @@
-/* Assembly_link.h - Assembly linkage for device and idt 
- * -- improves to syscall
- * vim:ts=4 noexpandtab
- */
-#ifndef _INTERRUPT_LINK_H_
-#define _INTERRUPT_LINK_H_
+// /* syscall_link.h - system call linkage  
+//  * Tony -- 1 PCB
+//  * vim:ts=4 noexpandtab
+//  */
+// #ifndef _SYSCALL_LINK_H_
+// #define _SYSCALL_LINK_H_
 
-void rtc_handler_linkage();
-void keyboard_handler_linkage();
+#include"../types.h"
+#include"../syscall.h"
 
-#endif
+    #ifndef ASM_SL
+
+    extern void syscall_handler();
+    #endif
+
+//#endif /* _SYSCALL_LINK_H_*/

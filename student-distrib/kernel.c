@@ -13,6 +13,7 @@
 #include "devices/terminal.h"
 #include "paging.h"
 #include "file_system.h"
+#include "syscall.h"
 
 #define RUN_TESTS
 
@@ -151,9 +152,10 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     paging_init();
+
     terminal_init();
     keyboard_init();
-
+    
     rtc_init();
     rtc_set_freq(2);
     /* Enable interrupts */
