@@ -245,8 +245,8 @@ uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
         printf("%c", buf[i]);
     }
     
-    return bytes_read;
-}
+//     return bytes_read;
+// }
 
 /* 
  *  file_write
@@ -269,7 +269,6 @@ int file_write() {
  *  SIDE EFFECTS: none
  */
 int file_close(int32_t fd) {
-    temp_pcb.flag = 0;     // set to unused
     return 0;
 }
 

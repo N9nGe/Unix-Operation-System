@@ -37,7 +37,7 @@ void terminal_reset(terminal_t terminal){
 }
 
 /* 
- *  int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes)
+ *  int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
  *  DESCRIPTION: terminal buffer read contents from kb_buf
  *  INPUTS: 
  *     fd     -- file descripter buffer 
@@ -46,7 +46,7 @@ void terminal_reset(terminal_t terminal){
  *  RETURN VALUE:
  *     number of bytes successfully copied
  */
-int32_t terminal_read(int32_t fd, void* buf, uint32_t nbytes){
+int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     //TODO: what the relationship between nbytes and kb_count?
     // check whether the fd is valid
     if (fd < 2 || fd > 7){

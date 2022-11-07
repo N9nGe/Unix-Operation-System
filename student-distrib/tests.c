@@ -410,18 +410,18 @@ void terminal_test(){
 
 
 
-/* File System Tests */
+// /* File System Tests */
 
-/* filesys_ls_test()
- * Inputs: none
- * Return Value: none
- * Function: test file list function
- */
-void filesys_ls_test() {
-	clear();
-    dir_open();
-    files_ls();
-}
+// /* filesys_ls_test()
+//  * Inputs: none
+//  * Return Value: none
+//  * Function: test file list function
+//  */
+// void filesys_ls_test() {
+// 	clear();
+//     dir_open();
+//     files_ls();
+// }
 
 /* filesys_frame0_test()
  * Inputs: none
@@ -493,21 +493,21 @@ void filesys_file_read_half_test(){
 	file_read((uint32_t) 0, temp_buf, (uint32_t) HALF_FRAME0);
 }
 
-/* filesys_dir_read_test()
- * Inputs: none
- * Return Value: none
- * Function: test dir_read that read file names one by one in the directory
- */
-void filesys_dir_read_test(){
-	clear();
-	uint32_t idx;
-	uint8_t temp_buf[LARGE_BUF_SIZE];
-	dir_open();
-	for (idx = 0; idx < FILE_COUNT; idx++){
-		dir_read((uint32_t) 0, temp_buf, (uint32_t) FILENAME_LEN);
-		printf("file name: %s\n", temp_buf);
-	}
-}
+// /* filesys_dir_read_test()
+//  * Inputs: none
+//  * Return Value: none
+//  * Function: test dir_read that read file names one by one in the directory
+//  */
+// void filesys_dir_read_test(){
+// 	clear();
+// 	uint32_t idx;
+// 	uint8_t temp_buf[LARGE_BUF_SIZE];
+// 	dir_open();
+// 	for (idx = 0; idx < FILE_COUNT; idx++){
+// 		dir_read((uint32_t) 0, temp_buf, (uint32_t) FILENAME_LEN);
+// 		printf("file name: %s\n", temp_buf);
+// 	}
+// }
 
 
 //  RTC driver test 
@@ -659,6 +659,10 @@ void test_sys_handler(){
 	
 }
 
+
+void execute_test() {
+	execute((uint8_t*)"shell ");
+}
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
@@ -678,7 +682,8 @@ void launch_tests(){
 
 	/***** CP2 TESTS *****/
 	//printf("---------------TEST CP2 START--------------\n");	
-
+	terminal_mode = 1; // The control boolean to set the termianl output mode
+	execute_test();
 	/*Test for rtc_driver*/
 	// TEST_OUTPUT("rtc_open_read_close_test", rtc_open_read_close_test());
 	// TEST_OUTPUT("rtc_write_test", rtc_write_test());

@@ -158,7 +158,6 @@ void system_call_handler () {
     printf("system call");
 }
 
-
 /*
  * add_intr_handler_setup (unsigned int n)
  * DESCRIPTION: Change the struct of the corresponding
@@ -253,7 +252,7 @@ void idt_init () {
     add_intr_handler_setup(RTC_INTR_NUM);
 
     // add system call to the IDT at 0x80
-    SET_IDT_ENTRY(idt[SYS_CALL_NUM], syscall_handler);
+    SET_IDT_ENTRY(idt[SYS_CALL_NUM], system_call_handler);
     idt[SYS_CALL_NUM].dpl = 3;
     idt[SYS_CALL_NUM].present = 1;
     idt[SYS_CALL_NUM].reserved3 = 1;

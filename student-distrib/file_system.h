@@ -1,5 +1,5 @@
-#ifndef FS_H
-#define FS_H
+#ifndef FILE_SYSTEM_H
+#define FILE_SYSTEM_H
 
 #include "x86_desc.h"
 #include "lib.h"
@@ -44,7 +44,6 @@ typedef struct boot_block {
     dentry_t dir_entries[DENTRY_SIZE];
 } boot_block_t;
 
-/*Checkpoint 3*/
 typedef struct file_op_t{
     int32_t (*open)(const uint8_t* filename);
     int32_t (*close)(int32_t fd);
@@ -67,6 +66,11 @@ typedef struct tmp_pcb {
     uint32_t flag;         // 1 indicates in-use; 0 indicates unused
 } tmp_pcb_t;
 
+
+extern data_block_t * data_block_ptr;
+extern inode_t * inode_ptr;
+extern dentry_t * dentry_ptr;
+extern boot_block_t * boot_block_ptr; 
 
 void file_system_init(uint32_t* fs_start);
 
@@ -94,5 +98,4 @@ int dir_close();
 
 void files_ls();
 
-#endif /*FS_H*/
-
+#endif /* FILE_SYSTEM_H */

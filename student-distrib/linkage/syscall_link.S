@@ -9,7 +9,7 @@
 jump_table:
 		.long 0x0, sys_halt, sys_execute, sys_read, sys_write, sys_open, sys_close
 
-.text
+# .text
 
 .globl syscall_handler
 # return value: none

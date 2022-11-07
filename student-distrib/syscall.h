@@ -9,6 +9,10 @@
 #include "devices/RTC.h"
 #include "devices/terminal.h"
 
+#define USER_PROGRAM_IMAGE_START     0x08048000
+#define KERNEL_BOTTOM                0x00800000
+#define PROCESS_SIZE                 0X2000
+#define MAX_PCB_NUM     6
 
 //jump table file_ops struct
 // typedef struct file_ops{
@@ -30,6 +34,18 @@
     uint8_t active;
     fd_entry_t fd_entry[6];
 } pcb_t;*/
+
+// system execute
+int32_t execute (const uint8_t* command);
+
+// system halt
+int32_t halt(uint8_t status);
+
+// helper function
+void parse_arg(const uint8_t* command, uint8_t* filename);
+void paging_execute();
+void page_halt(uint32_t parent_id);
+
 
 // clearify everything in it
 typedef struct pcb_t {
@@ -67,3 +83,4 @@ int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes);
 
 
 #endif /* TESTS_H */
+
