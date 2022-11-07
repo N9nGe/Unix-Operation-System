@@ -110,7 +110,7 @@ int32_t find_next_fd() {
             return i;
         }
     }
-    return -1;
+    return SYSCALL_FAIL;
 }
 
 /* 
@@ -121,7 +121,7 @@ int32_t find_next_fd() {
  *  OUTPUTS: none
  *  RETURN VALUE: 
  *      FAIL    -- -1 
- *      SUCCESS -- fd
+ *      SUCCESS -- fd, the opened file descriptor number
  *  SIDE EFFECTS: none
  */
 int32_t sys_open (const uint8_t* filename) {
@@ -145,7 +145,7 @@ int32_t sys_open (const uint8_t* filename) {
     } else {
         dentry_t temp_dentry;
         if (read_dentry_by_name (filename, &temp_dentry) != 0){     // check if read dentry succeeded
-            return -1;
+            return SYSCALL_FAIL;
         }
         pcb_1->fd_entry[fd].inode_num = temp_dentry.inode_num;
         pcb_1->fd_entry[fd].file_pos = 0;
@@ -163,7 +163,7 @@ int32_t sys_open (const uint8_t* filename) {
                 case 2: // regular file type
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
-                default:
+                default:// defaultly set as regular to avoid problem
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
             }
@@ -213,15 +213,14 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     // if((fd < FD_MIN || fd > FD_MAX ) ||
-    //    (buf == NULL || nbytes < 0  ) ||
-    //    ((int)buf < USER_SPACE_START  || (int)buf + nbytes > USER_SPACE_END ) ||
-    //    (pcb_1.fd_entry[fd].flag == 0 ) ||
-    //    (pcb_1.fd_entry[fd].fot_ptr->read == NULL)
+    // //    (buf == NULL || nbytes < 0  ) ||
+    //    (pcb_1->fd_entry[fd].flag == 0 ) 
+    // //   || (pcb_1->fd_entry[fd].fot_ptr->read == NULL)
     // ){
-    //     printf("failed to read fd: %d\n",fd);
-    //     return FAIL;
+    //     // printf("failed to read fd: %d\n",fd);
+    //     return SYSCALL_FAIL;
     // }
-    //printf("Reading fd: %d\n",fd);
+    //printf("Reading fd: %d\n",fd); // debug
   /*Function code is one line the return value */
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->read))(fd, buf, nbytes); 
     return ret;

@@ -83,9 +83,9 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 
 int32_t file_open(const uint8_t* fname);
 
-int32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes);
 
-int32_t file_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
+int32_t file_write(int32_t fd, const void* buf, int32_t nbytes);
 
 int32_t file_close(int32_t fd);
 
@@ -93,7 +93,7 @@ int32_t dir_open(const uint8_t* fname);
 
 int32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
 
-int32_t dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes);
 
 int32_t dir_close(int32_t fd);
 

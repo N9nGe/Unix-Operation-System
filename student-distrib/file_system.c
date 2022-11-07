@@ -135,7 +135,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     uint32_t idx, i;
     uint32_t buf_idx = 0;   // stores where we are at in the buffer
     uint32_t block_idx;     // index to the data blocks
-    uint32_t bytes_read = 0;    // number of bytes read
+    int32_t bytes_read = 0;    // number of bytes read
     inode_t curr_inode = inode_ptr[inode];
     
     // loop through each data_block_num entry in the current inode
@@ -184,7 +184,7 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
             }
         }
     }
-    return bytes_read;
+    return (int32_t)bytes_read;
 }
 
 
@@ -227,10 +227,10 @@ int32_t file_open(const uint8_t* fname) {
  *  RETURN VALUE: number of bytes read; 0 if no byte is read
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
-int32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
+int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     // unsigned i; // not used
     unsigned length;
-    uint32_t bytes_read;
+    int32_t bytes_read;
     // if (fd < 2 || fd > 7) return -1;
     fd_entry_t fd_entry = current_pcb_pointer->fd_entry[fd];
     //printf("%u", buf[0]);
@@ -257,7 +257,7 @@ int32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes) {
  *  RETURN VALUE: always -1
  *  SIDE EFFECTS: none
  */
-int file_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
+int file_write(int32_t fd, const void* buf, int32_t nbytes) {
     return -1;
 }
 
@@ -300,7 +300,7 @@ int dir_open(const uint8_t* fname) {
  */
 int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
-    uint32_t bytes_copied;
+    int32_t bytes_copied;
     //printf("dir_read");
     // if (fd < 2 || fd > 7) return -1;
     // copy filename of the current dentry to buffer
@@ -322,7 +322,7 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
  *  RETURN VALUE: always -1 for now
  *  SIDE EFFECTS: none
  */
-int32_t dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes) {
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes) {
     return -1;
 }
 
