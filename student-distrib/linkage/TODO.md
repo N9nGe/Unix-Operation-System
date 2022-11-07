@@ -64,3 +64,38 @@ jump_table:
             }
             // if no fd left,  what to do ?
         }
+
+
+6. todo
+
+    asm volatile(
+        "xorl %%eax, %%eax;"
+        "movl %0, %%eax;"
+        "movw %%ax, %%ds;"
+        "pushl %0;" 
+        "pushl %1;"
+        "orl  $0x200, %%eflags;"
+        "pushfl;"
+        "pushl %2;"
+        "pushl %3;"
+        "IRET;"
+        :
+        : "r" (user_data_segment), "r" (esp), "r" (user_code_segment), "r" (eip)
+        : "cc", "memory", "eax"
+    );
+->
+
+    asm volatile(
+        "pushl %0;" 
+        "pushl %1;"
+        "pushfl;"
+        "pushl %2;"
+        "pushl %3;"
+        "IRET;"
+        :
+        : "r" (user_data_segment), "r" (esp), "r" (user_code_segment), "r" (eip)
+        : "cc", "memory", "eax"
+    );
+is enough for syscall 
+
+7. where is the terminal write and 
