@@ -15,7 +15,6 @@
 #define PROCESS_SIZE                 0X2000
 #define MAX_PCB_NUM     6
 
-
 //jump table file_ops struct
 /*
 typedef struct file_op_t{
@@ -61,7 +60,7 @@ typedef struct pcb_t {
 
 // fd entry is in filesystem 
 // fop: also in filesystem
-
+extern pcb_t* current_pcb_pointer;
 
 pcb_t* find_pcb(void);
 

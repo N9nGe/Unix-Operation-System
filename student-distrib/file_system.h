@@ -80,21 +80,21 @@ int32_t read_dentry_by_index(const uint32_t index, dentry_t* dentry);
 
 int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t length);
 
-int file_open(const uint8_t* fname, fd_entry_t * fd_entry);
+int file_open(const uint8_t* fname);
 
 uint32_t file_read(int32_t fd, uint8_t* buf, int32_t nbytes);
 
-int file_write();
+int file_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
 
 int file_close(int32_t fd);
 
-int dir_open();
+int dir_open(const uint8_t* fname);
 
-uint32_t dir_read(int32_t fd, uint8_t* buf, int32_t nbytes);
+uint32_t dir_read(int32_t fd, void* buf, int32_t nbytes);
 
-int dir_write();
+int dir_write(int32_t fd, const uint8_t* buf, int32_t nbytes);
 
-int dir_close();
+int dir_close(int32_t fd);
 
 void files_ls();
 

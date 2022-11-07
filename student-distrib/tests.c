@@ -650,15 +650,16 @@ void test_syscall_linkage() {
  */
 void test_sys_open() {
 	printf("start testing open\n");
-	// int ret;
-	// ret = sys_open ("rtc");
-	// ret = sys_open ("cat");
+	int ret;
+	// sys_execute((uint8_t*)"testprint");
+	// ret = sys_open (".");
+	ret = sys_open ("cat");
 	// ret = sys_open ("fsdir");
 	// ret = sys_open ("rtc");
 	// ret = sys_open("frame0.txt");
 
-	// uint8_t temp_buf[LARGE_BUF_SIZE];
-	// sys_read(2, temp_buf, LARGE_BUF_SIZE);
+	uint8_t temp_buf[LARGE_BUF_SIZE];
+	sys_read(2, temp_buf, LARGE_BUF_SIZE);
 }
 
 
@@ -670,7 +671,7 @@ void execute_test() {
 	// sys_execute((uint8_t*)"hello ");
 	// sys_execute((uint8_t*)"pingpong ");
 	// sys_execute((uint8_t*)"fish ");
-	// sys_execute((uint8_t*)"fish ");
+	// sys_execute((uint8_t*)"shell ");
 
 
 }

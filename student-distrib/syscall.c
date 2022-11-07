@@ -9,10 +9,8 @@
 #define USER_SPACE_START 0x8000000
 #define USER_SPACE_END   0x8400000
 
-
-
-
 static uint32_t task_counter = 0;
+pcb_t * current_pcb_pointer;
 
 /*file operation table pointer */
 /*The following are a series of device-speific
@@ -126,7 +124,7 @@ int32_t find_next_fd() {
  *  OUTPUTS: none
  *  RETURN VALUE: 
  *      FAIL    -- -1 
- *      SUCCESS -- 0
+ *      SUCCESS -- fd
  *  SIDE EFFECTS: none
  */
 int32_t sys_open (const uint8_t* filename) {
@@ -135,7 +133,7 @@ int32_t sys_open (const uint8_t* filename) {
     printf ("sys_open called\n");
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
-        //printf("1 failed to open %s\n",filename);
+        printf("1 failed to open %s\n",filename);
         return FAIL;
     }
     // BUG: Always null filename
@@ -144,48 +142,64 @@ int32_t sys_open (const uint8_t* filename) {
     int fd = -1; // file descriptor
     /* select bit */
     // int file_type; // 0 for RTC, 1 for dir, 2 for regular file (including terminal)
-    fd_entry_t new_fd_entry;
 
-    new_fd_entry.inode_num = 0;
-    new_fd_entry.file_pos = 0;
-    new_fd_entry.flag = 1;
+    // fd_entry_t new_fd_entry;
+    // new_fd_entry.inode_num = 0;
+    // new_fd_entry.file_pos = 0;
+    // new_fd_entry.flag = 1;
     fd = find_next_fd();
-    // int print_fd  = fd+2;
-    //printf("current fd is %d || ",print_fd);
+    // pcb_1->fd_entry->inode_num = 0;
+
+    // printf("current fd is %d || ",fd);
     /*test function used for read and close*/  
-    if (fd <2 || fd > 7) return FAIL;
+    if (fd < 2 || fd > 7) return FAIL;
 
     // If failed to open the file, quit it
-    if (file_open (filename, &new_fd_entry) != 0) {
+    if (file_open (filename) != 0) {
         //printf("2 failed to open %s\n",filename);
         return FAIL;
     } else {
-        if (fd > 0) {
+        // dentry_t tmp_dentry;
+        // if (read_dentry_by_name (filename, &tmp_dentry) != 0){     // check if read dentry succeeded
+        //     return -1;
+        // }
+        // new_fd_entry.inode_num = tmp_dentry.inode_num;
+        // new_fd_entry.filetype = tmp_dentry.filetype;
+        dentry_t temp_dentry;
+        if (read_dentry_by_name (filename, &temp_dentry) != 0){     // check if read dentry succeeded
+            return -1;
+        }
+        pcb_1->fd_entry[fd].inode_num = temp_dentry.inode_num;
+        pcb_1->fd_entry[fd].file_pos = 0;
+        pcb_1->fd_entry[fd].flag = 1;
+        pcb_1->fd_entry[fd].filetype =temp_dentry.filetype;
+
+        if (fd >= 2) {
             //printf("%u x\n", new_fd_entry.filetype);
-            switch (new_fd_entry.filetype) {
+            switch (pcb_1->fd_entry[fd].filetype) {
                 case 0:
-                    new_fd_entry.fot_ptr = (&rtc_op);
-                    //printf("rtc\n");
+                    pcb_1->fd_entry[fd].fot_ptr = (&rtc_op);
+                    printf("rtc\n");
                     break;
                 case 1:
-                    new_fd_entry.fot_ptr = (&dir_op);
-                    //printf("dir\n");
+                    pcb_1->fd_entry[fd].fot_ptr = (&dir_op);
+                    printf("dir\n");
                     break;
                 case 2:
-                    new_fd_entry.fot_ptr = (&file_op);
-                    //printf("file\n");
+                    pcb_1->fd_entry[fd].fot_ptr = (&file_op);
+                    printf("file\n");
                     break;
-                default:
-                    new_fd_entry.fot_ptr = (&file_op);
-                    //printf("file\n");
+                default: //TODO
+                    pcb_1->fd_entry[fd].fot_ptr = (&file_op);
+                    printf("file2\n");
                     break;
             }
-            pcb_1 -> fd_entry[fd] = new_fd_entry;
-            //printf (" %s found, inode number is %u\n", filename, pcb_1->fd_entry[fd].inode_num); // debug usage
+            // pcb_1 -> fd_entry[fd] = new_fd_entry;
+            printf (" %s found, inode number is %u\n", filename, pcb_1->fd_entry[fd].inode_num); // debug usage
 
         } 
     }
-    return 0;
+    return fd;
     
 }
 
@@ -317,9 +331,11 @@ int32_t sys_execute (const uint8_t* command){
     
     // create new pcb
     pcb_t* new_pcb = pcb_initilize();
+    current_pcb_pointer = new_pcb;
     // update pid and parent_id
     new_pcb->pid = task_counter;
     new_pcb->parent_id = task_counter - 1;
+    
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
     register uint32_t saved_esp asm("esp");
@@ -361,26 +377,6 @@ int32_t sys_execute (const uint8_t* command){
     return 0;
 }
 
-/* asm voliate workable:
-TODO: 11.6 DEBUG
-   asm volatile(
-        "pushl %0;" 
-        "pushl %1;"
-        "pushfl;"
-        "pushl %2;"
-        "pushl %3;"
-        "IRET;"
-        :
-        : "r" (user_data_segment), "r" (esp), "r" (user_code_segment), "r" (eip)
-        : "cc", "memory", "eax"
-    );
-is enough for syscall 
-
-
-
-*/
-
-
 
 /* halt(uint8_t status)
  * Description: system call halt
@@ -391,23 +387,26 @@ is enough for syscall
 int32_t sys_halt(uint8_t status){
     // get current pcb
     int i;
-    uint32_t return_status = status;
+    uint32_t return_status = (uint32_t) status;
     cli();
     pcb_t* pcb = find_pcb();
-    pcb->active = 0;
+    
     // point to the parent kernel stack
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - 4); 
-    // restore parent paging
-    page_halt(pcb->parent_id);
+    
     for (i = 2; i < 8; i++) {
         // need file close
         sys_close(i);
     }
     pcb->fd_entry[0].flag = 0;
     pcb->fd_entry[1].flag = 0;
+    pcb->active = 0;
+    // restore parent paging
+    page_halt(pcb->parent_id);
     
     // jump to execute return
     // there is no program -> need to rerun shell
+    sti();
     if (task_counter == 0) {
         sys_execute((uint8_t*)"shell");
     } else {
@@ -419,10 +418,10 @@ int32_t sys_halt(uint8_t status){
             "ret;"
             :
             : "r" (return_status), "r" (pcb->saved_ebp), "r" (pcb->saved_esp)
-            : "esp", "ebp", "eax"
+            : "eax", "ebp", "esp"  
         );
     } 
-    sti();
+    
     return 0;
 }
 
@@ -481,7 +480,7 @@ void page_halt(uint32_t parent_id) {
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id + 1); // give the address of the process
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id ); // give the address of the process
     task_counter--; // decrement the counter
     // flush the TLB (OSdev)
     asm volatile(
