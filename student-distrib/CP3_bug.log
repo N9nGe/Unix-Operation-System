@@ -98,3 +98,16 @@ Description:
     page fault by sys_open. The return value is incorrect.
 Solution:
     The return value should not be 0, it should be the available fd(file descriptor index).
+
+<--------------------------------------------------------->
+                          BUG 6                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07.
+Creator:
+    Gabriel Gao
+Description:
+    There is no stuff in the keyboard buffer, causing nothing can be read by the terminal
+Solution:
+    Romoving the clear keyboard buffer instruction after the enter key is pressed. 
+    Adding this the clear instruction after terminal read. 

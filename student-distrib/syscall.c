@@ -132,35 +132,17 @@ int32_t sys_open (const uint8_t* filename) {
         printf("1 failed to open %s\n",filename);
         return SYSCALL_FAIL;
     }
-    // BUG: Always null filename
 
-    int i;  // Loop index
     int fd = -1; // file descriptor
     /* select bit */
-    // int file_type; // 0 for RTC, 1 for dir, 2 for regular file (including terminal)
-
-    // fd_entry_t new_fd_entry;
-    // new_fd_entry.inode_num = 0;
-    // new_fd_entry.file_pos = 0;
-    // new_fd_entry.flag = 1;
     fd = find_next_fd();
-    // pcb_1->fd_entry->inode_num = 0;
-
-    // printf("current fd is %d || ",fd);
     /*test function used for read and close*/  
     if (fd < FD_MIN || fd > FD_MAX) return SYSCALL_FAIL;
 
     // If failed to open the file, quit it
     if (file_open (filename) != 0) {
-        //printf("2 failed to open %s\n",filename);
         return SYSCALL_FAIL;
     } else {
-        // dentry_t tmp_dentry;
-        // if (read_dentry_by_name (filename, &tmp_dentry) != 0){     // check if read dentry succeeded
-        //     return -1;
-        // }
-        // new_fd_entry.inode_num = tmp_dentry.inode_num;
-        // new_fd_entry.filetype = tmp_dentry.filetype;
         dentry_t temp_dentry;
         if (read_dentry_by_name (filename, &temp_dentry) != 0){     // check if read dentry succeeded
             return -1;
@@ -171,7 +153,6 @@ int32_t sys_open (const uint8_t* filename) {
         pcb_1->fd_entry[fd].filetype =temp_dentry.filetype;
 
         if (fd >= FD_MIN) {
-            //printf("%u x\n", new_fd_entry.filetype);
             switch (pcb_1->fd_entry[fd].filetype) {
                 case 0:
                     pcb_1->fd_entry[fd].fot_ptr = (&rtc_op);
@@ -182,7 +163,7 @@ int32_t sys_open (const uint8_t* filename) {
                 case 2:
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
-                default: //TODO
+                default:
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
             }
@@ -204,7 +185,6 @@ int32_t sys_open (const uint8_t* filename) {
 int32_t sys_close (int32_t fd) {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    //printf ("sys_close called\n");
     if (fd < FD_MIN || fd > FD_MAX) {
         return SYSCALL_FAIL;
     }
