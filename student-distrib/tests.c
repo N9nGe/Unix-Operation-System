@@ -658,6 +658,7 @@ void test_sys_open() {
 
 
 void execute_test() {
+	printf("start testing execute\n");
 	sys_execute((uint8_t*)"testprint");
 	// sys_execute((uint8_t*)"ls");
 	// sys_execute((uint8_t*)"shell");
@@ -675,7 +676,7 @@ void launch_tests(){
 	// test_sys_open();
 	// test_sys_read();
 	// test_sys_write();
-	
+	execute_test();
 	// printf("---------------TEST CP3 END--------------\n");
 
 

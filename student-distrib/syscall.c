@@ -129,10 +129,10 @@ int32_t find_next_fd() {
 int32_t sys_open (const uint8_t* filename) {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    printf ("sys_open called\n");
+    //printf ("sys_open called\n");
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
-        printf("1 failed to open %s\n",filename);
+        //printf("1 failed to open %s\n",filename);
         return FAIL;
     }
     // BUG: Always null filename
@@ -154,7 +154,7 @@ int32_t sys_open (const uint8_t* filename) {
 
     // If failed to open the file, quit it
     if (file_open (filename, &new_fd_entry) != 0) {
-        printf("2 failed to open %s\n",filename);
+        //printf("2 failed to open %s\n",filename);
         return FAIL;
     } else {
         if (fd > 0) {
@@ -162,15 +162,15 @@ int32_t sys_open (const uint8_t* filename) {
             switch (new_fd_entry.filetype) {
                 case 0:
                     new_fd_entry.fot_ptr = (&rtc_op);
-                    printf("rtc\n");
+                    //printf("rtc\n");
                     break;
                 case 1:
                     new_fd_entry.fot_ptr = (&dir_op);
-                    printf("dir\n");
+                    //printf("dir\n");
                     break;
                 case 2:
                     new_fd_entry.fot_ptr = (&file_op);
-                    printf("file\n");
+                    //printf("file\n");
                     break;
             }
             pcb_1 -> fd_entry[fd] = new_fd_entry;
@@ -201,7 +201,7 @@ int32_t sys_open (const uint8_t* filename) {
 int32_t sys_close (int32_t fd) {
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    printf ("sys_close called\n");
+    //printf ("sys_close called\n");
     if (fd < 2 || fd > 7) {
         return -1;
     }
@@ -226,7 +226,7 @@ int32_t sys_close (int32_t fd) {
  *  SIDE EFFECTS: none
  */
 int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
-    printf ("sys_read called\n");
+    //printf ("sys_read called\n");
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     // if((fd < FD_MIN || fd > FD_MAX ) ||
@@ -238,7 +238,7 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
     //     printf("failed to read fd: %d\n",fd);
     //     return FAIL;
     // }
-    printf("Reading fd: %d\n",fd);
+    //printf("Reading fd: %d\n",fd);
   /*Function code is one line the return value */
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->read))(fd, buf, nbytes); 
     return ret;
@@ -256,7 +256,7 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
  *  SIDE EFFECTS:none
  */
 int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
-    printf ("sys_write called\n");
+    //printf ("sys_write called\n");
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     // return 0;

@@ -49,10 +49,10 @@ void terminal_reset(terminal_t terminal){
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     //TODO: what the relationship between nbytes and kb_count?
     // check whether the fd is valid
-    if (fd < 2 || fd > 7){
-        printf("Fd must be in [2,7]\n ");
-        return -1;
-    }
+    // if (fd < 2 || fd > 7){
+    //     printf("Fd must be in [2,7]\n ");
+    //     return -1;
+    // }
     // check whether the buffer is invalid
     if(buf == NULL){
         return -1;
@@ -100,10 +100,10 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     // check whether the fd is valid
-    if (fd < 2 || fd > 7){
-        printf("Fd must be in [2,7]\n ");
-        return -1;
-    }
+    // if (fd < 2 || fd > 7){
+    //     printf("Fd must be in [2,7]\n ");
+    //     return -1;
+    // }
     // check whether the buffer is invalid
     if(buf == NULL){
         return -1;
