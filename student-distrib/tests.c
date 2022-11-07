@@ -665,10 +665,18 @@ void test_sys_open() {
 
 void execute_test() {
 	printf("start testing execute\n");
-	// sys_execute((uint8_t*)"shell");
-	sys_execute((uint8_t*)"testprint");
+	sys_execute((uint8_t*)"shell");
+	// sys_execute((uint8_t*)"testprint");
+	// sys_execute((uint8_t*)"hello ");
+	// sys_execute((uint8_t*)"pingpong ");
+	// sys_execute((uint8_t*)"fish ");
+	// sys_execute((uint8_t*)"fish ");
+
 
 }
+
+
+
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 

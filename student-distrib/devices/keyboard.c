@@ -26,7 +26,7 @@ int alt_buf = 0;      // Alt buf, do nothing now
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
-int     kb_flag = 0;                // flag used to open the terminal read 
+volatile int  kb_flag = 0;                // flag used to open the terminal read 
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -157,7 +157,7 @@ void keyboard_interrupt_handler(){
             // printf("KEY pressed ["); // used for testing
             // Clear the screen when necessary
                 if ( value == '\n' ){
-                    memset(keyboard_buf,NULL,sizeof(keyboard_buf));
+                    // memset(keyboard_buf,NULL,sizeof(keyboard_buf));
                     terminal_count = keybuf_count;
                     keybuf_count = 0;
                     kb_flag = 1;            // interrupt the terminal 

@@ -47,12 +47,6 @@ void terminal_reset(terminal_t terminal){
  *     number of bytes successfully copied
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
-    //TODO: what the relationship between nbytes and kb_count?
-    // check whether the fd is valid
-    // if (fd < 2 || fd > 7){
-    //     printf("Fd must be in [2,7]\n ");
-    //     return -1;
-    // }
     // check whether the buffer is invalid
     if(buf == NULL){
         return -1;
@@ -69,14 +63,15 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
         if (index < terminal_count) {
-            *(uint8_t*)buf = keyboard_buf[index];
+            ((uint8_t*)buf)[index] = keyboard_buf[index];
         } else {
             //TODO: if we do not have the enough staff to copy, what should we fill
             // Could we break directly break the copy process?
             // the buffer do not have enough stuff, just fill null?
-            *(uint8_t*)buf = 0;
+            ((uint8_t*)buf)[index] = 0;
         }
     }
+
     // choose the return n bytes  
     if (nbytes <= terminal_count) {
         copy_byte = nbytes;
@@ -99,11 +94,6 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
  *  SIDE EFFECTS: none
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
-    // check whether the fd is valid
-    // if (fd < 2 || fd > 7){
-    //     printf("Fd must be in [2,7]\n ");
-    //     return -1;
-    // }
     // check whether the buffer is invalid
     if(buf == NULL){
         return -1;
@@ -152,7 +142,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
  */
 int32_t terminal_open(const uint8_t* filename){
     if ( filename == NULL){
-        printf("Can't read null file\n ");
+        printf("Can't read null file in ter\n ");
         return -1;
     }else{
         return 0;

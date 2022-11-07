@@ -259,14 +259,14 @@ int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
     // return 0;
-    if((fd < FD_MIN || fd > FD_MAX ) ||
-       (buf == NULL || nbytes < 0  ) ||
-    //    ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
-       (pcb_1->fd_entry[fd].flag == 0 ) ||
-       (pcb_1->fd_entry[fd].fot_ptr -> write == NULL)
-    ){
-        return FAIL;
-    }
+    // if((fd < FD_MIN || fd > FD_MAX ) ||
+    //    (buf == NULL || nbytes < 0  ) ||
+    // //    ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
+    //    (pcb_1->fd_entry[fd].flag == 0 ) ||
+    //    (pcb_1->fd_entry[fd].fot_ptr -> write == NULL)
+    // ){
+    //     return FAIL;
+    // }
 
 //   /*Function code is one line the return value */
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr -> write))(fd, buf, nbytes); 
@@ -344,6 +344,9 @@ int32_t sys_execute (const uint8_t* command){
 
     // context switch && IRET
     asm volatile(
+        "xorl %%eax, %%eax;"
+        "movl %0, %%eax;"
+        "movw %%ax, %%ds;"
         "pushl %0;" 
         "pushl %1;"
         "pushfl;"

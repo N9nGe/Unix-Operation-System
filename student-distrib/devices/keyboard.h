@@ -42,7 +42,7 @@
 
 extern uint8_t keyboard_buf[KEY_BUF_SIZE];
 extern int     keybuf_count;
-extern int     kb_flag;
+extern volatile int   kb_flag;
 
 /* Initialize keyboard input device */
 void keyboard_init(void);
