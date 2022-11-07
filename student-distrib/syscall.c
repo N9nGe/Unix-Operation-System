@@ -212,14 +212,13 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
     //printf ("sys_read called\n");
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    // if((fd < FD_MIN || fd > FD_MAX ) ||
-    // //    (buf == NULL || nbytes < 0  ) ||
-    //    (pcb_1->fd_entry[fd].flag == 0 ) 
-    // //   || (pcb_1->fd_entry[fd].fot_ptr->read == NULL)
-    // ){
-    //     // printf("failed to read fd: %d\n",fd);
-    //     return SYSCALL_FAIL;
-    // }
+    if((fd < 2 || fd > FD_MAX ) ||
+       (buf == NULL || nbytes < 0  ) ||
+       (pcb_1->fd_entry[fd].flag == 0 ) 
+    ){
+        // printf("failed to read fd: %d\n",fd);
+        // return SYSCALL_FAIL;
+    }
     //printf("Reading fd: %d\n",fd); // debug
   /*Function code is one line the return value */
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->read))(fd, buf, nbytes); 
@@ -241,15 +240,12 @@ int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
     //printf ("sys_write called\n");
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
-    // return 0;
-    // if((fd < FD_MIN || fd > FD_MAX ) ||
-    //    (buf == NULL || nbytes < 0  ) ||
-    // //    ((int)buf < USER_SPACE_START || (int)buf + nbytes > USER_SPACE_END ) ||
-    //    (pcb_1->fd_entry[fd].flag == 0 ) ||
-    //    (pcb_1->fd_entry[fd].fot_ptr -> write == NULL)
-    // ){
-    //     return FAIL;
-    // }
+    if((fd < FD_MIN || fd > FD_MAX ) ||
+       (buf == NULL || nbytes < 0  ) ||
+       (pcb_1->fd_entry[fd].flag == 0 ) 
+    ){
+        // return 0;
+    }
 
 //   /*Function code is one line the return value */
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr -> write))(fd, buf, nbytes); 

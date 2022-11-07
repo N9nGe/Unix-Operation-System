@@ -98,4 +98,5 @@ jump_table:
     );
 is enough for syscall 
 
-7. where is the terminal write and 
+7. where is the terminal write and read 
+-> in execute

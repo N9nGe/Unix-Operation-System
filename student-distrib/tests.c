@@ -365,10 +365,12 @@ void terminal_test(){
 	clear();
 	printf("=====Start testing the terminal open/read/write/close driver=====\n");
 	int32_t fd = 3; // Testing, set fd as any number
-	uint32_t test1,test2;
-	uint8_t read_buffer[KEY_BUF_SIZE];
-	uint8_t write_buffer[] = "Test the terminal write\n"; // its length is 24
-	memset(read_buffer,NULL,KEY_BUF_SIZE);
+	// uint32_t test1,
+	int test2;
+	int cnt;
+	uint8_t buf[1000];
+	// uint8_t write_buffer[] = "Test the terminal write\n"; // its length is 24
+	memset(buf,NULL,KEY_BUF_SIZE);
 	const uint8_t filename[10] = "TEST.txt";
 	// Open
 	printf("[Test terminal_open()]$\n");
@@ -400,11 +402,21 @@ void terminal_test(){
 	while (1){
 		
 		printf("[user@localhost]$ ");
-		test1 = terminal_read(fd,read_buffer,KEY_BUF_SIZE);
-		printf("The number of bytes is read: %d\n", test1);
-		test2 = terminal_write(2,write_buffer,sizeof(write_buffer));
+		printf("Hi, what's your name? ");
+
+		if (-1 == (cnt = terminal_read (0, buf, 1000-1))) {
+        printf ("Can't read name from keyboard.\n");
+		}else{
+			printf("The number of bytes is read: %d\n", cnt);
+
+		}
+		buf[cnt] = '\0';
+    	terminal_write (1, "Hello, ",strlen("Hello, "));
+    	test2 = terminal_write (1, buf,strlen(buf));
 		printf("The number of bytes is write: %d\n", test2);
-	}	
+
+    }
+	
 }
 
 

@@ -136,7 +136,6 @@ void keyboard_interrupt_handler(){
         sti();
         return;
     }
-    // TODO: After considering the real design of terminal, we change our design method here
     if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) ){ // leave the last bit for \n or \b
         if( value == '\n' || value == '\b'){
             // let it go
@@ -146,9 +145,6 @@ void keyboard_interrupt_handler(){
             return; // Reject further input
         }
     }
-    //     // key   = 0x1C; // set as enter
-    //     // value = '\n'; // set as enter for 127
-
     // Ignore the key out of the scope of scan size
     if (key > INITIAL_KEY && key <= MAX_SCAN_SIZE){
         if( shift_buf == 1){// decide the scancode
@@ -158,10 +154,12 @@ void keyboard_interrupt_handler(){
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
-                    terminal_count = keybuf_count;
+                    terminal_count = keybuf_count +1;
+                    if(terminal_count == KEY_BUF_SIZE - 1) keyboard_buf[keybuf_count+1] = '\n';
+                    keybuf_count++;
                     keybuf_count = 0;
-                    kb_flag = 1;            // interrupt the terminal 
                     putc_advanced(value);
+                    kb_flag = 1;            // interrupt the terminal 
                     sti();
                     return;
                 }

@@ -39,6 +39,7 @@ void terminal_reset(terminal_t terminal){
 /* 
  *  int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes)
  *  DESCRIPTION: terminal buffer read contents from kb_buf
+ *  the buf should be terminated by \n or as much as fits in buf
  *  INPUTS: 
  *     fd     -- file descripter buffer 
  *     buf    -- the terminal buffer to read 
@@ -47,10 +48,6 @@ void terminal_reset(terminal_t terminal){
  *     number of bytes successfully copied
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
-    // check whether the buffer is invalid
-    if(buf == NULL){
-        return -1;
-    }
     // the variable used for return
     int32_t copy_byte;
     // loop index for copy
@@ -62,7 +59,11 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // copy nbytes from the keyboard 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
-        if (index < terminal_count) {
+        // if( index == terminal_count || index == nbytes){
+        //     ((uint8_t*)buf)[index] = '\n'; 
+        //     break; 
+        // }
+        if (index <= terminal_count) {
             ((uint8_t*)buf)[index] = keyboard_buf[index];
         } else {
             //TODO: if we do not have the enough staff to copy, what should we fill
@@ -70,9 +71,6 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
             // the buffer do not have enough stuff, just fill null?
             ((uint8_t*)buf)[index] = 0;
         }
-    }
-    if( index == terminal_count || index == nbytes){
-       ((uint8_t*)buf)[index] = '\n';  
     }
     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
     // choose the return n bytes  
@@ -110,18 +108,20 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     int32_t buf_length = strlen(buf);
     const char* char_buf = buf; 
     // copy nbytes from the buffer to the terminal 
-    for (index = 0; index < nbytes; index++) {
+    for (index = 0; index < buf_length; index++) {
         // the buf still have character
             c = char_buf[index];
+
         if( c != '\b' ) {// ignore the backspace
             if (c == '\n') {
-                buf_length--;
+                // buf_length--;
+                // putc_advanced('\n');
             }
             if (c == '\0') {
-                continue;
+                // putc_advanced('\n');
             }
             putc_advanced(c);
-            
+
         }
     }
     // choose the return n bytes  

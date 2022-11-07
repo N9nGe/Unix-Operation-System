@@ -69,7 +69,9 @@ Solution:
     - Thirdly, our file_system's file_open takes multiple parameters
     from the system, which doesn't follow the syscall routine. (Jerry)
     - the file Descriptor isn't consist, when open pingpong, it will open
-    fd of RTC
+    fd of RTC                                               (Tim)
+    We work together to debug it by scanning the code line by line, and 
+    it comes from both sys_open return type and many other tiny bugs.
 
 <--------------------------------------------------------->
                           BUG 4                          
@@ -111,3 +113,44 @@ Description:
 Solution:
     Romoving the clear keyboard buffer instruction after the enter key is pressed. 
     Adding this the clear instruction after terminal read. 
+
+<--------------------------------------------------------->
+                          BUG 7                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07.
+Creator:
+    Tony Wang.
+Description:
+    Warning: initialization from incompatible pointer type * 4 
+    in fop initialization
+Solution:
+   This is because the filesystem system call functions are inconsistent 
+   with convention, and after fine-tuning to choose the correct return
+   type and parameter type, the Warning disappears
+
+<--------------------------------------------------------->
+                          BUG 8                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07
+Creator:
+    Tony Wang.
+Description:
+    Testing hello won't print \n at the end, which cause 
+    'name' attached with nextline 391OS>
+Solution:
+    
+
+<--------------------------------------------------------->
+                          BUG 9                          
+<--------------------------------------------------------->
+Time:
+    2022.11.07.
+Creator:
+    Tony Wang.
+Description:
+    When checking the .
+Solution:
+    ....
+
