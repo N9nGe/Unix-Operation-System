@@ -183,11 +183,14 @@ int32_t sys_open (const uint8_t* filename) {
  *  SIDE EFFECTS: Change fd_entry stored in pcb array
  */
 int32_t sys_close (int32_t fd) {
+    //get current pcb as pcb_1
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
+    // check if fd is closable
     if (fd < FD_MIN || fd > FD_MAX) {
         return SYSCALL_FAIL;
     }
+    // reset the designated fd_entry to 0
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return 0;
     }
@@ -209,9 +212,12 @@ int32_t sys_close (int32_t fd) {
  *  SIDE EFFECTS: none
  */
 int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
-    //printf ("sys_read called\n");
+    //get current pcb as pcb_1
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
+    // check if fd fulfills the requirement
+    // check if there's function pointer in the fd
+    // check if the nbytes is larger than 0
     if (fd == 1) {
         printf("failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
@@ -238,9 +244,12 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
  *  SIDE EFFECTS:none
  */
 int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
-    //printf ("sys_write called\n");
+    //get current pcb as pcb_1
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
+    // check if fd fulfills the requirement
+    // check if there's function pointer in the fd
+    // check if the nbytes is larger than 0
     if (fd == 0) {
         printf("failed to write fd: %d\n",fd);
         return SYSCALL_FAIL;
