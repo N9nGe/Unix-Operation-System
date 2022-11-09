@@ -2,7 +2,7 @@
 # syscall_link.h - Assembly linkage for device and idt
 .data
     SYS_MIN  =  1
-    SYS_MAX  =  6
+    SYS_MAX  =  10
     FAIL     =  -1
     SUCCESS  =  0
 
@@ -39,4 +39,4 @@ VALID_SYS:
     iret                                  
 # leave other 4 in CP4
 jump_table:
-		.long 0x0, sys_halt, sys_execute, sys_read, sys_write, sys_open, sys_close
+		.long 0x0, sys_halt, sys_execute, sys_read, sys_write, sys_open, sys_close, sys_getargs, sys_vidmap, sys_set_handler, sys_sigreturn

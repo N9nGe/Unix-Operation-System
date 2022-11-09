@@ -191,18 +191,17 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
 /* 
  *  file_open
  *  DESCRIPTION: 
- *  INPUTS: const uint32_t index -- the index of the of the dentry that is going to be read
- *          dentry * dentry -- dentry that will be modified, where the found dentry information
- *                             is going to be stored
+ *  INPUTS: const uint8_t* filename -- open the file in the system
  *  OUTPUTS: none
  *  RETURN VALUE: -1 if failed. Otherwise, return 0
  *  SIDE EFFECTS: none
+ *  NOTE: 
+ *      Tony 11.8: I delete the prvious header, it dosn't fit the prototype. 
  */
-//int file_open(const uint8_t* fname, fd_entry_t * fd_entry) { 
-int32_t file_open(const uint8_t* fname) {
+int32_t file_open(const uint8_t* filename) {
     // printf("opening %s \n", fname);
     // if( fname == NULL || fd_entry == NULL) { return -1;}
-    if (strlen_unsigned(fname) > FILENAME_LEN){    // return failed if file name is larger than 32B
+    if (strlen_unsigned(filename) > FILENAME_LEN){    // return failed if file name is larger than 32B
         printf("\n!!!File open failed!\n");
         return -1;
     }
@@ -254,7 +253,7 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
  *  DESCRIPTION: don't do anything
  *  INPUTS: none
  *  OUTPUTS: none
- *  RETURN VALUE: always -1
+ *  RETURN VALUE: always -1, because the filesystem is read-only
  *  SIDE EFFECTS: none
  */
 int file_write(int32_t fd, const void* buf, int32_t nbytes) {

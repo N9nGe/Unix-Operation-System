@@ -1,0 +1,41 @@
+<=========================================================>
+<=================>    BUG LOG HEADER   <=================>
+<=========================================================>
+Assignment:
+    MP3
+CheckPoint:
+    CP4
+CreateTime:
+    2022.11.08
+
+TASK: COMPLETE LAST FOUR SYSTEM CALL
+debug
+
+
+
+<--------------------------------------------------------->
+                          BUG 9                          
+<--------------------------------------------------------->
+Time:
+    2022.11.08.
+Creator:
+    Tony Wang.
+Description:
+    Double ls bug: The first time in shell to execute "ls" is fine. 
+    But Second time, the system can't read the file after verylargetextwithverylongname.tx
+    it will generate:
+... (correct ls)
+verylargetextwithverylongname.tx
+:-) ( a emoji like symbol)
+failed to read fd: 2562
+directory entry read failed
+program terminated abnoramally
+391OS>
+
+    This bug is detacted right before the ddl of CP3. And TA points it out. 
+Solution:
+    1. the smile symbol and fd 2562 is fixed, that may be the breakpoint
+    2. TA said in demo, this may because the system's parameter and return value doesn't fit
+    well with the userlevel syscall program. We should check that.
+        - Tony debug a datatype error, but nothing happens
+    3. 

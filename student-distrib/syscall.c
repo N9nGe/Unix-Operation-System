@@ -216,7 +216,7 @@ int32_t sys_close (int32_t fd) {
  *        - returns the number of bytes read.
  *  SIDE EFFECTS: none
  */
-int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
+int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //get current pcb as pcb_1
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
@@ -248,7 +248,7 @@ int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes){
  *  RETURN VALUE: none
  *  SIDE EFFECTS:none
  */
-int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes){
+int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     //get current pcb as pcb_1
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
@@ -489,4 +489,21 @@ void page_halt(uint32_t parent_id) {
     );
 }
 
+//Checkpoint 4 
+
+int32_t sys_getargs( uint8_t* buf, int32_t nbytes){
+    return 0;
+}
+
+int32_t sys_vidmap( uint8_t** screen_start){
+    return 0;
+}
+/*Extra point, useless for now*/
+int32_t sys_set_handler( int32_t signum, void* handler_address){
+    return -1;
+}
+/*Extra point, useless for now*/
+int32_t sys_sigreturn (void){
+    return -1;
+}
 

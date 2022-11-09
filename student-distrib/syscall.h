@@ -26,12 +26,31 @@
 #define SPACE                        0x20
 
 
+/*MentOS System Calls*/
+// Return value:
+//     -  Success -- 0
+//     -  Fail    -- -1
+//Checkpoint 3
+int32_t sys_halt(uint8_t status);
 
-// system execute
 int32_t sys_execute (const uint8_t* command);
 
-// system halt
-int32_t sys_halt(uint8_t status);
+int32_t sys_read (int32_t fd, void* buf, int32_t nbytes);
+
+int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes);
+
+int32_t sys_open (const uint8_t* filename);
+
+int32_t sys_close (int32_t fd);
+//Checkpoint 4
+int32_t sys_getargs( uint8_t* buf, int32_t nbytes);
+
+int32_t sys_vidmap( uint8_t** screen_start);
+/*Extra point, useless for now*/
+int32_t sys_set_handler( int32_t signum, void* handler_address);
+/*Extra point, useless for now*/
+int32_t sys_sigreturn (void);
+
 
 // helper function
 void parse_arg(const uint8_t* command, uint8_t* filename);
@@ -62,17 +81,5 @@ int32_t fd_entry_init(fd_entry_t* fd_entry);
 
 int32_t find_next_fd(void);
 
-
-
-int32_t sys_open (const uint8_t* filename);
-
-int32_t sys_close (int32_t fd);
-
-int32_t sys_read (int32_t fd, uint8_t* buf, int32_t nbytes);
-
-int32_t sys_write (int32_t fd, const uint8_t* buf, int32_t nbytes);
-
-
-
-#endif /* TESTS_H */
+#endif /* SYSCALL_H */
 
