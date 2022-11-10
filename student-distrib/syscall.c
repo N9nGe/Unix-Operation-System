@@ -220,6 +220,7 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //get current pcb as pcb_1
     pcb_t * pcb_1;
     pcb_1 = find_pcb();
+    memset(buf, 0, sizeof(buf));
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0

@@ -303,13 +303,20 @@ int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     //printf("dir_read");
     // if (fd < 2 || fd > 7) return -1;
     // copy filename of the current dentry to buffer
+    bytes_copied = 0;
     uint32_t curr_pos = current_pcb_pointer->fd_entry[fd].file_pos;
+    //printf("%s \n", boot_block_ptr->dir_entries[curr_pos].filename);
     strncpy_unsigned((uint8_t *) buf, boot_block_ptr->dir_entries[curr_pos].filename, FILENAME_LEN);
-    bytes_copied = strlen_unsigned((uint8_t *)buf);
+    //printf("%s \n", buf);
 
+    bytes_copied = strlen_unsigned((uint8_t *)buf);
+    //printf("%u", bytes_copied);
     if (current_pcb_pointer->fd_entry[fd].file_pos < boot_block_ptr->dentry_count)
         current_pcb_pointer->fd_entry[fd].file_pos++;
 
+    if (bytes_copied > nbytes) {
+        return nbytes;
+    }
     return bytes_copied;   // return bytes copied 
 }
 
