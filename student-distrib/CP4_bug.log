@@ -58,3 +58,16 @@ Description:
 Solution:
     I modified the boundary check of sys_open and sys_close.
     Put in correct return value, and it's fine now.
+
+<--------------------------------------------------------->
+                          BUG 2                          
+<--------------------------------------------------------->
+Time:
+    2022.11.09.
+Creator:
+    Gabriel Gao && Tim Zhao && Jerry Wang.
+Description:
+    Directory_read do not consider the nbytes relationship with the buffer length
+Solution:
+    Add the condition check to determine the correct copy length of the buffer after copying the data.
+

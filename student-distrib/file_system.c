@@ -5,7 +5,6 @@ data_block_t * data_block_ptr;
 inode_t * inode_ptr;
 dentry_t * dentry_ptr;
 boot_block_t * boot_block_ptr; 
-// static tmp_pcb_t temp_pcb;  // create a temporary pcb for 3.2
 static uint32_t temp_position;  // temporary file position 
 
 /* 
@@ -199,20 +198,10 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
  *      Tony 11.8: I delete the prvious header, it dosn't fit the prototype. 
  */
 int32_t file_open(const uint8_t* filename) {
-    // printf("opening %s \n", fname);
-    // if( fname == NULL || fd_entry == NULL) { return -1;}
     if (strlen_unsigned(filename) > FILENAME_LEN){    // return failed if file name is larger than 32B
         printf("\n!!!File open failed!\n");
         return -1;
     }
-    // dentry_t tmp_dentry;
-    // if (read_dentry_by_name (fname, &tmp_dentry) != 0){     // check if read dentry succeeded
-    //     return -1;
-    // }
-    // printf("%u\n", tmp_dentry.inode_num);
-    
-    // temp_pcb.inode_num = tmp_dentry.inode_num; 
-    // temp_pcb.flag = 1;     // set to in-use
     return 0;
 }
 
@@ -237,14 +226,7 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     if (fd_entry.file_pos >= length) 
         return 0;
     bytes_read = read_data (fd_entry.inode_num, fd_entry.file_pos, buf, nbytes);
-    if ((unsigned) nbytes > length) {
-        nbytes = length;
-    }
-    //for (i = 0; i < inode_ptr[temp_pcb.inode_num].length; i++) {
-    // for (i = 0; i < 1000; i++) {
-    //     printf("%c", buf[i]);
-    // }
-    
+
     return bytes_read;
 }
 
@@ -281,7 +263,6 @@ int file_close(int32_t fd) {
  *  SIDE EFFECTS: none
  */
 int dir_open(const uint8_t* fname) {
-    // temporary for 3.2
     temp_position = 0;
     printf("dir open");
     return 0;
@@ -300,17 +281,12 @@ int dir_open(const uint8_t* fname) {
 int32_t dir_read(int32_t fd, void* buf, int32_t nbytes) {
     // ignoring fd, nbytes for 3.2
     int32_t bytes_copied;
-    //printf("dir_read");
-    // if (fd < 2 || fd > 7) return -1;
     // copy filename of the current dentry to buffer
     bytes_copied = 0;
     uint32_t curr_pos = current_pcb_pointer->fd_entry[fd].file_pos;
-    //printf("%s \n", boot_block_ptr->dir_entries[curr_pos].filename);
     strncpy_unsigned((uint8_t *) buf, boot_block_ptr->dir_entries[curr_pos].filename, FILENAME_LEN);
-    //printf("%s \n", buf);
 
     bytes_copied = strlen_unsigned((uint8_t *)buf);
-    //printf("%u", bytes_copied);
     if (current_pcb_pointer->fd_entry[fd].file_pos < boot_block_ptr->dentry_count)
         current_pcb_pointer->fd_entry[fd].file_pos++;
 
