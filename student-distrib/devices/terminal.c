@@ -124,6 +124,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 
         }
     }
+    // memset(buf,NULL,sizeof(buf));
     // choose the return n bytes  
     if (nbytes <= buf_length) {
         copy_byte = nbytes;

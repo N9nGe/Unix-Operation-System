@@ -14,7 +14,7 @@ debug
 
 
 <--------------------------------------------------------->
-                          BUG 9                          
+                          BUG 0                          
 <--------------------------------------------------------->
 Time:
     2022.11.08.
@@ -26,8 +26,8 @@ Description:
     it will generate:
 ... (correct ls)
 verylargetextwithverylongname.tx
-:-) ( a emoji like symbol)
-failed to read fd: 2562
+:-) ( a emoji like symbol) -> ASCII 0x2 text start 
+failed to read fd: 2562  /*a fixed value 2562 = 0x160 +2 ? */
 directory entry read failed
 program terminated abnoramally
 391OS>
@@ -39,3 +39,22 @@ Solution:
     well with the userlevel syscall program. We should check that.
         - Tony debug a datatype error, but nothing happens
     3. 
+
+
+
+
+<--------------------------------------------------------->
+                          BUG 1                       
+<--------------------------------------------------------->
+Time:
+    2022.11.09
+Creator:
+    Tony Wang
+Description:
+    Our syscall can't handle test 4 and 5 in ece391syserr.c
+    It failed to pass, because
+    4: empty string
+    5: shouldn't close unopen fd
+Solution:
+    I modified the boundary check of sys_open and sys_close.
+    Put in correct return value, and it's fine now.

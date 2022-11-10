@@ -110,6 +110,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
 void keyboard_init(void){
     // printf("initialize keyboard...");
     enable_irq( KEYBOARD_IRQ_NUM );
+    memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // CP4 add
     return;
 };
 /* 
@@ -170,6 +171,7 @@ void keyboard_interrupt_handler(){
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
                     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
+                    
                     keybuf_count = 0;
                     // printf("Cleared the screen: "); // TEST
                     sti();

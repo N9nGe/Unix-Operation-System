@@ -133,6 +133,12 @@ int32_t sys_open (const uint8_t* filename) {
         return SYSCALL_FAIL;
     }
 
+    // check filename length is 0
+    if(strlen_unsigned(filename) == 0 ){
+        printf("Can't open empty filename\n");
+        return SYSCALL_FAIL;
+    }
+
     int fd = -1; // file descriptor
     /* select bit */
     fd = find_next_fd();
@@ -195,14 +201,14 @@ int32_t sys_close (int32_t fd) {
     }
     // reset the designated fd_entry to 0
     if (pcb_1 -> fd_entry[fd].flag == 0) {
-        return 0;
+        return SYSCALL_FAIL;
     }
     pcb_1 -> fd_entry[fd].inode_num = 0;
     pcb_1 -> fd_entry[fd].fot_ptr = NULL;
     pcb_1 -> fd_entry[fd].filetype = 0;
     pcb_1 -> fd_entry[fd].file_pos = 0;
     pcb_1 -> fd_entry[fd].flag = 0;
-    return 0;
+    return SYSCALL_SUCCESS;
 
 }
 /* 
