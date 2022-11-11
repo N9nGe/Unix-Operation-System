@@ -16,13 +16,20 @@ void paging_init() {
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         page_directory[index].pd_kb.val = 0;
     }
+
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         page_table[index].val = 0;
     }
 
+    for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
+        vid_page_table[index].val = 0;
+    }
+
     // set up the read_write, present signal for the first page directory (split to 4kb)
     // and give the corresponding page table base address
-    page_directory[0].pd_kb.val = ((uint32_t) page_table) | R_W_PRESENT;
+    page_directory[0].pd_kb.val = ((uint32_t) page_table) | R_W_PRESENT;    // TODO
+
+    page_directory[33].pd_kb.val = ((uint32_t) vid_page_table) | R_W_PRESENT;
 
     // set up the read_write, present signal for the second page directory (kernel-4mb page)
     // and give the corresponding page table base address
@@ -35,6 +42,11 @@ void paging_init() {
     page_table[VIDEO_MEMORY >> PT_SHIFT].present = 1;
     page_table[VIDEO_MEMORY >> PT_SHIFT].read_write = 1;
     page_table[VIDEO_MEMORY >> PT_SHIFT].base_addr = (VIDEO_MEMORY >> PT_SHIFT);
+
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;
+    vid_page_table[0].base_addr = 0;
 
     // enable the paging 
     asm volatile(
