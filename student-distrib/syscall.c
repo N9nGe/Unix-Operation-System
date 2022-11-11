@@ -87,7 +87,7 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
     fd_entry[1].flag = 1;
     fd_entry[1].fot_ptr = &terminal_stdout;
 
-    return 0;
+    return SYSCALL_SUCCESS;
 }
 
 /* find_pcb()
@@ -410,6 +410,7 @@ int32_t sys_halt(uint8_t status){
     // there is no program -> need to rerun shell
     sti();
     if (task_counter == 0) {
+        printf("Restart the Base shell...\n");
         sys_execute((uint8_t*)"shell");
     } else {
         asm volatile (
