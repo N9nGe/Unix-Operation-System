@@ -518,27 +518,21 @@ int32_t sys_getargs( uint8_t* buf, int32_t nbytes){
  * Side effect: none
  */
 int32_t sys_vidmap( uint8_t** screen_start){
-    // User video start memory?
-    // uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT + 1; 
-    // vid_page_table[index].present = 1;
-    // vid_page_table[index].read_write = 1;
+    // check if the pointer passed in is valid
+    if (screen_start == NULL || screen_start < 0x08000000 || screen_start > 0x08400000)
+        return -1;
 
+    uint32_t index;
+    for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
+        vid_page_table[index].val = 0;
+    }
 
-    // if( )
+    page_directory[33].pd_kb.val = ((uint32_t) vid_page_table) | 7;
 
-    /*check whether the address falls within the address range covered by the single user-level page. 
-Note that the video memory will require you to add
-another page mapping for the program, in this case a 4 kB page. */
-    // allocate the 4kb video memory for current video
-    
-    
-    /* Similar to page_execute
-    uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT + 1; 
-    page_directory[index].pd_mb.present = 1;
-    page_directory[index].pd_mb.read_write = 1;
-    page_directory[index].pd_mb.user_supervisor = 1;
-    page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;  
+    vid_page_table[0].base_addr = VIDEO_MEMORY >> PT_SHIFT;        // TODO
 
     // flush the TLB (OSdev)
     asm volatile(
@@ -548,7 +542,8 @@ another page mapping for the program, in this case a 4 kB page. */
         : 
         : "eax", "cc"
     );
-    */
+
+    *screen_start = (uint32_t*) 0x08400000;
 
     return 0;
 }
