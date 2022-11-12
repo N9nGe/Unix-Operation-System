@@ -689,8 +689,8 @@ void test_sys_open() {
  */
 void execute_test() {
 	clear();
-	UI_START();
-	printf("Welcome to MentOS!\n");
+	// UI_START();
+	// printf("Welcome to MentOS!\n");
 	sys_execute((uint8_t*)"shell");
 	/*Inidivitual test*/
 	// sys_execute((uint8_t*)"testprint");

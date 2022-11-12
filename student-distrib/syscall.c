@@ -527,12 +527,14 @@ int32_t sys_vidmap( uint8_t** screen_start){
         vid_page_table[index].val = 0;
     }
 
-    page_directory[33].pd_kb.val = ((uint32_t) vid_page_table) | 7;
+    page_directory[34].pd_kb.val = ((uint32_t) vid_page_table) | 23;
 
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
     vid_page_table[0].base_addr = VIDEO_MEMORY >> PT_SHIFT;        // TODO
+    vid_page_table[0].cache_disabled = 1;
+    vid_page_table[0].dirty = 1;
 
     // flush the TLB (OSdev)
     asm volatile(
@@ -543,7 +545,8 @@ int32_t sys_vidmap( uint8_t** screen_start){
         : "eax", "cc"
     );
 
-    *screen_start = (uint32_t*) 0x08400000;
+    // memset(0x08800000, 't', 200);
+    *screen_start = (uint8_t*) 0x08800000;
 
     return 0;
 }
