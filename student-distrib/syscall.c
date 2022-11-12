@@ -503,7 +503,53 @@ int32_t sys_getargs( uint8_t* buf, int32_t nbytes){
     return 0;
 }
 
+
+
+/* sys_vidmap
+ * Description: maps the text-mode video memory into user space at a pre-set virtual address. 
+ * address returned is always the same, it should be written into the memory location provided 
+ * by the caller (which must be checked for validity). 
+ * 
+ * Inputs: 
+ *    screen_start -- destination pointer-> the screen memory the user program specified
+ * Return Value: 
+ * - If the location is invalid, the call should return -1.
+ * - 0, for the success address
+ * Side effect: none
+ */
 int32_t sys_vidmap( uint8_t** screen_start){
+    // User video start memory?
+    // uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT + 1; 
+    // vid_page_table[index].present = 1;
+    // vid_page_table[index].read_write = 1;
+
+
+    // if( )
+
+    /*check whether the address falls within the address range covered by the single user-level page. 
+Note that the video memory will require you to add
+another page mapping for the program, in this case a 4 kB page. */
+    // allocate the 4kb video memory for current video
+    
+    
+    /* Similar to page_execute
+    uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT + 1; 
+    page_directory[index].pd_mb.present = 1;
+    page_directory[index].pd_mb.read_write = 1;
+    page_directory[index].pd_mb.user_supervisor = 1;
+    page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
+
+
+    // flush the TLB (OSdev)
+    asm volatile(
+        "movl %%cr3, %%eax;" 
+        "movl %%eax, %%cr3;"
+        : 
+        : 
+        : "eax", "cc"
+    );
+    */
+
     return 0;
 }
 /*Extra point, useless for now*/

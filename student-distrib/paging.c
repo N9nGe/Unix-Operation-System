@@ -45,8 +45,8 @@ void paging_init() {
 
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
-    vid_page_table[0].user_supervisor = 1;
-    vid_page_table[0].base_addr = 0;
+    vid_page_table[0].user_supervisor = 1;  
+    vid_page_table[0].base_addr = 0;        // Sure?
 
     // enable the paging 
     asm volatile(
