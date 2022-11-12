@@ -43,6 +43,8 @@ int32_t sys_open (const uint8_t* filename);
 
 int32_t sys_close (int32_t fd);
 //Checkpoint 4
+void command_to_arg(uint8_t* arg, uint8_t* command);
+
 int32_t sys_getargs(uint8_t* buf, int32_t nbytes);
 
 int32_t sys_vidmap( uint8_t** screen_start);
@@ -65,6 +67,7 @@ typedef struct pcb_t {
     uint32_t saved_esp;    // stack pointer save
     uint32_t saved_ebp;    // Base pointer save
     uint8_t active;        // test bit
+    uint8_t cmd[128];
     fd_entry_t fd_entry[8];// file descriptor entry for current pcb
 } pcb_t;
 /*Other CP3 structure location*/

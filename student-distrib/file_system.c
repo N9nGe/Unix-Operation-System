@@ -216,18 +216,21 @@ int32_t file_open(const uint8_t* filename) {
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
-    // unsigned i; // not used
     unsigned length;
     int32_t bytes_read;
-    // if (fd < 2 || fd > 7) return -1;
-    fd_entry_t fd_entry = current_pcb_pointer->fd_entry[fd];
-    //printf("%u", buf[0]);
-    length = inode_ptr[fd_entry.inode_num].length;
-    if (fd_entry.file_pos >= length) 
+    length = inode_ptr[current_pcb_pointer->fd_entry[fd].inode_num].length;
+    if (current_pcb_pointer->fd_entry[fd].file_pos >= length)  {
         return 0;
-    bytes_read = read_data (fd_entry.inode_num, fd_entry.file_pos, buf, nbytes);
+    }
+    bytes_read = read_data (current_pcb_pointer->fd_entry[fd].inode_num, 
+                            current_pcb_pointer->fd_entry[fd].file_pos, buf, nbytes);
 
-    return bytes_read;
+    if (bytes_read > nbytes) {
+        current_pcb_pointer->fd_entry[fd].file_pos += nbytes;
+        return nbytes;
+    }
+    current_pcb_pointer->fd_entry[fd].file_pos += bytes_read;
+    return bytes_read;   // return bytes copied 
 }
 
 /* 
