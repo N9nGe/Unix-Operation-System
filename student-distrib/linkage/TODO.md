@@ -7,6 +7,8 @@
 3. Debug keyboard
     - Tab
     - edge case
+    - will the last space make any problem?
+        - print the keyboard counter at end
     - record video 
     - Design a data structure for it
 
@@ -23,3 +25,7 @@
 
 */
 
+5. fix the start ui
+
+
+6. 
