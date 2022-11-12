@@ -153,7 +153,11 @@ int32_t sys_open (const uint8_t* filename) {
         return SYSCALL_FAIL;
     } else {
         dentry_t temp_dentry;
-        if (read_dentry_by_name (filename, &temp_dentry) != 0){     // check if read dentry succeeded
+        printf("%s", filename);
+
+        if (read_dentry_by_name ((uint8_t *) filename, &temp_dentry) != 0){     // check if read dentry succeeded
+            //printf("%s", filename);
+
             return SYSCALL_FAIL;
         }
         pcb_1->fd_entry[fd].inode_num = temp_dentry.inode_num;
@@ -179,6 +183,9 @@ int32_t sys_open (const uint8_t* filename) {
 
         } 
     }
+    printf("%s", filename);
+
+    printf("%d", fd);
     return fd;
     
 }
@@ -276,8 +283,6 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr -> write))(fd, buf, nbytes); 
     return ret;
 }
-
-
 
 /* execute (const uint8_t* command)
  * Description: system call execute
@@ -498,7 +503,35 @@ void page_halt(uint32_t parent_id) {
 
 //Checkpoint 4 
 
-int32_t sys_getargs( uint8_t* buf, int32_t nbytes){
+int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
+    pcb_t * pcb_1;
+    int32_t ret;
+    int32_t i;
+    int32_t j;
+    int32_t lastend;
+    uint8_t tmp_buf[15];
+    pcb_1 = find_pcb();
+
+    if (pcb_1 -> fd_entry[0].flag == 0) {
+        return -1;
+    }
+    ret = terminal_read(0, buf, nbytes);
+    j = 0;
+    for (i = 0; i < sizeof(buf); i++) {
+        // stop at the first space
+        if (buf[i] == SPACE || buf[i] == 0) {
+            for (j = 0; j < 32; j++) {
+                if (buf[i + j + 1] == SPACE || buf[i + j + 1] == 0) {
+                    break;
+                }
+                tmp_buf[j] = buf[i + j + 1];
+                }
+            break;
+        }
+    }
+    tmp_buf[strlen_unsigned(tmp_buf) - 1] = NULL; 
+    memset(buf,NULL,sizeof(buf));
+    strncpy_unsigned(buf, tmp_buf, 32);
     return 0;
 }
 

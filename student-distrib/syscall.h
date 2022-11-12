@@ -43,7 +43,7 @@ int32_t sys_open (const uint8_t* filename);
 
 int32_t sys_close (int32_t fd);
 //Checkpoint 4
-int32_t sys_getargs( uint8_t* buf, int32_t nbytes);
+int32_t sys_getargs(uint8_t* buf, int32_t nbytes);
 
 int32_t sys_vidmap( uint8_t** screen_start);
 /*Extra point, useless for now*/
