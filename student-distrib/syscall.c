@@ -7,7 +7,9 @@
 #define FD_MAX      7
 
 static uint32_t task_counter = 0;
-pcb_t * current_pcb_pointer;
+pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE);
+pcb_t * parent_pcb = NULL;
+static uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
 
 /*file operation table pointer */
 /*The following are a series of device-speific
@@ -90,6 +92,16 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
     return 0;
 }
 
+uint32_t find_pid() {
+    uint32_t pcb_bitmap = 0;
+    while (pcb_counter[pcb_bitmap] != 0) {
+        pcb_bitmap++;
+        if (pcb_bitmap >= 6) {
+            return 0;
+        }
+    }
+    return (pcb_bitmap + 1);
+}
 /* find_pcb()
  * Description: get the current pcb pointer
  * Inputs: task_pointer, a global variable used to linearly accumulate the pcb
@@ -97,13 +109,17 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
  * Function: get the current pcb by the task counter
  */
 pcb_t* find_pcb() {
-    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter)));
+    uint32_t pid = find_pid();
+    if (pid == 0) {
+        return NULL;
+    }
+    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (pid)));
 }
 
 
 int32_t find_next_fd() {
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     int i;
     for (i = FD_MIN; i < FD_MAX + 1; i++) {
         if (pcb_1 -> fd_entry[i].flag == 0) {
@@ -125,8 +141,8 @@ int32_t find_next_fd() {
  *  SIDE EFFECTS: none
  */
 int32_t sys_open (const uint8_t* filename) {
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
         printf("1 failed to open %s\n",filename);
@@ -197,8 +213,8 @@ int32_t sys_open (const uint8_t* filename) {
  */
 int32_t sys_close (int32_t fd) {
     //get current pcb as pcb_1
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     // check if fd is closable
     if (fd < FD_MIN || fd > FD_MAX) {
         return SYSCALL_FAIL;
@@ -228,8 +244,8 @@ int32_t sys_close (int32_t fd) {
  */
 int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //get current pcb as pcb_1
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     memset(buf, 0, sizeof(buf));
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
@@ -261,8 +277,8 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  */
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     //get current pcb as pcb_1
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
@@ -321,19 +337,29 @@ int32_t sys_execute (const uint8_t* command){
 
     cli();
     // paging the new memory
-    paging_execute();
+    paging_execute(find_pid());
     // load the file into USER_PROGRAM_IMAGE_START(virtual memory)
     if (read_data(execute_file.inode_num, 0, (uint8_t*) USER_PROGRAM_IMAGE_START, inode_ptr[execute_file.inode_num].length) == 0) {
         return SYSCALL_FAIL;
     }
     
     // create new pcb
+    int32_t parent_id = 0;
+    if (task_counter > 1) {
+        parent_id = current_pcb_pointer->pid;
+    }
+    parent_pcb = current_pcb_pointer;
     pcb_t* new_pcb = pcb_initilize();
+    if (new_pcb == NULL) {
+        printf("No position for new pcb!\n");
+        return SYSCALL_FAIL;
+    }
     current_pcb_pointer = new_pcb;
     // update pid and parent_id
-    new_pcb->pid = task_counter;
-    new_pcb->parent_id = task_counter - 1;
+    new_pcb->pid = find_pid();
+    new_pcb->parent_id = parent_id;
     strcpy_unsigned(new_pcb->cmd, tmp_cmd);
+    pcb_counter[new_pcb->pid - 1] = 1;
     
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
@@ -354,7 +380,7 @@ int32_t sys_execute (const uint8_t* command){
     // TSS
     // no need to change ss0 because kernel using the same kernel stack(initilize at booting)
     // get the current stack address
-    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter - 1) - AVOID_PAGE_FAULT);
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (new_pcb->pid - 1) - AVOID_PAGE_FAULT);
     sti();
 
     // context switch && IRET
@@ -392,7 +418,9 @@ int32_t sys_halt(uint8_t status){
         exception_flag = 0;
     }
     cli();
-    pcb_t* pcb = find_pcb();
+    pcb_t* pcb = current_pcb_pointer;
+    pcb_counter[pcb->pid - 1] = 0;
+    current_pcb_pointer = parent_pcb;
     
     // point to the parent kernel stack
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - AVOID_PAGE_FAULT); 
@@ -462,14 +490,14 @@ void parse_arg(const uint8_t* command, uint8_t* filename){
  * Return Value: none
  * Function: allocate the page begin from 8mb in the kernel memory
  */
-void paging_execute() {
+void paging_execute(uint32_t pid) {
     // allocate the 4mb page for each process
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
     page_directory[index].pd_mb.present = 1;
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + task_counter + 1); // give the address of the process
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + pid); // give the address of the process
     task_counter++; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(
@@ -487,7 +515,7 @@ void paging_execute() {
  * Return Value: none
  * Function: map to the parent
  */
-void page_halt(uint32_t parent_id) {
+void page_halt(int32_t parent_id) {
     // allocate the 4mb page for each process
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
     page_directory[index].pd_mb.present = 1;
@@ -526,13 +554,10 @@ void command_to_arg(uint8_t* arg, uint8_t* command) {
 }
 
 int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
-    pcb_t * pcb_1;
-    int32_t ret;
+    pcb_t * pcb_1 = current_pcb_pointer;
     int32_t i;
     int32_t j;
-    int flag = 0;
-    int32_t lastend;
-    pcb_1 = find_pcb();
+    // pcb_1 = find_pcb();
 
     if (pcb_1 -> fd_entry[0].flag == 0) {
         return -1;
