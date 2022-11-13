@@ -87,7 +87,7 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
     fd_entry[1].flag = 1;
     fd_entry[1].fot_ptr = &terminal_stdout;
 
-    return 0;
+    return SYSCALL_SUCCESS;
 }
 
 /* find_pcb()
@@ -420,6 +420,7 @@ int32_t sys_halt(uint8_t status){
     // there is no program -> need to rerun shell
     sti();
     if (task_counter == 0) {
+        printf("Restart the Base shell...\n");
         sys_execute((uint8_t*)"shell");
     } else {
         asm volatile (
@@ -555,7 +556,51 @@ int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
     return 0;
 }
 
+
+
+/* sys_vidmap
+ * Description: maps the text-mode video memory into user space at a pre-set virtual address. 
+ * address returned is always the same, it should be written into the memory location provided 
+ * by the caller (which must be checked for validity). 
+ * 
+ * Inputs: 
+ *    screen_start -- destination pointer-> the screen memory the user program specified
+ * Return Value: 
+ * - If the location is invalid, the call should return -1.
+ * - 0, for the success address
+ * Side effect: none
+ */
 int32_t sys_vidmap( uint8_t** screen_start){
+    // check if the pointer passed in is valid
+    if (screen_start == NULL || screen_start < 0x08000000 || screen_start > 0x08400000)
+        return -1;
+
+    uint32_t index;
+    for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
+        vid_page_table[index].val = 0;
+    }
+
+    page_directory[34].pd_kb.val = ((uint32_t) vid_page_table) | 23;
+
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;  
+    vid_page_table[0].base_addr = VIDEO_MEMORY >> PT_SHIFT;        // TODO
+    vid_page_table[0].cache_disabled = 1;
+    vid_page_table[0].dirty = 1;
+
+    // flush the TLB (OSdev)
+    asm volatile(
+        "movl %%cr3, %%eax;" 
+        "movl %%eax, %%cr3;"
+        : 
+        : 
+        : "eax", "cc"
+    );
+
+    // memset(0x08800000, 't', 200);
+    *screen_start = (uint8_t*) 0x08800000;
+
     return 0;
 }
 /*Extra point, useless for now*/

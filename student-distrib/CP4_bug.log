@@ -38,7 +38,7 @@ Solution:
     2. TA said in demo, this may because the system's parameter and return value doesn't fit
     well with the userlevel syscall program. We should check that.
         - Tony debug a datatype error, but nothing happens
-    3. 
+    3. We found this bug is related to BUG 2, ie. the boundary check failed in filesystem driver
 
 
 
@@ -71,3 +71,24 @@ Description:
 Solution:
     Add the condition check to determine the correct copy length of the buffer after copying the data.
 
+
+<--------------------------------------------------------->
+                          BUG 3                          
+<--------------------------------------------------------->
+Time:
+    2022.11.10.
+Creator:
+    Jerry Wang && Tony Wang.
+Description:
+    vidmap: We finished and execute the vidmap by fish program
+    but there is no fish or any other thing displayed on the screen
+Solution:
+    1. no fish
+    2. all black
+    3. memset, white background, font number wrong <100>   
+    vidmap display method ?-> ASCII + COLOR 2BYTE
+symptom:
+tttttttt_____________
+________
+
+    4. 
