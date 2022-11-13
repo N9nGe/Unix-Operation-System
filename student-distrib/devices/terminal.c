@@ -113,7 +113,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
-            putc(c);
+            putc_advanced(c);
 
     }
     

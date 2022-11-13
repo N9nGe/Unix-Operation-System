@@ -510,9 +510,7 @@ void page_halt(uint32_t parent_id) {
     asm volatile(
         "movl %%cr3, %%eax;" 
         "movl %%eax, %%cr3;"
-        : 
-        : 
-        : "eax", "cc"
+        : : : "eax", "cc"
     );
 }
 
@@ -583,7 +581,8 @@ int32_t sys_vidmap( uint8_t** screen_start){
     // check if the pointer passed in is valid
     if (screen_start == NULL || screen_start < 0x08000000 || screen_start > 0x08400000)
         return -1;
-
+    // TODO : fix this warning!
+    // Better: 
     uint32_t index;
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         vid_page_table[index].val = 0;
