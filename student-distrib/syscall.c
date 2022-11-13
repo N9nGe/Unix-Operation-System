@@ -337,7 +337,7 @@ int32_t sys_execute (const uint8_t* command){
     // check whether new pcb has the position
     if (find_pid() == 0) {
         printf("No position for new pcb!\n");
-        return SYSCALL_FAIL;
+        return 1;
     }
 
     cli();
