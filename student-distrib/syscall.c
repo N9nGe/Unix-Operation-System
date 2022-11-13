@@ -240,7 +240,7 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     }
     if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        printf("failed to read fd: %d\n",fd);
+        // printf("failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     /*Function code is one line the return value */
@@ -272,7 +272,7 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     }
     if (fd < 1 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        printf("failed to write fd: %d\n",fd);
+        // printf("failed to write fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
 
@@ -497,6 +497,15 @@ void page_halt(uint32_t parent_id) {
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id); // give the address of the process
     task_counter--; // decrement the counter
+
+    //CP 4: remove the vid page table
+    vid_page_table[0].present = 0;
+    vid_page_table[0].read_write = 0;
+    vid_page_table[0].user_supervisor = 0;  
+    vid_page_table[0].base_addr = NULL;
+    vid_page_table[0].cache_disabled = 0;
+    vid_page_table[0].dirty = 0;
+
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 
