@@ -14,7 +14,7 @@
 
 page_directory_t page_directory[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
 page_table_entry_t page_table[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
-
+page_table_entry_t vid_page_table[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
 
 void paging_init();
 

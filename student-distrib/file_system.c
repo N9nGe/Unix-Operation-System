@@ -6,6 +6,7 @@ inode_t * inode_ptr;
 dentry_t * dentry_ptr;
 boot_block_t * boot_block_ptr; 
 static uint32_t temp_position;  // temporary file position 
+extern pcb_t* current_pcb_pointer;
 
 /* 
  *  file_system_init
