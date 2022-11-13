@@ -334,6 +334,11 @@ int32_t sys_execute (const uint8_t* command){
         execute_code_buf[2] != EXE_MAGIC_3 || execute_code_buf[3] != EXE_MAGIC_4) {
         return SYSCALL_FAIL;
     }
+    // check whether new pcb has the position
+    if (find_pid() == 0) {
+        printf("No position for new pcb!\n");
+        return SYSCALL_FAIL;
+    }
 
     cli();
     // paging the new memory
@@ -350,14 +355,15 @@ int32_t sys_execute (const uint8_t* command){
     }
     parent_pcb = current_pcb_pointer;
     pcb_t* new_pcb = pcb_initilize();
-    if (new_pcb == NULL) {
-        printf("No position for new pcb!\n");
-        return SYSCALL_FAIL;
-    }
+    // if (new_pcb == NULL) {
+    //     printf("No position for new pcb!\n");
+    //     return SYSCALL_FAIL;
+    // }
     current_pcb_pointer = new_pcb;
     // update pid and parent_id
     new_pcb->pid = find_pid();
     new_pcb->parent_id = parent_id;
+    new_pcb->parent_pcb = parent_pcb;
     strcpy_unsigned(new_pcb->cmd, tmp_cmd);
     pcb_counter[new_pcb->pid - 1] = 1;
     
@@ -420,7 +426,7 @@ int32_t sys_halt(uint8_t status){
     cli();
     pcb_t* pcb = current_pcb_pointer;
     pcb_counter[pcb->pid - 1] = 0;
-    current_pcb_pointer = parent_pcb;
+    current_pcb_pointer = pcb->parent_pcb;
     
     // point to the parent kernel stack
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - AVOID_PAGE_FAULT); 
