@@ -67,7 +67,7 @@ typedef struct pcb_t {
     uint32_t saved_esp;    // stack pointer save
     uint32_t saved_ebp;    // Base pointer save
     uint8_t active;        // test bit
-    uint8_t cmd[128];
+    uint8_t cmd[1024];
     fd_entry_t fd_entry[8];// file descriptor entry for current pcb
 } pcb_t;
 /*Other CP3 structure location*/

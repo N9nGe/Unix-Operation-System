@@ -295,10 +295,12 @@ int32_t sys_execute (const uint8_t* command){
     // filename buffer used by parse the command
     uint8_t filename[FILENAME_LEN];
     uint8_t tmp_cmd[strlen_unsigned(command)];
-    strcpy_unsigned(tmp_cmd, command);
-
+    
     // initialize the filename buffer
     memset(filename, 0, FILENAME_LEN);
+    memset(tmp_cmd, 0, strlen_unsigned(command));
+
+    strcpy_unsigned(tmp_cmd, command);
     // parse the command(fill the command into the buffer)
     parse_arg(command, filename);
 
@@ -332,7 +334,6 @@ int32_t sys_execute (const uint8_t* command){
     new_pcb->pid = task_counter;
     new_pcb->parent_id = task_counter - 1;
     strcpy_unsigned(new_pcb->cmd, tmp_cmd);
-    //printf("copied: %s", tmp_cmd);
     
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
@@ -411,6 +412,7 @@ int32_t sys_halt(uint8_t status){
     pcb->fd_entry[1].inode_num = 0;
     pcb->fd_entry[1].fot_ptr = NULL;
     pcb->active = 0;
+    memset(pcb->cmd, 0, sizeof(pcb->cmd));
     // restore parent paging
     page_halt(pcb->parent_id);
     
@@ -506,13 +508,14 @@ void page_halt(uint32_t parent_id) {
 
 //Checkpoint 4 
 void command_to_arg(uint8_t* arg, uint8_t* command) {
-    int32_t i;
-    int32_t j;
-    for (i = 0; i < 1024; i++) {
+    uint32_t i;
+    uint32_t j;
+    memset(arg, 0, sizeof(arg));
+    for (i = 0; i < 128; i++) {
         // stop at the first space
-        if (command[i] == SPACE || command[i] == 0) {
-            for (j = 0; j < 1024; j++) {
-                if (command[i + j + 1] == SPACE || command[i + j + 1] == 0) {
+        if (command[i] == SPACE) {
+            for (j = 0; j < 128; j++) {
+                if (command[i + j + 1] == '\0') {
                     break;
                 }
                 arg[j] = command[i + j + 1];
@@ -520,7 +523,6 @@ void command_to_arg(uint8_t* arg, uint8_t* command) {
             break;
         }
     }
-    //tmp_buf[strlen_unsigned(tmp_buf) - 1] = NULL; 
 }
 
 int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
@@ -528,19 +530,28 @@ int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
     int32_t ret;
     int32_t i;
     int32_t j;
+    int flag = 0;
     int32_t lastend;
-    uint8_t tmp_buf[sizeof(buf)];
     pcb_1 = find_pcb();
 
     if (pcb_1 -> fd_entry[0].flag == 0) {
         return -1;
     }
+    memset(buf, NULL, nbytes);
+    
+    for (i = 0; i < 1024; i++) {
+        // stop at the first space
+        if (pcb_1->cmd[i] == SPACE || pcb_1->cmd[i] == 0) {
+            for (j = 0; j < 1024; j++) {
+                if (pcb_1->cmd[i + j + 1] == SPACE || pcb_1->cmd[i + j + 1] == 0) {
+                    break;
+                }
+                buf[j] = pcb_1->cmd[i + j + 1];
+                }
+            break;
+        }
+    }
 
-    printf("%s\n", pcb_1->cmd);
-    //ret = terminal_read(0, buf, nbytes);
-    //j = 0;
-    command_to_arg(buf, pcb_1->cmd);
-    printf("%s\n", buf);
     return 0;
 }
 

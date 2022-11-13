@@ -55,7 +55,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // set the flag off and wait for the [enter] pressed
     kb_flag = 0;
     while (kb_flag == 0); // lock the terminal until the keyboard flag is set 1
-
+    memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
@@ -113,13 +113,13 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
             c = char_buf[index];
 
         if( c != '\b' ) {// ignore the backspace
-            if (c == '\n') {
-                // buf_length--;
-                // putc_advanced('\n');
-            }
-            if (c == '\0') {
-                // putc_advanced('\n');
-            }
+            // if (c == '\n') {
+            //     // buf_length--;
+            //     // putc_advanced('\n');
+            // }
+            // if (c == '\0') {
+            //     // putc_advanced('\n');
+            // }
             putc_advanced(c);
 
         }
