@@ -235,12 +235,12 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
     if (fd == 1) {
-        printf("failed to read fd: %d\n",fd);
+        // printf("1 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        // printf("failed to read fd: %d\n",fd);
+        // printf("2 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     /*Function code is one line the return value */

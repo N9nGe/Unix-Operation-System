@@ -217,10 +217,10 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
-    if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
-        screen_x = 0; 
-        screen_y +=1 ; 
-    }
+    // if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
+    //     screen_x = 0; 
+    //     screen_y +=1 ; 
+    // }
     if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one
@@ -230,7 +230,7 @@ void putc(uint8_t c) {
 
 /* void putc_advanced(uint8_t c);
  * Author : Tony 1 10.22.2022
- * Inputs: uint_8* c = character to print
+ * Inputs: uint_8 c = character to print
  * Return Value: void
  *  Function: Output a character to the console */
 void putc_advanced(uint8_t c) {

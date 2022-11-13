@@ -91,7 +91,9 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
  *      buf     -- buffer used to 
  *      nbytes  --
  *  OUTPUTS: none
- *  RETURN VALUE: none
+ *  RETURN VALUE: 
+ *      0  -- success
+ *      -1 -- fail
  *  SIDE EFFECTS: none
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
@@ -104,26 +106,17 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     // loop index for copy
     int32_t index;
     // Output charcter
-    int8_t  c;
+    uint8_t  c;
     int32_t buf_length = strlen(buf);
-    const char* char_buf = buf; 
+    const uint8_t* char_buf = buf; 
     // copy nbytes from the buffer to the terminal 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
+            putc(c);
 
-        if( c != '\b' ) {// ignore the backspace
-            // if (c == '\n') {
-            //     // buf_length--;
-            //     // putc_advanced('\n');
-            // }
-            // if (c == '\0') {
-            //     // putc_advanced('\n');
-            // }
-            putc_advanced(c);
-
-        }
     }
+    
     // memset(buf,NULL,sizeof(buf));
     // choose the return n bytes  
     if (nbytes <= buf_length) {
@@ -131,7 +124,6 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     } else {
         copy_byte = buf_length;
     }
-    // copy_byte = index;
     return copy_byte;// return number of bytes successfully copied
 }
 
