@@ -211,6 +211,11 @@ void putc(uint8_t c) {
         screen_y++;
         screen_x = 0;
     } else {
+        // if( screen_x >= NUM_COLS-1){ // 79, need to shift to next line
+        //     screen_x = 0; 
+        //     screen_y +=1 ; 
+        //     keybuf_count++;
+        // }
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB; 
         screen_x++;
@@ -238,9 +243,6 @@ void putc_advanced(uint8_t c) {
         if( screen_x >= NUM_COLS-1){ // 79, need to shift to next line
             screen_x = 0; 
             screen_y +=1 ; 
-
-        // keyboard_buf[keybuf_count] = '\n';
-        
             keybuf_count++;
         }
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;

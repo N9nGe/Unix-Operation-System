@@ -28,4 +28,8 @@
 5. fix the start ui
 
 
-6. 
+6. OS DEV: mouse choose and copy paste
+
+Q how to 
+
+7. gdb test the cat hello, know keyboard buf case 
