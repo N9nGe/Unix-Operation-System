@@ -12,9 +12,10 @@
 # return value: none
 syscall_handler:      
     /* Push registers and parameters */                                                
-    pushl %esi
-    pushl %edi
     pushl %esp
+    pushl %edi
+    pushl %esi
+
     pushl %edx
     pushl %ecx
     pushl %ebx
@@ -32,9 +33,9 @@ VALID_SYS:
     popl %ebx
     popl %ecx
     popl %edx
-    popl %esp
-    popl %edi
     popl %esi
+    popl %edi
+    popl %esp
                                        
     iret                                  
 # leave other 4 in CP4

@@ -702,6 +702,34 @@ void execute_test() {
 
 
 /* Checkpoint 4 tests */
+int vidmap_test(){
+	TEST_HEADER;
+	int result = PASS;
+	// int correct_PT = 1 + 2 + 4 + 16 + 64 +(0xB8000 >> 12);
+	// printf("correctPT is %d\n",correct_PT);
+	// uint8_t test_addr[5];
+	// test_addr[0] = (uint8_t)0x08300000;
+	// int ret;
+	// if (0 != (ret = sys_vidmap(test_addr[0])))
+	// {
+	// 	result = FAIL;
+	// }
+	// if( correct_PT != vid_page_table[0].val){
+	// 	result = FAIL;
+	// }
+	// printf("vidPT is %d\n",vid_page_table[0].val);
+
+	return result;
+}
+/*
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;  
+    vid_page_table[0].base_addr = VIDEO_MEMORY >> PT_SHIFT;        
+    vid_page_table[0].cache_disabled = 1;
+    vid_page_table[0].dirty = 1;
+
+*/
 /* Checkpoint 5 tests */
 
 
