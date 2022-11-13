@@ -217,10 +217,6 @@ void putc(uint8_t c) {
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
-    // if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
-    //     screen_x = 0; 
-    //     screen_y +=1 ; 
-    // }
     if (screen_y == NUM_ROWS){
         scroll_up(video_mem);
         // now screen_x is retained, shift up screen_y by one
@@ -239,22 +235,21 @@ void putc_advanced(uint8_t c) {
         screen_x = 0;
     } else{// First detect backspace 
     // common case
-        if(c != '\b'){
+        if( screen_x >= NUM_COLS-1){ // 79, need to shift to next line
+            screen_x = 0; 
+            screen_y +=1 ; 
+
+        // keyboard_buf[keybuf_count] = '\n';
+        
+            keybuf_count++;
+        }
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
             screen_x++;
             screen_x %= NUM_COLS;
             screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
-        }
     }
-    if( screen_x == NUM_COLS-1){ // 79, need to shift to next line
-        screen_x = 0; 
-        screen_y +=1 ; 
-        // if (keyboard_buf[keybuf_count]!= '\t'){
-            keyboard_buf[keybuf_count] = '\n';
-        // }
-        keybuf_count++;
-    }
+
 
     // When the cursor is at the bottom of terminal
     if (screen_y == NUM_ROWS){
