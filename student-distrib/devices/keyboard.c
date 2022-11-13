@@ -119,12 +119,9 @@ void keyboard_init(void){
  *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: none
- *  SIDE EFFECTS: none
- *  Notice: I used a cli-sti to create a crtical section, but it may be
- *  unnecessary? I delete it now
+ *  SIDE EFFECTS: set kb_flag on when \n is entered
  */
 void keyboard_interrupt_handler(){
-    // printf("key pressed ");
     cli(); // Clear all the interrupt first
     send_eoi(KEYBOARD_IRQ_NUM); // end present interrupt
     // NOTICE: it must be here! 
@@ -139,9 +136,8 @@ void keyboard_interrupt_handler(){
     }
     if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) ){ // leave the last bit for \n or \b
         if( value == '\n' || value == '\b'){
-            // let it go
+            // printf("\nfirst count is %d\n",keybuf_count); // TEST
         }else{
-            // printf("  [MAX]");
             sti();
             return; // Reject further input
         }
@@ -151,7 +147,7 @@ void keyboard_interrupt_handler(){
         if( shift_buf == 1){// decide the scancode
             value = scancode[key][1];
         }
-            // printf("KEY pressed ["); // used for testing
+            
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
@@ -161,10 +157,10 @@ void keyboard_interrupt_handler(){
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
-                    keybuf_count++;
                     keybuf_count = 0;
-                    putc_advanced(value);
                     kb_flag = 1;            // interrupt the terminal 
+                    putc_advanced(value);
+                    // printf("\nsecond count is %d\n",keybuf_count); // TEST
                     sti();
                     return;
                 }
@@ -209,10 +205,6 @@ void keyboard_interrupt_handler(){
                     putc_advanced(value);
                     keyboard_buf[keybuf_count] = value;
                     keybuf_count++;
-                
-                
-                
-            // printf("] ");  // used for testing
     }
     
     sti();
