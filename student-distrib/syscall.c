@@ -476,9 +476,7 @@ void paging_execute() {
     asm volatile(
         "movl %%cr3, %%eax;" 
         "movl %%eax, %%cr3;"
-        : 
-        : 
-        : "eax", "cc"
+        : : : "eax", "cc"
     );
 }
 
@@ -579,10 +577,9 @@ int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
  */
 int32_t sys_vidmap( uint8_t** screen_start){
     // check if the pointer passed in is valid
-    if (screen_start == NULL || screen_start < 0x08000000 || screen_start > 0x08400000)
-        return -1;
-    // TODO : fix this warning!
-    // Better: 
+    if (screen_start == NULL || screen_start < VIDMAP_LOWER_BOUND || screen_start > VIDMAP_UPPER_BOUND)
+        return SYSCALL_FAIL;
+
     uint32_t index;
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         vid_page_table[index].val = 0;
@@ -601,13 +598,11 @@ int32_t sys_vidmap( uint8_t** screen_start){
     asm volatile(
         "movl %%cr3, %%eax;" 
         "movl %%eax, %%cr3;"
-        : 
-        : 
-        : "eax", "cc"
+        : : : "eax", "cc"
     );
 
     // memset(0x08800000, 't', 200);
-    *screen_start = (uint8_t*) 0x08800000;
+    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
 
     return 0;
 }

@@ -10,7 +10,7 @@
 #include "devices/terminal.h"
 #include "idt.h"
 
-
+/*CP3*/
 #define USER_PROGRAM_IMAGE_START     0x08048000
 #define KERNEL_BOTTOM                0x00800000
 #define PROCESS_SIZE                 0X2000
@@ -25,7 +25,10 @@
 #define AVOID_PAGE_FAULT             4
 #define SPACE                        0x20
 
-
+/*CP4*/
+#define VIDMAP_UPPER_BOUND          0x08400000
+#define VIDMAP_LOWER_BOUND          0x08000000
+#define VIDMAP_NEW_ADDRESS          0x08800000
 /*MentOS System Calls*/
 // Return value:
 //     -  Success -- 0
