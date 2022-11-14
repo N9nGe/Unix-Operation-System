@@ -577,23 +577,26 @@ int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
  */
 int32_t sys_vidmap( uint8_t** screen_start){
     // check if the pointer passed in is valid
-    if (screen_start == NULL || screen_start < VIDMAP_LOWER_BOUND || screen_start > VIDMAP_UPPER_BOUND)
+    if (screen_start == NULL || (uint32_t)screen_start < VIDMAP_LOWER_BOUND || (uint32_t)screen_start > VIDMAP_UPPER_BOUND)
         return SYSCALL_FAIL;
 
     uint32_t index;
+    // uint32_t vm = (uint32_t)(*screen_start);
+
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         vid_page_table[index].val = 0;
     }
 
-    page_directory[34].pd_kb.val = ((uint32_t) vid_page_table) | 23;
+    page_directory[34].pd_kb.val = ( (uint32_t)vid_page_table) | 23;
 
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
-    vid_page_table[0].base_addr = VIDEO_MEMORY >> PT_SHIFT;        // TODO
+    vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT) &(0x3ff);        // B8000 >> 12,
     vid_page_table[0].cache_disabled = 1;
     vid_page_table[0].dirty = 1;
 
+    // SET_PT_ENTRY(vid_page_table[(vm>>12)&(0x3FF)])
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 
