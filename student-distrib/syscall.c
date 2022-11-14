@@ -533,11 +533,11 @@ void command_to_arg(uint8_t* arg, uint8_t* command) {
 
 int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
     pcb_t * pcb_1;
-    int32_t ret;
+    // int32_t ret;
     int32_t i;
     int32_t j;
-    int flag = 0;
-    int32_t lastend;
+    // int flag = 0;
+    // int32_t lastend;
     pcb_1 = find_pcb();
 
     if (pcb_1 -> fd_entry[0].flag == 0) {
