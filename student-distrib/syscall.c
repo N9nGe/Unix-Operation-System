@@ -231,9 +231,7 @@ int32_t sys_close (int32_t fd) {
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return SYSCALL_FAIL;
     }
-
-    current_pcb_pointer -> fd_entry[fd].flag = 0;
-
+    pcb_1->fd_entry[fd].flag = 0;
     int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); // TODO
     return ret; 
 
@@ -253,7 +251,7 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //get current pcb as pcb_1
     pcb_t * pcb_1 = current_pcb_pointer;
     // pcb_1 = find_pcb();
-    memset(buf, 0, sizeof(buf));
+    // memset(buf, 0, sizeof(buf));
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
@@ -261,9 +259,9 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
         printf("1 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
-    if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) 
-    /*|| (pcb_1->fd_entry[fd].flag == 0 )*/ ) {
-        // printf("2 failed to read fd: %d\n",fd);
+    if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0)||
+       (pcb_1->fd_entry[fd].flag == 0 )) {
+        printf("2 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     /*Function code is one line the return value */
@@ -642,13 +640,14 @@ int32_t sys_vidmap( uint8_t** screen_start){
         vid_page_table[index].val = 0;
     }
 
-    page_directory[34].pd_kb.val = ( (uint32_t)vid_page_table) | 23;
+    page_directory[33].pd_kb.val = ( (uint32_t)vid_page_table) | 7;
 
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
-    vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT) &(0x3ff);        // B8000 >> 12,
-    vid_page_table[0].cache_disabled = 1;
+    vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12,
+    // vid_page_table[0].cache_disabled = 1;
+    // vid_page_table[0].dirty = 1;
 
     // flush the TLB (OSdev)
     asm volatile(
@@ -660,7 +659,7 @@ int32_t sys_vidmap( uint8_t** screen_start){
     );
 
     // memset(0x08800000, 't', 200);
-    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
+    *screen_start = (uint8_t*) 0x08400000;
 
     return 0;
 }
