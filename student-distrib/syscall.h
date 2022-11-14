@@ -26,9 +26,14 @@
 #define SPACE                        0x20
 
 /*CP4*/
+#define ARG_LENGTH                  1024
+#define CMD_LENGTH                  128
 #define VIDMAP_UPPER_BOUND          0x08400000
 #define VIDMAP_LOWER_BOUND          0x08000000
-#define VIDMAP_NEW_ADDRESS          0x08800000
+#define VIDMAP_NEW_ADDRESS          0x08400000
+
+#define VIDMAP_PAGE_INDEX           33
+#define VIDMAP_MAGIC                7
 /*MentOS System Calls*/
 // Return value:
 //     -  Success -- 0

@@ -235,24 +235,17 @@ void putc(uint8_t c) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc_advanced(uint8_t c) {
-    if(c == '\n' || c == '\r') { // TODO: \r in terminal?
+    if(c == '\n' || c == '\r') { 
         screen_y++;
         screen_x = 0;
     } else{// First detect backspace 
-    // common case
-        // if( screen_x >= NUM_COLS-1){ // 79, need to shift to next line
-        //     screen_x = 0; 
-        //     screen_y +=1 ; 
-        //     keybuf_count++;
-        // }
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
             screen_x++;
-            if(screen_x == NUM_COLS){
+            if(screen_x == NUM_COLS){ // RIGHT edge check
                 screen_y++;
             }
             screen_x %= NUM_COLS;
-            // screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
 
 

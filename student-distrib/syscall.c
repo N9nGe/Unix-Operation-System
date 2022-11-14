@@ -3,7 +3,7 @@
 /*Local constant*/
 #define SYSCALL_FAIL        -1
 #define SYSCALL_SUCCESS     0
-#define FD_MIN      2
+#define FD_MIN      2 // For read, write, open and close, stdin and stdout is check seperately
 #define FD_MAX      7
 
 static uint32_t task_counter = 0;
@@ -122,10 +122,14 @@ pcb_t* find_pcb() {
     return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (pid)));
 }
 
-
+/* find_next_fd()
+ * Description: get the next fd
+ * Inputs: none
+ * Return Value: -1 for syscall_fail; i for the available fd
+ * Function: get the next available fd
+ */
 int32_t find_next_fd() {
     pcb_t * pcb_1 = current_pcb_pointer;
-    // pcb_1 = find_pcb();
     int i;
     for (i = FD_MIN; i < FD_MAX + 1; i++) {
         if (pcb_1 -> fd_entry[i].flag == 0) {
@@ -232,7 +236,7 @@ int32_t sys_close (int32_t fd) {
         return SYSCALL_FAIL;
     }
     pcb_1->fd_entry[fd].flag = 0;
-    int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); // TODO
+    int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); 
     return ret; 
 
 }
@@ -259,7 +263,7 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
         printf("1 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
-    if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0)||
+    if (fd < 0 || fd > FD_MAX || (buf == NULL || nbytes < 0)||
        (pcb_1->fd_entry[fd].flag == 0 )) {
         printf("2 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
@@ -282,7 +286,6 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     //get current pcb as pcb_1
     pcb_t * pcb_1 = current_pcb_pointer;
-    // pcb_1 = find_pcb();
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
@@ -290,8 +293,8 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
         printf("failed to write fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
-
-    if (fd < 1 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
+    // sys_write is related to stdin, so we check fd == 1 case
+    if (fd < 1 || fd > FD_MAX || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
         // printf("failed to write fd: %d\n",fd);
         return SYSCALL_FAIL;
@@ -543,8 +546,6 @@ void page_halt(int32_t parent_id) {
     vid_page_table[0].read_write = 0;
     vid_page_table[0].user_supervisor = 0;  
     vid_page_table[0].base_addr = NULL;
-    vid_page_table[0].cache_disabled = 0;
-    vid_page_table[0].dirty = 0;
 
     // flush the TLB (OSdev)
     asm volatile(
@@ -567,10 +568,10 @@ void command_to_arg(uint8_t* arg, uint8_t* command) {
     uint32_t i;
     uint32_t j;
     memset(arg, 0, sizeof(arg));
-    for (i = 0; i < 128; i++) {
+    for (i = 0; i < CMD_LENGTH; i++) {
         // stop at the first space
         if (command[i] == SPACE) {
-            for (j = 0; j < 128; j++) {
+            for (j = 0; j < CMD_LENGTH; j++) {
                 if (command[i + j + 1] == '\0') {
                     break;
                 }
@@ -592,17 +593,16 @@ int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
     pcb_t * pcb_1 = current_pcb_pointer;
     int32_t i;
     int32_t j;
-    // pcb_1 = find_pcb();
 
     if (pcb_1 -> fd_entry[0].flag == 0) {
-        return -1;
+        return SYSCALL_FAIL;
     }
     memset(buf, NULL, nbytes);
     
-    for (i = 0; i < 1024; i++) {
+    for (i = 0; i < ARG_LENGTH; i++) {
         // stop at the first space
         if (pcb_1->cmd[i] == SPACE || pcb_1->cmd[i] == 0) {
-            for (j = 0; j < 1024; j++) {
+            for (j = 0; j < ARG_LENGTH; j++) {
                 if (pcb_1->cmd[i + j + 1] == SPACE || pcb_1->cmd[i + j + 1] == 0) {
                     break;
                 }
@@ -612,7 +612,7 @@ int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
         }
     }
 
-    return 0;
+    return SYSCALL_SUCCESS;
 }
 
 
@@ -639,15 +639,13 @@ int32_t sys_vidmap( uint8_t** screen_start){
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         vid_page_table[index].val = 0;
     }
-
-    page_directory[33].pd_kb.val = ( (uint32_t)vid_page_table) | 7;
+    // VIDMAP_MAGIC == PD's present, R_W, U_S 
+    page_directory[VIDMAP_PAGE_INDEX].pd_kb.val = ( (uint32_t)vid_page_table) | VIDMAP_MAGIC;
 
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
     vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12,
-    // vid_page_table[0].cache_disabled = 1;
-    // vid_page_table[0].dirty = 1;
 
     // flush the TLB (OSdev)
     asm volatile(
@@ -657,18 +655,18 @@ int32_t sys_vidmap( uint8_t** screen_start){
         : 
         : "eax", "cc"
     );
+    // memset(0x08800000, 't', 200); // TEST 
+    // Set in a new page location for user program to display video
+    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
 
-    // memset(0x08800000, 't', 200);
-    *screen_start = (uint8_t*) 0x08400000;
-
-    return 0;
+    return SYSCALL_SUCCESS;
 }
 /*Extra point, useless for now*/
 int32_t sys_set_handler( int32_t signum, void* handler_address){
-    return -1;
+    return SYSCALL_FAIL;
 }
 /*Extra point, useless for now*/
 int32_t sys_sigreturn (void){
-    return -1;
+    return SYSCALL_FAIL;
 }
 
