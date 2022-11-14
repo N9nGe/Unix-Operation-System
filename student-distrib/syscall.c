@@ -7,7 +7,9 @@
 #define FD_MAX      7
 
 static uint32_t task_counter = 0;
-pcb_t * current_pcb_pointer;
+pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE);
+pcb_t * parent_pcb = NULL;
+static uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
 
 /*file operation table pointer */
 /*The following are a series of device-speific
@@ -75,35 +77,55 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
         return SYSCALL_FAIL;
     }
     uint8_t i;
-    for (i= 0; i < 8; i++) {
+    for (i= 0; i < 2; i++) {
         fd_entry[i].file_pos = 0;
-        fd_entry[i].flag = 0;
-        fd_entry[i].fot_ptr = NULL;
+        fd_entry[i].flag = 1;
         fd_entry[i].inode_num = 0;
         fd_entry[i].filetype = 0;
     }
-    fd_entry[0].flag = 1;
     fd_entry[0].fot_ptr = &terminal_stdin;
-    fd_entry[1].flag = 1;
     fd_entry[1].fot_ptr = &terminal_stdout;
-
+    /*Other fd only need to set flag*/
+    for (i= 2; i < 8; i++) {
+        fd_entry[i].flag = 0;
+    }
     return 0;
 }
 
+/* find_pid()
+ * Description: get the current pid
+ * Inputs: NONE
+ * Return Value: current pid
+ * Function: get the current pid by the pcb counter
+ */
+uint32_t find_pid() {
+    uint32_t pcb_bitmap = 0;
+    while (pcb_counter[pcb_bitmap] != 0) {
+        pcb_bitmap++;
+        if (pcb_bitmap >= 6) {
+            return 0;
+        }
+    }
+    return (pcb_bitmap + 1);
+}
 /* find_pcb()
  * Description: get the current pcb pointer
- * Inputs: task_pointer, a global variable used to linearly accumulate the pcb
+ * Inputs: pid
  * Return Value: current pcb pointer
- * Function: get the current pcb by the task counter
+ * Function: get the current pcb by the pid
  */
 pcb_t* find_pcb() {
-    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter)));
+    uint32_t pid = find_pid();
+    if (pid == 0) {
+        return NULL;
+    }
+    return ((pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE * (pid)));
 }
 
 
 int32_t find_next_fd() {
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     int i;
     for (i = FD_MIN; i < FD_MAX + 1; i++) {
         if (pcb_1 -> fd_entry[i].flag == 0) {
@@ -125,8 +147,8 @@ int32_t find_next_fd() {
  *  SIDE EFFECTS: none
  */
 int32_t sys_open (const uint8_t* filename) {
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     // Boundary check: making sure file is within the user space, end - 32 is for 32B length 
     if(filename == NULL ){
         printf("1 failed to open %s\n",filename);
@@ -147,13 +169,16 @@ int32_t sys_open (const uint8_t* filename) {
         printf("open failed\n");
         return SYSCALL_FAIL;
     }
-
+        
+    dentry_t temp_dentry;
     // If failed to open the file, quit it
-    if (file_open (filename) != 0) {
+    if (read_dentry_by_name ((uint8_t *) filename, &temp_dentry) != 0) {
         return SYSCALL_FAIL;
     } else {
-        dentry_t temp_dentry;
-        if (read_dentry_by_name (filename, &temp_dentry) != 0){     // check if read dentry succeeded
+        //printf("%s", filename);
+
+        if (read_dentry_by_name ((uint8_t *) filename, &temp_dentry) != 0){     // check if read dentry succeeded
+            //printf("%s", filename);
             return SYSCALL_FAIL;
         }
         pcb_1->fd_entry[fd].inode_num = temp_dentry.inode_num;
@@ -176,7 +201,10 @@ int32_t sys_open (const uint8_t* filename) {
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
             }
-
+            int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->open))(filename); 
+            if (ret == -1) {
+                return SYSCALL_FAIL;
+            }
         } 
     }
     return fd;
@@ -193,8 +221,8 @@ int32_t sys_open (const uint8_t* filename) {
  */
 int32_t sys_close (int32_t fd) {
     //get current pcb as pcb_1
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     // check if fd is closable
     if (fd < FD_MIN || fd > FD_MAX) {
         return SYSCALL_FAIL;
@@ -203,12 +231,8 @@ int32_t sys_close (int32_t fd) {
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return SYSCALL_FAIL;
     }
-    pcb_1 -> fd_entry[fd].inode_num = 0;
-    pcb_1 -> fd_entry[fd].fot_ptr = NULL;
-    pcb_1 -> fd_entry[fd].filetype = 0;
-    pcb_1 -> fd_entry[fd].file_pos = 0;
-    pcb_1 -> fd_entry[fd].flag = 0;
-    return SYSCALL_SUCCESS;
+    int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); // TODO
+    return ret; 
 
 }
 /* 
@@ -224,19 +248,19 @@ int32_t sys_close (int32_t fd) {
  */
 int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     //get current pcb as pcb_1
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     memset(buf, 0, sizeof(buf));
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
     if (fd == 1) {
-        printf("failed to read fd: %d\n",fd);
+        printf("1 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        printf("failed to read fd: %d\n",fd);
+        printf("2 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     /*Function code is one line the return value */
@@ -247,7 +271,6 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  * sys_write
  *  DESCRIPTION: Use file operations jump table to 
  *  call the corresponding write function
-
  *  INPUTS: 
         fd  -- file descriptor number
         buf -- b 
@@ -257,18 +280,14 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  */
 int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     //get current pcb as pcb_1
-    pcb_t * pcb_1;
-    pcb_1 = find_pcb();
+    pcb_t * pcb_1 = current_pcb_pointer;
+    // pcb_1 = find_pcb();
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
-    if (fd == 0) {
-        printf("failed to write fd: %d\n",fd);
-        return SYSCALL_FAIL;
-    }
     if (fd < 1 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        printf("failed to write fd: %d\n",fd);
+        // printf("failed to write fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
 
@@ -276,8 +295,6 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr -> write))(fd, buf, nbytes); 
     return ret;
 }
-
-
 
 /* execute (const uint8_t* command)
  * Description: system call execute
@@ -289,10 +306,16 @@ int32_t sys_execute (const uint8_t* command){
     if (command == NULL) {
         return SYSCALL_FAIL;
     }
+    
     // filename buffer used by parse the command
     uint8_t filename[FILENAME_LEN];
+    uint8_t tmp_cmd[strlen_unsigned(command)];
+    
     // initialize the filename buffer
     memset(filename, 0, FILENAME_LEN);
+    memset(tmp_cmd, 0, strlen_unsigned(command));
+
+    strcpy_unsigned(tmp_cmd, command);
     // parse the command(fill the command into the buffer)
     parse_arg(command, filename);
 
@@ -310,21 +333,38 @@ int32_t sys_execute (const uint8_t* command){
         execute_code_buf[2] != EXE_MAGIC_3 || execute_code_buf[3] != EXE_MAGIC_4) {
         return SYSCALL_FAIL;
     }
+    // check whether new pcb has the position
+    if (find_pid() == 0) {
+        printf("No position for new pcb!\n");
+        return 1;
+    }
 
     cli();
     // paging the new memory
-    paging_execute();
+    paging_execute(find_pid());
     // load the file into USER_PROGRAM_IMAGE_START(virtual memory)
     if (read_data(execute_file.inode_num, 0, (uint8_t*) USER_PROGRAM_IMAGE_START, inode_ptr[execute_file.inode_num].length) == 0) {
         return SYSCALL_FAIL;
     }
     
     // create new pcb
+    int32_t parent_id = 0;
+    if (task_counter > 1) {
+        parent_id = current_pcb_pointer->pid;
+    }
+    parent_pcb = current_pcb_pointer;
     pcb_t* new_pcb = pcb_initilize();
+    // if (new_pcb == NULL) {
+    //     printf("No position for new pcb!\n");
+    //     return SYSCALL_FAIL;
+    // }
     current_pcb_pointer = new_pcb;
     // update pid and parent_id
-    new_pcb->pid = task_counter;
-    new_pcb->parent_id = task_counter - 1;
+    new_pcb->pid = find_pid();
+    new_pcb->parent_id = parent_id;
+    new_pcb->parent_pcb = parent_pcb;
+    strcpy_unsigned(new_pcb->cmd, tmp_cmd);
+    pcb_counter[new_pcb->pid - 1] = 1;
     
     // save old ebp & esp (from review slides)
     register uint32_t saved_ebp asm("ebp");
@@ -345,7 +385,7 @@ int32_t sys_execute (const uint8_t* command){
     // TSS
     // no need to change ss0 because kernel using the same kernel stack(initilize at booting)
     // get the current stack address
-    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (task_counter - 1) - AVOID_PAGE_FAULT);
+    tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (new_pcb->pid - 1) - AVOID_PAGE_FAULT);
     sti();
 
     // context switch && IRET
@@ -383,7 +423,9 @@ int32_t sys_halt(uint8_t status){
         exception_flag = 0;
     }
     cli();
-    pcb_t* pcb = find_pcb();
+    pcb_t* pcb = current_pcb_pointer;
+    pcb_counter[pcb->pid - 1] = 0;
+    current_pcb_pointer = pcb->parent_pcb;
     
     // point to the parent kernel stack
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - AVOID_PAGE_FAULT); 
@@ -403,6 +445,7 @@ int32_t sys_halt(uint8_t status){
     pcb->fd_entry[1].inode_num = 0;
     pcb->fd_entry[1].fot_ptr = NULL;
     pcb->active = 0;
+    memset(pcb->cmd, 0, sizeof(pcb->cmd));
     // restore parent paging
     page_halt(pcb->parent_id);
     
@@ -410,6 +453,7 @@ int32_t sys_halt(uint8_t status){
     // there is no program -> need to rerun shell
     sti();
     if (task_counter == 0) {
+        printf("Restart the Base shell...\n");
         sys_execute((uint8_t*)"shell");
     } else {
         asm volatile (
@@ -452,14 +496,14 @@ void parse_arg(const uint8_t* command, uint8_t* filename){
  * Return Value: none
  * Function: allocate the page begin from 8mb in the kernel memory
  */
-void paging_execute() {
+void paging_execute(uint32_t pid) {
     // allocate the 4mb page for each process
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
     page_directory[index].pd_mb.present = 1;
     page_directory[index].pd_mb.read_write = 1;
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
-    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + task_counter + 1); // give the address of the process
+    page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + pid); // give the address of the process
     task_counter++; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(
@@ -477,7 +521,7 @@ void paging_execute() {
  * Return Value: none
  * Function: map to the parent
  */
-void page_halt(uint32_t parent_id) {
+void page_halt(int32_t parent_id) {
     // allocate the 4mb page for each process
     uint32_t index = (uint32_t) USER_PROGRAM_IMAGE_START >> PD_SHIFT;
     page_directory[index].pd_mb.present = 1;
@@ -486,6 +530,15 @@ void page_halt(uint32_t parent_id) {
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id); // give the address of the process
     task_counter--; // decrement the counter
+
+    //CP 4: remove the vid page table
+    vid_page_table[0].present = 0;
+    vid_page_table[0].read_write = 0;
+    vid_page_table[0].user_supervisor = 0;  
+    vid_page_table[0].base_addr = NULL;
+    vid_page_table[0].cache_disabled = 0;
+    vid_page_table[0].dirty = 0;
+
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 
@@ -497,12 +550,110 @@ void page_halt(uint32_t parent_id) {
 }
 
 //Checkpoint 4 
+/* command_to_arg(uint8_t* arg, uint8_t* command)
+ * Description: get the argument from a command
+ * Inputs: uint8_t* arg -- argument string
+ *         uint8_t* command -- command string
+ * Return Value: none
+ */
+void command_to_arg(uint8_t* arg, uint8_t* command) {
+    uint32_t i;
+    uint32_t j;
+    memset(arg, 0, sizeof(arg));
+    for (i = 0; i < 128; i++) {
+        // stop at the first space
+        if (command[i] == SPACE) {
+            for (j = 0; j < 128; j++) {
+                if (command[i + j + 1] == '\0') {
+                    break;
+                }
+                arg[j] = command[i + j + 1];
+                }
+            break;
+        }
+    }
+}
 
-int32_t sys_getargs( uint8_t* buf, int32_t nbytes){
+/* sys_getargs (uint8_t* buf, int32_t nbytes)
+ * Description: get argument from pcb's command and store in buffer
+ * of size nbytes
+ * Inputs: uint8_t* buf -- buffer storing the argument
+ *         int32_t nbytes -- size of the buffer
+ * Return Value: none
+ */
+int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
+    pcb_t * pcb_1 = current_pcb_pointer;
+    int32_t i;
+    int32_t j;
+    // pcb_1 = find_pcb();
+
+    if (pcb_1 -> fd_entry[0].flag == 0) {
+        return -1;
+    }
+    memset(buf, NULL, nbytes);
+    
+    for (i = 0; i < 1024; i++) {
+        // stop at the first space
+        if (pcb_1->cmd[i] == SPACE || pcb_1->cmd[i] == 0) {
+            for (j = 0; j < 1024; j++) {
+                if (pcb_1->cmd[i + j + 1] == SPACE || pcb_1->cmd[i + j + 1] == 0) {
+                    break;
+                }
+                buf[j] = pcb_1->cmd[i + j + 1];
+                }
+            break;
+        }
+    }
+
     return 0;
 }
 
+
+
+/* sys_vidmap
+ * Description: maps the text-mode video memory into user space at a pre-set virtual address. 
+ * address returned is always the same, it should be written into the memory location provided 
+ * by the caller (which must be checked for validity). 
+ * 
+ * Inputs: 
+ *    screen_start -- destination pointer-> the screen memory the user program specified
+ * Return Value: 
+ * - If the location is invalid, the call should return -1.
+ * - 0, for the success address
+ * Side effect: none
+ */
 int32_t sys_vidmap( uint8_t** screen_start){
+    // check if the pointer passed in is valid
+    if (screen_start == NULL || (uint32_t)screen_start < VIDMAP_LOWER_BOUND || (uint32_t)screen_start > VIDMAP_UPPER_BOUND)
+        return SYSCALL_FAIL;
+
+    uint32_t index;
+
+    for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
+        vid_page_table[index].val = 0;
+    }
+
+    page_directory[34].pd_kb.val = ( (uint32_t)vid_page_table) | 23;
+
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;  
+    vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT) &(0x3ff);        // B8000 >> 12,
+    vid_page_table[0].cache_disabled = 1;
+    vid_page_table[0].dirty = 1;
+
+    // // flush the TLB (OSdev)
+    // asm volatile(
+    //     "movl %%cr3, %%eax;" 
+    //     "movl %%eax, %%cr3;"
+    //     : 
+    //     : 
+    //     : "eax", "cc"
+    // );
+
+    // memset(0x08800000, 't', 200);
+    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
+
     return 0;
 }
 /*Extra point, useless for now*/

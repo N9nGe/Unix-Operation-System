@@ -6,6 +6,7 @@ inode_t * inode_ptr;
 dentry_t * dentry_ptr;
 boot_block_t * boot_block_ptr; 
 static uint32_t temp_position;  // temporary file position 
+extern pcb_t* current_pcb_pointer;
 
 /* 
  *  file_system_init
@@ -117,70 +118,52 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     if (inode < 0 || inode >= DENTRY_SIZE || buf == NULL || boot_block_ptr == NULL) return -1;
 
     uint32_t inode_startblk_idx = offset / DATA_BLOCK_ENTRY_SIZE;     // calculate which block to start with
-    uint32_t startblk_idx = offset % DATA_BLOCK_ENTRY_SIZE;           // calculate the start byte within the start block
+    //TODO: unused
+    // uint32_t startblk_idx = offset % DATA_BLOCK_ENTRY_SIZE;           // calculate the start byte within the start block
     uint32_t inode_endblk_idx;  // the block to end with
     uint32_t endblk_idx;        // the end byte within the end block
+    int32_t bytes_read = 0;    // number of bytes read
 
-    // calculate which block to end with 
     if ((length + offset) > inode_ptr[inode].length) {  // if reading more data than the actual size of the file
-        inode_endblk_idx = inode_ptr[inode].length / DATA_BLOCK_ENTRY_SIZE;
+        inode_endblk_idx = (inode_ptr[inode].length) / DATA_BLOCK_ENTRY_SIZE;
         endblk_idx = (inode_ptr[inode].length) % DATA_BLOCK_ENTRY_SIZE;      // end byte is the ending byte of the file
     }
     else{    // we are reading within the size of the file
         inode_endblk_idx = (length + offset) / DATA_BLOCK_ENTRY_SIZE;
         endblk_idx = (length + offset) % DATA_BLOCK_ENTRY_SIZE;
     }
-    
+
     uint32_t idx, i;
     uint32_t buf_idx = 0;   // stores where we are at in the buffer
     uint32_t block_idx;     // index to the data blocks
-    int32_t bytes_read = 0;    // number of bytes read
     inode_t curr_inode = inode_ptr[inode];
-    
-    // loop through each data_block_num entry in the current inode
-    for (idx = inode_startblk_idx; idx <= inode_endblk_idx; ++idx){
-
-        // if it's the last block
-        if (idx == inode_endblk_idx){  
-            // copy the data of the last block (from 0 to endblk_idx) to buffer
-            for (i = 0; i < endblk_idx; ++i){
-                block_idx = curr_inode.data_block_num[idx];
-                // block_idx error checking
-                if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
-                    return -1;
-                buf[buf_idx] = data_block_ptr[block_idx].entry[i];
-                buf_idx++;
-                bytes_read++;
-            }
-            continue;
+    int32_t loop_start;
+    int32_t loop_end;
+    for (idx = inode_startblk_idx; idx <= inode_endblk_idx; idx++) {
+       
+        // start case
+        if (idx == inode_startblk_idx && idx == inode_endblk_idx) {
+            loop_start = offset % DATA_BLOCK_ENTRY_SIZE;
+            loop_end = endblk_idx;
+        } else if (idx == inode_startblk_idx && idx != inode_endblk_idx) {
+            loop_start = offset % DATA_BLOCK_ENTRY_SIZE;
+            loop_end = DATA_BLOCK_ENTRY_SIZE;
+        } else if (idx != inode_startblk_idx && idx == inode_endblk_idx) {
+            loop_start = 0;
+            loop_end = endblk_idx;
+        } else {
+            loop_start = 0;
+            loop_end = DATA_BLOCK_ENTRY_SIZE;
         }
 
-        // if it's the first block
-        if (idx == inode_startblk_idx){ 
-            for (i = startblk_idx; i < DATA_BLOCK_ENTRY_SIZE; ++i){
-                block_idx = curr_inode.data_block_num[idx];
-                // block_idx error checking
-                if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
-                    return -1;
-                // copy data of the first block (from startblk_idx to the end of this block) to buffer 
-                buf[buf_idx] = data_block_ptr[block_idx].entry[i]; 
-                buf_idx++;
-                bytes_read++;
-            }
-            continue;
-        }
-
-        // if it's not the first or last block, copy the entire block
-        else {  
-            for (i = 0; i < DATA_BLOCK_ENTRY_SIZE; ++i){
-                block_idx = curr_inode.data_block_num[idx];
-                // block_idx error checking
-                if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
-                    return -1;
-                buf[buf_idx] = data_block_ptr[block_idx].entry[i];
-                buf_idx++;
-                bytes_read++;
-            }
+        for (i = loop_start; i < loop_end; i++){
+            block_idx = curr_inode.data_block_num[idx];
+            // block_idx error checking
+            if (block_idx < 0 || block_idx > DATA_BLOCK_SIZE)
+                return -1;
+            buf[buf_idx] = data_block_ptr[block_idx].entry[i];
+            buf_idx++;
+            bytes_read++;
         }
     }
     return (int32_t)bytes_read;
@@ -216,18 +199,23 @@ int32_t file_open(const uint8_t* filename) {
  *  SIDE EFFECTS: save the data read into the buffer passed into the function
  */
 int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
-    // unsigned i; // not used
     unsigned length;
     int32_t bytes_read;
-    // if (fd < 2 || fd > 7) return -1;
-    fd_entry_t fd_entry = current_pcb_pointer->fd_entry[fd];
-    //printf("%u", buf[0]);
-    length = inode_ptr[fd_entry.inode_num].length;
-    if (fd_entry.file_pos >= length) 
+    length = inode_ptr[current_pcb_pointer->fd_entry[fd].inode_num].length;
+    if (current_pcb_pointer->fd_entry[fd].file_pos >= length)  {
+        //current_pcb_pointer->fd_entry[fd].file_pos = 0;
         return 0;
-    bytes_read = read_data (fd_entry.inode_num, fd_entry.file_pos, buf, nbytes);
+    }
+    memset(buf, NULL, nbytes);
+    bytes_read = read_data (current_pcb_pointer->fd_entry[fd].inode_num, 
+    current_pcb_pointer->fd_entry[fd].file_pos, buf, nbytes);
 
-    return bytes_read;
+    // if (bytes_read > nbytes) {
+    //     current_pcb_pointer->fd_entry[fd].file_pos += nbytes;
+    //     return nbytes;
+    // }
+    current_pcb_pointer->fd_entry[fd].file_pos += bytes_read;
+    return bytes_read;   // return bytes copied 
 }
 
 /* 

@@ -10,6 +10,8 @@
 #include "file_system.h"
 #include "syscall.h"
 
+#include "game/MentOS.h"
+
 #define PASS 1
 #define FAIL 0
 #define KERNAL_START 0x400000
@@ -687,7 +689,8 @@ void test_sys_open() {
  */
 void execute_test() {
 	clear();
-	printf("start testing execute\n");
+	UI_START();
+	printf("Welcome to MentOS!\n");
 	sys_execute((uint8_t*)"shell");
 	/*Inidivitual test*/
 	// sys_execute((uint8_t*)"testprint");
@@ -702,6 +705,34 @@ void execute_test() {
 
 
 /* Checkpoint 4 tests */
+// int vidmap_test(){
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	int correct_PT = 1 + 2 + 4 + 16 + 64 +(0xB8000 >> 12);
+// 	printf("correctPT is %d\n",correct_PT);
+// 	uint8_t test_addr[5];
+// 	test_addr[0] = (uint8_t)0x08300000;
+// 	int ret = sys_vidmap(test_addr[0]); // TODO : how to input the argument?
+// 	if (0 !=  ret)
+// 	{
+// 		result = FAIL;
+// 	}
+// 	if( correct_PT != vid_page_table[0].val){
+// 		result = FAIL;
+// 	}
+// 	printf("vidPT is %d\n",vid_page_table[0].val);
+
+// 	return result;
+// }
+/*
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;  
+    vid_page_table[0].base_addr = VIDEO_MEMORY >> PT_SHIFT;        
+    vid_page_table[0].cache_disabled = 1;
+    vid_page_table[0].dirty = 1;
+
+*/
 /* Checkpoint 5 tests */
 
 
@@ -712,7 +743,7 @@ void launch_tests(){
 	//printf("---------------TEST CP3 START--------------\n");
 	// Here we delete those out of used test, leaving the excute along
 	execute_test();
-
+	// vidmap_test();
 	// printf("---------------TEST CP3 END--------------\n");
 
 

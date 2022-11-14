@@ -56,8 +56,8 @@ int function_key_handle(unsigned int key);
 void reset_keyboard_buffer(void);
 /*Handle backspace, modify corresponding keyboard buffer*/
 void backspace_handler();
-/*set as device driver*/
-int32_t keyboard_open(const uint8_t* filename);
-int32_t keyboard_close(int32_t fd);
+//CP4: Tony delete the open and close for keyboard driver,
+// because in fact they are established through terminal driver
+// in our MentOS
 
 #endif /* _KEYBOARD_H */
