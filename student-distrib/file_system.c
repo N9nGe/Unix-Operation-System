@@ -202,7 +202,7 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
     int32_t bytes_read;
     length = inode_ptr[current_pcb_pointer->fd_entry[fd].inode_num].length;
     if (current_pcb_pointer->fd_entry[fd].file_pos >= length)  {
-        current_pcb_pointer->fd_entry[fd].file_pos = 0;
+        //current_pcb_pointer->fd_entry[fd].file_pos = 0;
         return 0;
     }
     memset(buf, NULL, nbytes);

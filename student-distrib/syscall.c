@@ -169,17 +169,16 @@ int32_t sys_open (const uint8_t* filename) {
         printf("open failed\n");
         return SYSCALL_FAIL;
     }
-
+        
+    dentry_t temp_dentry;
     // If failed to open the file, quit it
-    if (file_open (filename) != 0) {
+    if (read_dentry_by_name ((uint8_t *) filename, &temp_dentry) != 0) {
         return SYSCALL_FAIL;
     } else {
-        dentry_t temp_dentry;
         //printf("%s", filename);
 
         if (read_dentry_by_name ((uint8_t *) filename, &temp_dentry) != 0){     // check if read dentry succeeded
             //printf("%s", filename);
-
             return SYSCALL_FAIL;
         }
         pcb_1->fd_entry[fd].inode_num = temp_dentry.inode_num;
@@ -202,7 +201,10 @@ int32_t sys_open (const uint8_t* filename) {
                     pcb_1->fd_entry[fd].fot_ptr = (&file_op);
                     break;
             }
-
+            int32_t ret = (*(pcb_1 -> fd_entry[fd].fot_ptr->open))(filename); 
+            if (ret == -1) {
+                return SYSCALL_FAIL;
+            }
         } 
     }
     return fd;
@@ -557,6 +559,12 @@ void page_halt(int32_t parent_id) {
 }
 
 //Checkpoint 4 
+/* command_to_arg(uint8_t* arg, uint8_t* command)
+ * Description: get the argument from a command
+ * Inputs: uint8_t* arg -- argument string
+ *         uint8_t* command -- command string
+ * Return Value: none
+ */
 void command_to_arg(uint8_t* arg, uint8_t* command) {
     uint32_t i;
     uint32_t j;
@@ -575,6 +583,13 @@ void command_to_arg(uint8_t* arg, uint8_t* command) {
     }
 }
 
+/* sys_getargs (uint8_t* buf, int32_t nbytes)
+ * Description: get argument from pcb's command and store in buffer
+ * of size nbytes
+ * Inputs: uint8_t* buf -- buffer storing the argument
+ *         int32_t nbytes -- size of the buffer
+ * Return Value: none
+ */
 int32_t sys_getargs (uint8_t* buf, int32_t nbytes) {
     pcb_t * pcb_1 = current_pcb_pointer;
     int32_t i;
