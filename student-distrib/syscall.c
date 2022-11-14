@@ -77,18 +77,18 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
         return SYSCALL_FAIL;
     }
     uint8_t i;
-    for (i= 0; i < 8; i++) {
+    for (i= 0; i < 2; i++) {
         fd_entry[i].file_pos = 0;
-        fd_entry[i].flag = 0;
+        fd_entry[i].flag = 1;
         fd_entry[i].fot_ptr = NULL;
         fd_entry[i].inode_num = 0;
         fd_entry[i].filetype = 0;
     }
-    fd_entry[0].flag = 1;
     fd_entry[0].fot_ptr = &terminal_stdin;
-    fd_entry[1].flag = 1;
     fd_entry[1].fot_ptr = &terminal_stdout;
-
+    for (i= 2; i < 8; i++) {
+        fd_entry[i].flag = 0;
+    }
     return 0;
 }
 
@@ -231,12 +231,13 @@ int32_t sys_close (int32_t fd) {
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return SYSCALL_FAIL;
     }
-    pcb_1 -> fd_entry[fd].inode_num = 0;
-    pcb_1 -> fd_entry[fd].fot_ptr = NULL;
-    pcb_1 -> fd_entry[fd].filetype = 0;
-    pcb_1 -> fd_entry[fd].file_pos = 0;
-    pcb_1 -> fd_entry[fd].flag = 0;
-    return SYSCALL_SUCCESS;
+    // pcb_1 -> fd_entry[fd].inode_num = 0;
+    // pcb_1 -> fd_entry[fd].fot_ptr = NULL;
+    // pcb_1 -> fd_entry[fd].filetype = 0;
+    // pcb_1 -> fd_entry[fd].file_pos = 0;
+    // pcb_1 -> fd_entry[fd].flag = 0;
+    int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); // TODO
+    return ret; 
 
 }
 /* 
@@ -275,7 +276,6 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
  * sys_write
  *  DESCRIPTION: Use file operations jump table to 
  *  call the corresponding write function
-
  *  INPUTS: 
         fd  -- file descriptor number
         buf -- b 
