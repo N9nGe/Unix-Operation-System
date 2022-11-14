@@ -92,3 +92,23 @@ tttttttt_____________
 ________
 
     4. 
+
+<--------------------------------------------------------->
+                          BUG 4                          
+<--------------------------------------------------------->
+Time:
+    2022.11.13.
+Creator:
+    Tony Wang.
+Description:
+    1. The keyboard can't deal with the edge case at (79,Y).
+    i.e. it will delete back
+    2. The user level program [pingpong] will display an extra
+    space line on the screen
+Solution:
+    After deleting useless structure in the handler, I gdb 
+    to find the lib.c's sequence is wrong, after switching
+    a conditon in putc_advanced, and return the putc to a 
+    pure case, it's fine now.
+
+

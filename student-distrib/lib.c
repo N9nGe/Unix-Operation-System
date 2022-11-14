@@ -240,16 +240,19 @@ void putc_advanced(uint8_t c) {
         screen_x = 0;
     } else{// First detect backspace 
     // common case
-        if( screen_x >= NUM_COLS-1){ // 79, need to shift to next line
-            screen_x = 0; 
-            screen_y +=1 ; 
-            keybuf_count++;
-        }
+        // if( screen_x >= NUM_COLS-1){ // 79, need to shift to next line
+        //     screen_x = 0; 
+        //     screen_y +=1 ; 
+        //     keybuf_count++;
+        // }
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
             *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
             screen_x++;
+            if(screen_x == NUM_COLS){
+                screen_y++;
+            }
             screen_x %= NUM_COLS;
-            screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+            // screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
 
 
