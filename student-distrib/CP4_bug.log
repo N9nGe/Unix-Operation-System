@@ -112,3 +112,48 @@ Solution:
     pure case, it's fine now.
 
 
+<--------------------------------------------------------->
+                          BUG 5                          
+<--------------------------------------------------------->
+Time:
+    2022.11.14.
+Creator:
+    Tim Zhao.
+Description:
+    - an unnecessary memset caused a frame of the fish to 
+    mess up when displaying
+Solution:
+    - delete the memset and the frame displayed properly
+
+
+<--------------------------------------------------------->
+                          BUG 6                          
+<--------------------------------------------------------->
+Time:
+    2022.11.14.
+Creator:
+    Jerry Wang.
+Description:
+    - when error checking the vidmap address in vidmap, we
+    dereferenced the vidmap address instead of comparing the
+    address directly
+    - this caused vidmap to return immediately
+Solution:
+    - compare the vidmap address directly to solve the issue
+
+<--------------------------------------------------------->
+                          BUG 7                          
+<--------------------------------------------------------->
+Time:
+    2022.11.14.
+Creator:
+    Gabreil Gao.
+Description:
+    - change the structure of the pcb to support max 6 process.
+    page fault when modified the current pcb pointer(after halt)
+Solution:
+    - add a member element struct pcb* parent_pcb inside the pcb struct to track the parent
+    for halt program.
+
+ 
+
