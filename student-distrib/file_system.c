@@ -207,6 +207,7 @@ int32_t file_read(int32_t fd, void* buf, int32_t nbytes) {
         return 0;
     }
     memset(buf, NULL, nbytes);
+    // printf("fd is %d||%s",fd,(int8_t*)buf); // TEST     
     bytes_read = read_data (current_pcb_pointer->fd_entry[fd].inode_num, 
     current_pcb_pointer->fd_entry[fd].file_pos, buf, nbytes);
 
@@ -252,7 +253,7 @@ int file_close(int32_t fd) {
  */
 int dir_open(const uint8_t* fname) {
     temp_position = 0;
-    printf("dir open");
+    // printf("dir open");
     return 0;
 }
 

@@ -231,6 +231,9 @@ int32_t sys_close (int32_t fd) {
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return SYSCALL_FAIL;
     }
+
+    current_pcb_pointer -> fd_entry[fd].flag = 0;
+
     int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); // TODO
     return ret; 
 
@@ -258,9 +261,9 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
         printf("1 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
-    if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
-       (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        printf("2 failed to read fd: %d\n",fd);
+    if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) 
+    /*|| (pcb_1->fd_entry[fd].flag == 0 )*/ ) {
+        // printf("2 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     /*Function code is one line the return value */
@@ -285,6 +288,11 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
+    if (fd == 0) {
+        printf("failed to write fd: %d\n",fd);
+        return SYSCALL_FAIL;
+    }
+
     if (fd < 1 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
         // printf("failed to write fd: %d\n",fd);
@@ -434,6 +442,7 @@ int32_t sys_halt(uint8_t status){
     for (i = FD_MIN; i < FD_MAX+1; i++) {
         // need file close
         sys_close(i);
+        current_pcb_pointer -> fd_entry[i].flag = 0;
     }
     // close stdin and stdout
     pcb->fd_entry[0].flag = 0;
@@ -640,16 +649,15 @@ int32_t sys_vidmap( uint8_t** screen_start){
     vid_page_table[0].user_supervisor = 1;  
     vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT) &(0x3ff);        // B8000 >> 12,
     vid_page_table[0].cache_disabled = 1;
-    vid_page_table[0].dirty = 1;
 
-    // // flush the TLB (OSdev)
-    // asm volatile(
-    //     "movl %%cr3, %%eax;" 
-    //     "movl %%eax, %%cr3;"
-    //     : 
-    //     : 
-    //     : "eax", "cc"
-    // );
+    // flush the TLB (OSdev)
+    asm volatile(
+        "movl %%cr3, %%eax;" 
+        "movl %%eax, %%cr3;"
+        : 
+        : 
+        : "eax", "cc"
+    );
 
     // memset(0x08800000, 't', 200);
     *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
