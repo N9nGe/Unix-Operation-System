@@ -59,25 +59,28 @@ int32_t sys_sigreturn (void);
 
 // helper function
 void parse_arg(const uint8_t* command, uint8_t* filename);
-void paging_execute();
-void page_halt(uint32_t parent_id);
+void paging_execute(uint32_t pid);
+void page_halt(int32_t parent_id);
 
 
 // Program Control Block
 typedef struct pcb_t {
     uint32_t pid;          // Current Process id
-    uint32_t parent_id;    // Father process
+    int32_t parent_id;     // parent process
     uint32_t saved_esp;    // stack pointer save
     uint32_t saved_ebp;    // Base pointer save
     uint8_t active;        // test bit
-    uint8_t cmd[1024];
+    uint8_t cmd[128];
     fd_entry_t fd_entry[8];// file descriptor entry for current pcb
+    struct pcb_t * parent_pcb;
 } pcb_t;
 /*Other CP3 structure location*/
 // fd entry is in filesystem 
 // fop: also in filesystem
 /*Local varialbe*/
 extern pcb_t* current_pcb_pointer;
+
+uint32_t find_pid();
 
 pcb_t* find_pcb(void);
 
