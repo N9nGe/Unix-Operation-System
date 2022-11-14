@@ -80,12 +80,12 @@ int32_t fd_entry_init(fd_entry_t* fd_entry) {
     for (i= 0; i < 2; i++) {
         fd_entry[i].file_pos = 0;
         fd_entry[i].flag = 1;
-        fd_entry[i].fot_ptr = NULL;
         fd_entry[i].inode_num = 0;
         fd_entry[i].filetype = 0;
     }
     fd_entry[0].fot_ptr = &terminal_stdin;
     fd_entry[1].fot_ptr = &terminal_stdout;
+    /*Other fd only need to set flag*/
     for (i= 2; i < 8; i++) {
         fd_entry[i].flag = 0;
     }
@@ -231,11 +231,6 @@ int32_t sys_close (int32_t fd) {
     if (pcb_1 -> fd_entry[fd].flag == 0) {
         return SYSCALL_FAIL;
     }
-    // pcb_1 -> fd_entry[fd].inode_num = 0;
-    // pcb_1 -> fd_entry[fd].fot_ptr = NULL;
-    // pcb_1 -> fd_entry[fd].filetype = 0;
-    // pcb_1 -> fd_entry[fd].file_pos = 0;
-    // pcb_1 -> fd_entry[fd].flag = 0;
     int32_t ret = pcb_1->fd_entry[fd].fot_ptr->close(fd); // TODO
     return ret; 
 
@@ -260,12 +255,12 @@ int32_t sys_read (int32_t fd, void* buf, int32_t nbytes){
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
     if (fd == 1) {
-        // printf("1 failed to read fd: %d\n",fd);
+        printf("1 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     if (fd < 0 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
-        // printf("2 failed to read fd: %d\n",fd);
+        printf("2 failed to read fd: %d\n",fd);
         return SYSCALL_FAIL;
     }
     /*Function code is one line the return value */
@@ -290,10 +285,6 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     // check if fd fulfills the requirement
     // check if there's function pointer in the fd
     // check if the nbytes is larger than 0
-    if (fd == 0) {
-        printf("failed to write fd: %d\n",fd);
-        return SYSCALL_FAIL;
-    }
     if (fd < 1 || fd > 7 || (buf == NULL || nbytes < 0  ) ||
        (pcb_1->fd_entry[fd].flag == 0 ) ) {
         // printf("failed to write fd: %d\n",fd);
@@ -637,7 +628,6 @@ int32_t sys_vidmap( uint8_t** screen_start){
         return SYSCALL_FAIL;
 
     uint32_t index;
-    // uint32_t vm = (uint32_t)(*screen_start);
 
     for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
         vid_page_table[index].val = 0;
@@ -652,15 +642,14 @@ int32_t sys_vidmap( uint8_t** screen_start){
     vid_page_table[0].cache_disabled = 1;
     vid_page_table[0].dirty = 1;
 
-    // SET_PT_ENTRY(vid_page_table[(vm>>12)&(0x3FF)])
-    // flush the TLB (OSdev)
-    asm volatile(
-        "movl %%cr3, %%eax;" 
-        "movl %%eax, %%cr3;"
-        : 
-        : 
-        : "eax", "cc"
-    );
+    // // flush the TLB (OSdev)
+    // asm volatile(
+    //     "movl %%cr3, %%eax;" 
+    //     "movl %%eax, %%cr3;"
+    //     : 
+    //     : 
+    //     : "eax", "cc"
+    // );
 
     // memset(0x08800000, 't', 200);
     *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
