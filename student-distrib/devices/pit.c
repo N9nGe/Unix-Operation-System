@@ -45,7 +45,7 @@ void pit_init(){
 void pit_interrupt_handler(){
     cli();
     send_eoi(PIT_IRQ_NUM);
-	printf("hello, pit! ");
+	// printf("hello, pit! ");
 	// Used for sheduling
     sti();
 }

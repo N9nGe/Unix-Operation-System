@@ -14,6 +14,7 @@
 #include "paging.h"
 #include "file_system.h"
 #include "syscall.h"
+#include "devices/pit.h"
 
 #define RUN_TESTS
 
