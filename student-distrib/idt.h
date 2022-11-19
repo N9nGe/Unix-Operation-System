@@ -23,7 +23,8 @@
 #define EXCEPTION_17            17
 #define EXCEPTION_18            18
 #define EXCEPTION_19            19
-
+// CP5
+#define PIT_INTR_NUM            0x20
 #define KEYBOARD_INTR_NUM       0x21
 #define RTC_INTR_NUM            0x28
 #define SYS_CALL_NUM            0x80

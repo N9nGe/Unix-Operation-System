@@ -6,5 +6,6 @@
 
 void rtc_handler_linkage();
 void keyboard_handler_linkage();
-
+//CP5
+void pit_handler_linkage();
 #endif

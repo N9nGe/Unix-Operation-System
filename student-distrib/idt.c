@@ -4,6 +4,7 @@
 #include "idt.h"
 #include "devices/RTC.h"
 #include "devices/keyboard.h"
+#include "devices/pit.h"
 #include "linkage/interrupt_link.h"
 #include "linkage/syscall_link.h"
 #include "syscall.h"
@@ -250,6 +251,9 @@ void idt_init () {
 
     // add interrupt handlers for keyboard and rtc to the IDT
     // and complete corresponding setup in idt array
+    SET_IDT_ENTRY(idt[PIT_INTR_NUM], pit_handler_linkage);
+    add_intr_handler_setup(PIT_INTR_NUM);
+
     SET_IDT_ENTRY(idt[KEYBOARD_INTR_NUM], keyboard_handler_linkage);
     add_intr_handler_setup(KEYBOARD_INTR_NUM);
 

@@ -153,6 +153,8 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     paging_init();
 
+    pit_init();
+    
     terminal_init();
     keyboard_init();
     
