@@ -11,8 +11,8 @@
 //only need channel one, other 2 are useless
 #define PIT_DATA_PORT	0x40
 #define PIT_MODE_PORT	0x43
-/* Mode: Channel 0, mode 2 */
-#define PIT_MODE_2        0x37      
+/* Mode: Channel 0, mode 3 */
+#define PIT_MODE_2        0x37 	// Square wave, to seperate the mode evenly with 3 terminals      
 #define PIT_FREQ_SET	0x10000 // Slowest freq, but how to judge?      
 /*
 The PIT chip uses the following I/O ports:
