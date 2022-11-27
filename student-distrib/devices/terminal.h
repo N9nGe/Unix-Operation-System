@@ -13,16 +13,16 @@
 #define TERMINAL_BUF_SIZE 128
 typedef struct terminal_t
 {
-    int id;
+    int id;    // ID: 1, 2, 3 for F1 F2 F3
     int index; // line buffer index&counter
-    unsigned int buf[TERMINAL_BUF_SIZE];
-
+    unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
+    
 } terminal_t;
 
 extern terminal_t main_terminal;
 extern uint32_t terminal_count;
 // initalize the terminal
-void terminal_init();
+void terminal_init(int id);
 // reset the specific terminal structure 
 void terminal_reset(terminal_t terminal);
 // Load kb_buf -> buf specificed

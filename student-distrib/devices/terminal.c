@@ -21,7 +21,7 @@ uint32_t terminal_count;
  *  RETURN VALUE: none
  *  SIDE EFFECTS: none
  */
-void terminal_init(){
+void terminal_init(int id){
     // printf("initialize terminal...");
     main_terminal.id = 0;
     main_terminal.index = 0;

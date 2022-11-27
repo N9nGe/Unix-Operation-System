@@ -20,9 +20,9 @@ int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
-// CP2: initialize these 2 as 0, prepare for future cp5
-// int present_terminal = 0;
-// int last_terminal = 0; 
+// CP5: the bit to decide which terminal
+int present_terminal = 1;
+int last_terminal = 1; 
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
@@ -174,7 +174,16 @@ void keyboard_interrupt_handler(){
                     return;
                 }
                 if ( alt_buf == 1){
-                    // TODO do nothing for now
+                    if(value == 0x3b){//F1
+                        present_terminal = 1;
+                    }
+                    if(value == 0x3c){//F2
+                        present_terminal = 2;
+                    }
+                    if(value == 0x3d){//F3
+                        present_terminal = 3;
+                    }
+                    // TODO return
                 }
 
                 if( value ==  '\b' && keybuf_count >= 0){
@@ -226,14 +235,9 @@ void backspace_handler(){
         backspace();
         backspace();
         backspace();
-        // keyboard_buf[keybuf_count] = '\b';
-
-        // keybuf_count++;
     }else{
         backspace();
     }
-    // keyboard_buf[keybuf_count] = '\b';
-    // keybuf_count--;
 }
 
 

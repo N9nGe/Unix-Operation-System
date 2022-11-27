@@ -14,4 +14,17 @@ CreateTime:
 - [ ] Multiple terminal 
 - [ ] Scheduling
 
+<--------------------------------------------------------->
+                          BUG 0                          
+<--------------------------------------------------------->
+Time:
+    2022.11.19.
+Creator:
+    Tony Wang.
+Description:
+    Realized color output
+    Bug: colored output can't scolling -> the attribe behind it!.
+Solution:
+    TODO: Add a new scoll and printf function, to intergrate the color 
+
 

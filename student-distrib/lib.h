@@ -20,6 +20,11 @@ void clear(void);
 void putc_advanced(uint8_t c);
 void scroll_up(char* memory);
 void backspace();
+//CP5
+void printf_color(int8_t* str,int color);
+void putc_color(uint8_t str,int color);
+
+
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
 void* memset_dword(void* s, int32_t c, uint32_t n);

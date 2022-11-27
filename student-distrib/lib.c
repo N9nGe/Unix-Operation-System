@@ -10,8 +10,8 @@
 // [Font color]  
 // 0x1 == dark blue 0x2 == green 0x3 == light blue 0x4 == red 0x5 == purple 
 // 0x6 ~= orange 0x7 == black (but font is white), 0x8 == grey 0x9 ~= light purple
-
-#define ATTRIB      0x2
+#define COLOR       0x2
+#define ATTRIB      COLOR
 // 0x0 == empty black
 // 0x11 == blue screen
 
@@ -257,6 +257,40 @@ void putc_advanced(uint8_t c) {
     update_cursor(screen_x,screen_y);
 }
 
+void printf_color(int8_t* format,int color){
+
+    /* Pointer to the format string */
+    int8_t* buf = format;
+
+    while (*buf != '\0') {
+        putc_color(*buf,color);
+        buf++;
+    }
+
+}
+
+void putc_color(uint8_t c,int color){
+    if(c == '\n' || c == '\r') { 
+        screen_y++;
+        screen_x = 0;
+    } else{// First detect backspace 
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = color;
+            screen_x++;
+            if(screen_x == NUM_COLS){ // RIGHT edge check
+                screen_y++;
+            }
+            screen_x %= NUM_COLS;
+    }
+
+
+    // When the cursor is at the bottom of terminal
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
+    update_cursor(screen_x,screen_y);
+}
 /* void backspace();
  * Author : Tony 1 10.22.2022
  * Inputs: none
