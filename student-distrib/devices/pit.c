@@ -1,5 +1,6 @@
-#include"pit.h"
-#include"../i8259.h"
+#include "pit.h"
+#include "../i8259.h"
+#include "scheduling.h"
 
 /* Programmable Interval Timer Driver
  * Author: Tony Wang -- 1 11/18
@@ -12,7 +13,7 @@
 #define PIT_DATA_PORT	0x40
 #define PIT_MODE_PORT	0x43
 /* Mode: Channel 0, mode 3 */
-#define PIT_MODE_2        0x36 	// Square wave, to seperate the mode evenly with 3 terminals      
+#define PIT_MODE_2        0x36 	// (00110110) Square wave, to seperate the mode evenly with 3 terminals      
 #define PIT_FREQ_SET	0x10000 // Slowest freq, but how to judge?      
 /*
 The PIT chip uses the following I/O ports:
@@ -44,9 +45,12 @@ void pit_init(){
 
 void pit_interrupt_handler(){
     cli();
-    send_eoi(PIT_IRQ_NUM);
+    // send_eoi(PIT_IRQ_NUM);
 	// printf("hello, pit! ");
 	// Used for sheduling
+
+	scheduler();
+
     sti();
 }
 /*
