@@ -462,6 +462,7 @@ int32_t sys_halt(uint8_t status){
     // jump to execute return
     // there is no program -> need to rerun shell
     sti();
+    // TODO: improve task counter into mult-terminal 
     if (task_counter == 0) {
         printf("Restart the Base shell...\n");
         sys_execute((uint8_t*)"shell");

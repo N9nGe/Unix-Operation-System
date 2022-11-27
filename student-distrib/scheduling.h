@@ -4,6 +4,9 @@
 #include "lib.h"
 #include "paging.h"
 #include "syscall.h"
+#include "types.h"
+#include "devices/keyboard.h"
+#include "devices/terminal.h"
 
 void scheduler();
 
