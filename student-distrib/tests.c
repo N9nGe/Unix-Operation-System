@@ -735,16 +735,31 @@ void execute_test() {
 */
 /* Checkpoint 5 tests */
 
+/* CP5: 
+ * - main program for checkpoint 5
+ */
+void CP5() {
+	clear();
+	UI_START();
+	printf("Welcome to MentOS!\n");
+	terminal_init();
+
+	sys_execute((uint8_t*)"shell");
+
+
+
+}
 
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
-	/***** CP3 TESTS *****/
-	//printf("---------------TEST CP3 START--------------\n");
+	// Let us start MentOS
+	CP5();
+	/***** CP3,4 TESTS *****/
+	//printf("---------------TEST CP3,4 START--------------\n");
 	// Here we delete those out of used test, leaving the excute along
-	execute_test();
 	// vidmap_test();
-	// printf("---------------TEST CP3 END--------------\n");
+	// printf("---------------TEST CP3,4 END--------------\n");
 
 
 	/***** CP2 TESTS *****/

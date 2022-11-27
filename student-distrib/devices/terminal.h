@@ -16,13 +16,15 @@ typedef struct terminal_t
     int id;    // ID: 1, 2, 3 for F1 F2 F3
     int index; // line buffer index&counter
     unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
-    
+    uint32_t count;
+    int task_counter; // Task counter for current terminal
 } terminal_t;
 
-extern terminal_t main_terminal;
-extern uint32_t terminal_count;
-// initalize the terminal
-void terminal_init(int id);
+extern terminal_t terminal[4];
+extern int running_term;
+
+// initalize the terminals
+void terminal_init();
 // reset the specific terminal structure 
 void terminal_reset(terminal_t terminal);
 // Load kb_buf -> buf specificed

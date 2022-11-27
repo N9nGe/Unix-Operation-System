@@ -21,11 +21,11 @@ int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
 // CP5: the bit to decide which terminal
-int present_terminal = 1;
 int last_terminal = 1; 
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
+// TOOD How to change this
 volatile int  kb_flag = 0;                // flag used to open the terminal read 
 
 /*The CP2 edition scancode list*/
@@ -147,12 +147,11 @@ void keyboard_interrupt_handler(){
         if( shift_buf == 1){// decide the scancode
             value = scancode[key][1];
         }
-            
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
-                    terminal_count = keybuf_count +1;
-                    if(terminal_count == KEY_BUF_SIZE - 2) {
+                    terminal[running_term].count = keybuf_count +1;
+                    if(terminal[running_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
@@ -173,18 +172,22 @@ void keyboard_interrupt_handler(){
                     sti();
                     return;
                 }
-                if ( alt_buf == 1){
-                    if(value == 0x3b){//F1
-                        present_terminal = 1;
+                    if ( ctrl_buf == 1){
+                        if(value == 0x3b){//F1
+                            running_term = 1;
+                        }
+                        if(value == 0x3c){//F2
+                            running_term = 2;
+                        }
+                        if(value == 0x3d){//F3
+                            running_term = 3;
+                        }
+                        if( running_term != last_terminal){
+                            last_terminal = running_term;
+                            sti();
+                            return;
+                        }
                     }
-                    if(value == 0x3c){//F2
-                        present_terminal = 2;
-                    }
-                    if(value == 0x3d){//F3
-                        present_terminal = 3;
-                    }
-                    // TODO return
-                }
 
                 if( value ==  '\b' && keybuf_count >= 0){
                     if (keybuf_count == 0){

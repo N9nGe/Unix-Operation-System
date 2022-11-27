@@ -4,15 +4,16 @@
  * Tony  2  10.22.2022  -- finish basic structure, init, open and close
  * Gabriel 1 10.23.2022 -- finish read 
  * Tony  3  10.23.2022  -- finish write and test function 
- * 
+ * Tony  4  11.26.2022  -- start working on mult_terminal
  */
 #include"../lib.h"
 #include"../types.h"
 #include"keyboard.h"
 #include"terminal.h"
+//CP5: I allocate 4 terminal array
+terminal_t terminal[4];
+int running_term = 1;
 
-terminal_t main_terminal;
-uint32_t terminal_count;
 /* 
  * terminal_init
  *  DESCRIPTION: Initialize terminal display
@@ -21,19 +22,27 @@ uint32_t terminal_count;
  *  RETURN VALUE: none
  *  SIDE EFFECTS: none
  */
-void terminal_init(int id){
-    // printf("initialize terminal...");
-    main_terminal.id = 0;
-    main_terminal.index = 0;
-    memset(main_terminal.buf, NULL, sizeof(main_terminal.buf));
+void terminal_init(){
+    // TODO: how to execute 3 shell at the very begining?
+    int i; // loop index
+    for ( i = 0; i < 4; i++)
+    {
+        terminal[i].id = i;
+        terminal[i].index = 0;
+        terminal[i].count = 0;
+        memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
+    }
     return;
 };
-
-void terminal_reset(terminal_t terminal){
-    terminal.id = 0;
-    terminal.index = 0;
-    memset(main_terminal.buf, NULL, sizeof(main_terminal.buf));
-
+/* Helper function
+ * - reset current terminal and relevent pcb
+ */
+void terminal_reset(terminal_t terminal_tmp){
+    // TODO: reset or halt the running
+    terminal_tmp.id = 0;
+    terminal_tmp.index = 0;
+    terminal_tmp.count = 0;
+    memset(terminal_tmp.buf, NULL, sizeof(terminal_tmp.buf));
 }
 
 /* 
@@ -56,28 +65,21 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     kb_flag = 0;
     while (kb_flag == 0); // lock the terminal until the keyboard flag is set 1
     memset(buf,NULL,sizeof(buf));
-    // copy nbytes from the keyboard 
+    // copy nbytes from the keyboard buffer
     for (index = 0; index < nbytes; index++) {
-        // the buf still have character
-        // if( index == terminal_count || index == nbytes){
-        //     ((uint8_t*)buf)[index] = '\n'; 
-        //     break; 
-        // }
-        if (index <= terminal_count) {
+        // Only copy the required part 
+        if (index <= terminal[running_term].count) {
             ((uint8_t*)buf)[index] = keyboard_buf[index];
         } else {
-            //TODO: if we do not have the enough staff to copy, what should we fill
-            // Could we break directly break the copy process?
-            // the buffer do not have enough stuff, just fill null?
             ((uint8_t*)buf)[index] = 0;
         }
     }
     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
     // choose the return n bytes  
-    if (nbytes <= terminal_count) {
+    if (nbytes <= terminal[running_term].count) {
         copy_byte = nbytes;
     } else {
-        copy_byte = terminal_count;
+        copy_byte = terminal[running_term].count;
     }
 
     return copy_byte;// return number of bytes successfully copied
