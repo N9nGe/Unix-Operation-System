@@ -1,6 +1,6 @@
 #include"pit.h"
 #include"../i8259.h"
-
+static i = 0;
 /*
 The PIT chip uses the following I/O ports:
 
@@ -11,6 +11,12 @@ I/O port     Usage
 0x43         Mode/Command register (write only, a read is ignored)
 */
 
+/* pit_init()
+ * Description: pit initialization
+ * Inputs: void
+ * Return Value: void
+ * Function: pit initialization when boot the system (set to 100 hz/ 10ms per interrupt)
+ */
 void pit_init(){
     // Reference link: https://wiki.osdev.org/Programmable_Interval_Timer
     // Turn on the IRQ0 for PIT
@@ -20,7 +26,7 @@ void pit_init(){
 	// set the squared wave mode
 	outb(PIT_MODE_3, PIT_MODE_PORT);
 
-	// set the devisor frequency(16 bit) 
+	// set the devisor frequency(16 bit)  (0.01s per interrupt.)
 	outb(PIT_OSCILLATOR_FREQ & PIT_LOW_MASK, PIT_DATA_PORT); // get the low 8 bit of the frequency
 	outb(PIT_OSCILLATOR_FREQ >> 8, PIT_DATA_PORT);  // get the high 8 bit of the frequency
 
@@ -30,10 +36,21 @@ void pit_init(){
     enable_irq(PIT_IRQ_NUM);
 }
 
+/* pit_interrupt_handler()
+ * Description: pit interrupt handler
+ * Inputs: void
+ * Return Value: void
+ * Function: support for multiprocessor.
+ */
 void pit_interrupt_handler(){
     cli();
     send_eoi(PIT_IRQ_NUM);
-    printf("test pit");
+    // 0.01s per interrupt.
+    // test for functinality of pit
+    if (i == 1000) {
+        printf("%u\n", i);
+    } 
+    i++;
 	//TODO: NEED TO add the multiterminal stuff to do the context switch(flag. global process...)
 
     sti();
