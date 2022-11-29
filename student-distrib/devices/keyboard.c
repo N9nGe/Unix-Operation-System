@@ -22,6 +22,8 @@ int alt_buf = 0;      // Alt buf, do nothing now
 
 // CP5: the bit to decide which terminal
 int last_terminal = 1; 
+uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
+int keybuf_count_arr[3] = {0,0,0};
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
@@ -189,6 +191,11 @@ void keyboard_interrupt_handler(){
                         if( running_term != last_terminal){
                             //printf("current terminal: %u\n", running_term);
                             switch_screen(last_terminal, running_term);
+                            memcpy(keyboard_buf_arr[last_terminal-1], keyboard_buf, KEY_BUF_SIZE);
+                            memcpy(keyboard_buf, keyboard_buf_arr[running_term-1], KEY_BUF_SIZE);
+                            keybuf_count_arr[last_terminal-1] = keybuf_count;
+                            keybuf_count = keybuf_count_arr[running_term-1];
+
                             last_terminal = running_term;
                             sti();
                             return;
