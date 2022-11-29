@@ -19,6 +19,9 @@ static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+static int screen_x_arr[3];
+static int screen_y_arr[3];
+static char** video_mem_arr[3][NUM_ROWS * NUM_COLS * 2];
 
 /* void update_cursor(x,y);
  * Author: Tony 10.20
@@ -340,6 +343,41 @@ void scroll_up(char* memory){
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
     }
+}
+
+void clear_multi(uint8_t current_term) {
+    uint8_t idx = current_term - 1;
+    screen_x = screen_x_arr[idx];
+    screen_y = screen_y_arr[idx];
+    //video_mem = video_mem_arr[idx];
+    clear();
+    screen_x_arr[idx] = screen_x;
+    screen_y_arr[idx] = screen_y;
+    //video_mem_arr[idx] = video_mem;
+}
+
+void putc_advanced_multi(uint8_t c, uint8_t current_term) {
+    uint8_t idx = current_term - 1;
+    screen_x = screen_x_arr[idx];
+    screen_y = screen_y_arr[idx];
+    //video_mem = video_mem_arr[idx];
+    putc_advanced(c);
+    screen_x_arr[idx] = screen_x;
+    screen_y_arr[idx] = screen_y;
+    //video_mem_arr[idx] = video_mem;
+
+}
+
+void backspace_multi(uint8_t current_term) {
+    uint8_t idx = current_term - 1;
+    screen_x = screen_x_arr[idx];
+    screen_y = screen_y_arr[idx];
+    //video_mem = video_mem_arr[idx];
+    backspace();
+    screen_x_arr[idx] = screen_x;
+    screen_y_arr[idx] = screen_y;
+   //video_mem_arr[idx] = video_mem;
+
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
