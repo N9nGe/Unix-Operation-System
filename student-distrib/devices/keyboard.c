@@ -158,7 +158,7 @@ void keyboard_interrupt_handler(){
                     }
                     keybuf_count = 0;
                     kb_flag = 1;            // interrupt the terminal 
-                    putc_advanced_multi(value, running_term);
+                    putc_advanced(value);
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
                     sti();
                     return;
@@ -186,14 +186,12 @@ void keyboard_interrupt_handler(){
                             running_term = 3;
                         }
                         if( running_term != last_terminal){
-                            printf("current terminal: %u\n", running_term);
+                            //printf("current terminal: %u\n", running_term);
+                            switch_screen(last_terminal, running_term);
                             last_terminal = running_term;
                             sti();
                             return;
-                        } else { // added this line to ignore switching to the same terminal
-                            sti();
-                            return;
-                        }
+                        } 
                     }
 
                 if( value ==  '\b' && keybuf_count >= 0){
@@ -206,10 +204,10 @@ void keyboard_interrupt_handler(){
                     return;
                 }
                 if( value == '\t'){ // Tab output, here I use the easiest way
-                    putc_advanced_multi(' ', running_term);
-                    putc_advanced_multi(' ', running_term);
-                    putc_advanced_multi(' ', running_term);
-                    putc_advanced_multi(' ', running_term);
+                    putc_advanced(' ');
+                    putc_advanced(' ');
+                    putc_advanced(' ');
+                    putc_advanced(' ');
                     // keybuf_count++;
                     keyboard_buf[keybuf_count] = '\t'; 
                     keybuf_count++;
@@ -221,7 +219,7 @@ void keyboard_interrupt_handler(){
                     value = scancode[key][1]; // check if caps_lock is on
                 }
                 
-                    putc_advanced_multi(value, running_term);
+                    putc_advanced(value);
                     keyboard_buf[keybuf_count] = value;
                     keybuf_count++;
     }
@@ -241,12 +239,12 @@ void keyboard_interrupt_handler(){
 void backspace_handler(){
     keybuf_count--;
     if (keyboard_buf[keybuf_count] == '\t'){
-        backspace_multi(running_term);
-        backspace_multi(running_term);
-        backspace_multi(running_term);
-        backspace_multi(running_term);
+        backspace();
+        backspace();
+        backspace();
+        backspace();
     }else{
-        backspace_multi(running_term);
+        backspace();
     }
 }
 

@@ -31,7 +31,7 @@ void backspace();
 void printf_color(int8_t* str,int color);
 void putc_color(uint8_t str,int color);
 // those functions achieves save functionalities but for different terminals
-void clear_multi(uint8_t current_term);
+void switch_screen(uint8_t prev_term, uint8_t current_term);
 void putc_advanced_multi(uint8_t c, uint8_t current_term);
 void backspace_multi(uint8_t current_term);
 

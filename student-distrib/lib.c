@@ -345,39 +345,25 @@ void scroll_up(char* memory){
     }
 }
 
-void clear_multi(uint8_t current_term) {
-    uint8_t idx = current_term - 1;
-    screen_x = screen_x_arr[idx];
-    screen_y = screen_y_arr[idx];
-    //video_mem = video_mem_arr[idx];
+void switch_screen(uint8_t prev_term, uint8_t current_term) {
+    uint8_t prev_idx = prev_term - 1;
+    uint8_t current_idx = current_term - 1;
+    int i;
+    screen_x_arr[prev_idx] = screen_x;
+    screen_y_arr[prev_idx] = screen_y;
+    for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(video_mem_arr[prev_idx] + (i << 1)) = *(uint8_t *)(video_mem + (i << 1));
+        *(uint8_t *)(video_mem_arr[prev_idx] + (i << 1) + 1) = *(uint8_t *)(video_mem + (i << 1) + 1);
+    }
     clear();
-    screen_x_arr[idx] = screen_x;
-    screen_y_arr[idx] = screen_y;
-    //video_mem_arr[idx] = video_mem;
-}
-
-void putc_advanced_multi(uint8_t c, uint8_t current_term) {
-    uint8_t idx = current_term - 1;
-    screen_x = screen_x_arr[idx];
-    screen_y = screen_y_arr[idx];
+    screen_x = screen_x_arr[current_idx];
+    screen_y = screen_y_arr[current_idx];
+    for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(video_mem + (i << 1)) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1));
+        *(uint8_t *)(video_mem + (i << 1) + 1) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1) + 1);
+    }
+    update_cursor(screen_x,screen_y);
     //video_mem = video_mem_arr[idx];
-    putc_advanced(c);
-    screen_x_arr[idx] = screen_x;
-    screen_y_arr[idx] = screen_y;
-    //video_mem_arr[idx] = video_mem;
-
-}
-
-void backspace_multi(uint8_t current_term) {
-    uint8_t idx = current_term - 1;
-    screen_x = screen_x_arr[idx];
-    screen_y = screen_y_arr[idx];
-    //video_mem = video_mem_arr[idx];
-    backspace();
-    screen_x_arr[idx] = screen_x;
-    screen_y_arr[idx] = screen_y;
-   //video_mem_arr[idx] = video_mem;
-
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
