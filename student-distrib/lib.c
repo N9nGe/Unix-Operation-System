@@ -15,10 +15,14 @@
 // 0x0 == empty black
 // 0x11 == blue screen
 
+// current display data and screen info
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+// cp5
+// these 3 arrays store display data for each terminal
+// change by switch_screen()
 static int screen_x_arr[3];
 static int screen_y_arr[3];
 static char** video_mem_arr[3][NUM_ROWS * NUM_COLS * 2];
