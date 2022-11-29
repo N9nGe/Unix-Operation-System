@@ -18,11 +18,12 @@ typedef struct terminal_t
     unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
     uint32_t count;
     int task_counter; // Task counter for current terminal
+    int read_flag;  // keyboard flag 
 } terminal_t;
 
 extern terminal_t terminal[4];
 extern int running_term;
-
+extern int last_terminal;
 // initalize the terminals
 void terminal_init();
 // reset the specific terminal structure 
