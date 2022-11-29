@@ -349,25 +349,33 @@ void scroll_up(char* memory){
     }
 }
 
+// this function basically gets the index of the previous terminal and the index of the current terminal
+// store the current screen position to the previous terminal index
+// store all video memory into previous terminal index
+// clear the screen
+// move every data inside current terminal index into screen_x,y and video_mem variables
 void switch_screen(uint8_t prev_term, uint8_t current_term) {
     uint8_t prev_idx = prev_term - 1;
     uint8_t current_idx = current_term - 1;
     int i;
     screen_x_arr[prev_idx] = screen_x;
     screen_y_arr[prev_idx] = screen_y;
+    int counter = 0;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         *(uint8_t *)(video_mem_arr[prev_idx] + (i << 1)) = *(uint8_t *)(video_mem + (i << 1));
         *(uint8_t *)(video_mem_arr[prev_idx] + (i << 1) + 1) = *(uint8_t *)(video_mem + (i << 1) + 1);
+        counter = counter + 2;
     }
     clear();
     screen_x = screen_x_arr[current_idx];
     screen_y = screen_y_arr[current_idx];
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         *(uint8_t *)(video_mem + (i << 1)) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1));
-        *(uint8_t *)(video_mem + (i << 1) + 1) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1) + 1);
+        //*(uint8_t *)(video_mem + (i << 1) + 1) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1) + 1);     // this caused a bug
+        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+
     }
     update_cursor(screen_x,screen_y);
-    //video_mem = video_mem_arr[idx];
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);

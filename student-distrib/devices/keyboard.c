@@ -174,21 +174,29 @@ void keyboard_interrupt_handler(){
                     sti();
                     return;
                 }
-                    if ( ctrl_buf == 1){
-                        //if(value == 0x3b){//F1
-                        // changed those value just for testing
-                        if(value == 49){//F1
+                    if (ctrl_buf == 1){
+                        switch (value)
+                        {
+                        case 49: // replace this key to f1
                             running_term = 1;
-                        }
-                        //if(value == 0x3c){//F2
-                        if(value == 50){//F1
+                            break;
+                        case 50: // replace this key to f2
                             running_term = 2;
-                        }
-                        //if(value == 0x3d){//F3
-                        if(value == 51){//F1
+                            break;
+                        case 51: // replace this key to f3
                             running_term = 3;
+                            break;
+                        default:
+                            // running term = 0 means that invalid terminal number
+                            running_term = 0;
+                            break;
                         }
-                        if( running_term != last_terminal){
+                        // if the terminal number is invalid, ignore the command
+                        if (running_term == 0) {
+                            sti();
+                            return;
+                        }
+                        if(running_term != last_terminal){
                             //printf("current terminal: %u\n", running_term);
                             switch_screen(last_terminal, running_term);
                             memcpy(keyboard_buf_arr[last_terminal-1], keyboard_buf, KEY_BUF_SIZE);
