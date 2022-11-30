@@ -21,6 +21,5 @@ page_table_entry_t page_table[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZ
 page_table_entry_t vid_page_table[PAGE_ENTRY_NUMBER] __attribute__((aligned(PAGE_SIZE)));
 
 void paging_init();
-void mult_terminal_page();
 
 #endif
