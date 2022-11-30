@@ -198,8 +198,9 @@ void keyboard_interrupt_handler(){
                         }
                         if(display_term != last_term){
                             //printf("current terminal: %u\n", display_term);
+                            switch_vid_page(last_term, display_term);
                             switch_screen(last_term, display_term);
-                            printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
+                            //printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
 
                             memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
                             memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);

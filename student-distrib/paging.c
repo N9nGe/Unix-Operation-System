@@ -2,6 +2,7 @@
 #include "types.h"
 #include "lib.h"
 
+int * vid_pages[4];
 
 /* paging_init()
  * Description: initialize the paging
@@ -37,7 +38,26 @@ void paging_init() {
     page_table[VIDEO_MEMORY >> PT_SHIFT].read_write = 1;
     page_table[VIDEO_MEMORY >> PT_SHIFT].base_addr = (VIDEO_MEMORY >> PT_SHIFT);
 
-    mult_terminal_page();
+    // video pages for the multiple terminal
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].base_addr = (VIDEO_PAGE_1 >> PT_SHIFT);
+
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].base_addr = (VIDEO_PAGE_2 >> PT_SHIFT);
+
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].base_addr = (VIDEO_PAGE_3 >> PT_SHIFT);
+
+    vid_pages[0] = VIDEO_MEMORY;
+    vid_pages[1] = VIDEO_PAGE_1;
+    vid_pages[2] = VIDEO_PAGE_2;
+    vid_pages[3] = VIDEO_PAGE_3;
 
     // enable the paging 
     asm volatile(
@@ -61,18 +81,8 @@ void paging_init() {
 
 }
 
-
-
-void mult_terminal_page(){
-    page_table[0xB9000 >> PT_SHIFT].present = 1;
-    page_table[0xB9000 >> PT_SHIFT].read_write = 1;
-    page_table[0xB9000 >> PT_SHIFT].base_addr = (0xB9000 >> PT_SHIFT);
-
-    page_table[0xBA000 >> PT_SHIFT].present = 1;
-    page_table[0xBA000 >> PT_SHIFT].read_write = 1;
-    page_table[0xBA000 >> PT_SHIFT].base_addr = (0xBA000 >> PT_SHIFT);
-
-    page_table[0xBB000 >> PT_SHIFT].present = 1;
-    page_table[0xBB000 >> PT_SHIFT].read_write = 1;
-    page_table[0xBB000 >> PT_SHIFT].base_addr = (0xBA000 >> PT_SHIFT);   
+void switch_vid_page(uint8_t current, uint8_t next) {
+    memcpy(vid_pages[current], vid_pages[0], 4096);
+    //clear();
+    memcpy(vid_pages[0], vid_pages[next], 4096);
 }
