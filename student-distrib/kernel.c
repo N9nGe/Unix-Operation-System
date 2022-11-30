@@ -156,7 +156,6 @@ void entry(unsigned long magic, unsigned long addr) {
 
     pit_init();
     
-    terminal_init();
     keyboard_init();
     
     rtc_init();

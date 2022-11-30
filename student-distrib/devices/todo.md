@@ -54,8 +54,8 @@ i think it is because scolling unimplement
     - [x] must implement now 
     - [x] in terminal.h
     - [x] where to initialize it?
-    - [ ] construct test 
-    - [ ] construct open lines
+    - [x] construct test 
+    - [x] construct open lines
 
 ## Q&A
 

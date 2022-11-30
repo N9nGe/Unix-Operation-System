@@ -20,12 +20,13 @@ int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
-// CP2: initialize these 2 as 0, prepare for future cp5
-// int present_terminal = 0;
-// int last_terminal = 0; 
+
+uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
+int keybuf_count_arr[3] = {0,0,0};
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
+// TOOD How to change this
 volatile int  kb_flag = 0;                // flag used to open the terminal read 
 
 /*The CP2 edition scancode list*/
@@ -147,18 +148,17 @@ void keyboard_interrupt_handler(){
         if( shift_buf == 1){// decide the scancode
             value = scancode[key][1];
         }
-            
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
-                    terminal_count = keybuf_count +1;
-                    if(terminal_count == KEY_BUF_SIZE - 2) {
+                    terminal[display_term].count = keybuf_count +1;
+                    if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
                     keybuf_count = 0;
-                    kb_flag = 1;            // interrupt the terminal 
+                    terminal[display_term].read_flag = 1;            // interrupt the terminal 
                     putc_advanced(value);
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
                     sti();
@@ -173,9 +173,44 @@ void keyboard_interrupt_handler(){
                     sti();
                     return;
                 }
-                if ( alt_buf == 1){
-                    // TODO do nothing for now
-                }
+                    if (ctrl_buf == 1){ //TODO: replace back to Fn 
+                        switch (value)
+                        {
+                        case 49: // replace this key to f1
+                            display_term = 1;
+                            break;
+                        case 50: // replace this key to f2
+                            display_term = 2;
+                            break;
+                        case 51: // replace this key to f3
+                            display_term = 3;
+                            break;
+                        default:
+                        //BUG  default shouldn't change current terminal 
+                            // running term = 0 means that invalid terminal number 
+                            // display_term = 0; 
+                            break;
+                        }
+                        // if the terminal number is invalid, ignore the command
+                        if (display_term == 0) {
+                            sti();   // BUG: here if we should ignore 0,
+                            return;
+                        }
+                        if(display_term != last_term){
+                            //printf("current terminal: %u\n", display_term);
+                            switch_screen(last_term, display_term);
+                            printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
+
+                            memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
+                            memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
+                            keybuf_count_arr[last_term-1] = keybuf_count;
+                            keybuf_count = keybuf_count_arr[display_term-1];
+
+                            last_term = display_term;
+                            sti();
+                            return;
+                        } 
+                    }
 
                 if( value ==  '\b' && keybuf_count >= 0){
                     if (keybuf_count == 0){
@@ -226,14 +261,9 @@ void backspace_handler(){
         backspace();
         backspace();
         backspace();
-        // keyboard_buf[keybuf_count] = '\b';
-
-        // keybuf_count++;
     }else{
         backspace();
     }
-    // keyboard_buf[keybuf_count] = '\b';
-    // keybuf_count--;
 }
 
 

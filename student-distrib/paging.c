@@ -75,3 +75,18 @@ void paging_init() {
 
 }
 
+
+
+void mult_terminal_page(){
+    page_table[0xB9000 >> PT_SHIFT].present = 1;
+    page_table[0xB9000 >> PT_SHIFT].read_write = 1;
+    page_table[0xB9000 >> PT_SHIFT].base_addr = (0xB9000 >> PT_SHIFT);
+
+    page_table[0xBA000 >> PT_SHIFT].present = 1;
+    page_table[0xBA000 >> PT_SHIFT].read_write = 1;
+    page_table[0xBA000 >> PT_SHIFT].base_addr = (0xBA000 >> PT_SHIFT);
+
+    page_table[0xBB000 >> PT_SHIFT].present = 1;
+    page_table[0xBB000 >> PT_SHIFT].read_write = 1;
+    page_table[0xBB000 >> PT_SHIFT].base_addr = (0xBA000 >> PT_SHIFT);   
+}
