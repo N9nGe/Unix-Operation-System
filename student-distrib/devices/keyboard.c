@@ -177,36 +177,36 @@ void keyboard_interrupt_handler(){
                         switch (value)
                         {
                         case 49: // replace this key to f1
-                            running_term = 1;
+                            display_term = 1;
                             break;
                         case 50: // replace this key to f2
-                            running_term = 2;
+                            display_term = 2;
                             break;
                         case 51: // replace this key to f3
-                            running_term = 3;
+                            display_term = 3;
                             break;
                         default:
                         //BUG  default shouldn't change current terminal 
                             // running term = 0 means that invalid terminal number 
-                            // running_term = 0; 
+                            // display_term = 0; 
                             break;
                         }
                         // if the terminal number is invalid, ignore the command
-                        if (running_term == 0) {
+                        if (display_term == 0) {
                             sti();   // BUG: here if we should ignore 0,
                             return;
                         }
-                        if(running_term != last_terminal){
-                            //printf("current terminal: %u\n", running_term);
-                            switch_screen(last_terminal, running_term);
-                            printf("changinng to terminal %d",running_term); // TEST: current at 3 2 but not 1
+                        if(display_term != last_term){
+                            //printf("current terminal: %u\n", display_term);
+                            switch_screen(last_term, display_term);
+                            printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
 
-                            memcpy(keyboard_buf_arr[last_terminal-1], keyboard_buf, KEY_BUF_SIZE);
-                            memcpy(keyboard_buf, keyboard_buf_arr[running_term-1], KEY_BUF_SIZE);
-                            keybuf_count_arr[last_terminal-1] = keybuf_count;
-                            keybuf_count = keybuf_count_arr[running_term-1];
+                            memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
+                            memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
+                            keybuf_count_arr[last_term-1] = keybuf_count;
+                            keybuf_count = keybuf_count_arr[display_term-1];
 
-                            last_terminal = running_term;
+                            last_term = display_term;
                             sti();
                             return;
                         } 

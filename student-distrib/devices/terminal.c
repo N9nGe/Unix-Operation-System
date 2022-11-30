@@ -69,8 +69,8 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     int32_t index;
     // set the flag off and wait for the [enter] pressed
     //CP5 : terminal sepecific read flag
-    terminal[running_term].read_flag = 0;
-    while (terminal[running_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
+    terminal[display_term].read_flag = 0;
+    while (terminal[display_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
 // TODO: currently useless because there are no scheduling here.
     memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard buffer
