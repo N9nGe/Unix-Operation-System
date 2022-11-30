@@ -7,6 +7,13 @@
 
 #include "types.h"
 
+typedef struct screen_t
+{
+    int screen_pos_x;
+    int screen_pos_y;
+    char* screen_video_mem;
+} screen_t;
+
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
@@ -23,7 +30,8 @@ void backspace();
 //CP5
 void printf_color(int8_t* str,int color);
 void putc_color(uint8_t str,int color);
-
+// those functions achieves save functionalities but for different terminals
+void switch_screen(uint8_t prev_term, uint8_t current_term);
 
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);

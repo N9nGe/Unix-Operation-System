@@ -10,7 +10,8 @@
 #include"../types.h"
 #include"keyboard.h"
 #include"terminal.h"
-//CP5: I allocate 4 terminal array
+
+//CP5: allocate 4 terminal array, 1 2 3 for specific F1 F2 F3, and 0 is for error terminal signal 
 terminal_t terminal[4];
 int display_term = 1;
 int last_term = 1;
@@ -67,10 +68,10 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // loop index for copy
     int32_t index;
     // set the flag off and wait for the [enter] pressed
-    // kb_flag = 0;
-    terminal[display_term].read_flag = 0;
-
-    while (terminal[display_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
+    //CP5 : terminal sepecific read flag
+    terminal[running_term].read_flag = 0;
+    while (terminal[running_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
+// TODO: currently useless because there are no scheduling here.
     memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard buffer
     for (index = 0; index < nbytes; index++) {
@@ -123,7 +124,6 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
         // the buf still have character
             c = char_buf[index];
             putc_advanced(c);
-
     }
     
     // memset(buf,NULL,sizeof(buf));
