@@ -12,8 +12,8 @@
 #include"terminal.h"
 //CP5: I allocate 4 terminal array
 terminal_t terminal[4];
-int running_term = 1;
-
+int display_term = 1;
+int last_term = 1;
 /* 
  * terminal_init
  *  DESCRIPTION: Initialize terminal display
@@ -30,12 +30,17 @@ void terminal_init(){
         terminal[i].id = i;
         terminal[i].index = 0;
         terminal[i].count = 0;
+        terminal[i].read_flag = 0;
+        terminal[i].cursor_x = 0;
+        terminal[i].cursor_y = 0;
+        terminal[i].task_counter = 0;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
     }
     return;
 };
 /* Helper function
  * - reset current terminal and relevent pcb
+ * - TODO: modify it to be used for reset current terminal 
  */
 void terminal_reset(terminal_t terminal_tmp){
     // TODO: reset or halt the running
@@ -62,13 +67,15 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // loop index for copy
     int32_t index;
     // set the flag off and wait for the [enter] pressed
-    kb_flag = 0;
-    while (kb_flag == 0); // lock the terminal until the keyboard flag is set 1
+    // kb_flag = 0;
+    terminal[display_term].read_flag = 0;
+
+    while (terminal[display_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
     memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard buffer
     for (index = 0; index < nbytes; index++) {
         // Only copy the required part 
-        if (index <= terminal[running_term].count) {
+        if (index <= terminal[display_term].count) {
             ((uint8_t*)buf)[index] = keyboard_buf[index];
         } else {
             ((uint8_t*)buf)[index] = 0;
@@ -76,10 +83,10 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     }
     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
     // choose the return n bytes  
-    if (nbytes <= terminal[running_term].count) {
+    if (nbytes <= terminal[display_term].count) {
         copy_byte = nbytes;
     } else {
-        copy_byte = terminal[running_term].count;
+        copy_byte = terminal[display_term].count;
     }
 
     return copy_byte;// return number of bytes successfully copied

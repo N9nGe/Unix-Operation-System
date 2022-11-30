@@ -21,7 +21,7 @@ int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
 // CP5: the bit to decide which terminal
-int last_terminal = 1; 
+int last_terminal = 1; //TODO: delete it
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
@@ -150,14 +150,14 @@ void keyboard_interrupt_handler(){
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
-                    terminal[running_term].count = keybuf_count +1;
-                    if(terminal[running_term].count == KEY_BUF_SIZE - 2) {
+                    terminal[display_term].count = keybuf_count +1;
+                    if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
                     keybuf_count = 0;
-                    kb_flag = 1;            // interrupt the terminal 
+                    terminal[display_term].read_flag = 1;            // interrupt the terminal 
                     putc_advanced(value);
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
                     sti();
@@ -174,16 +174,16 @@ void keyboard_interrupt_handler(){
                 }
                     if ( ctrl_buf == 1){
                         if(value == 0x3b){//F1
-                            running_term = 1;
+                            display_term = 1;
                         }
                         if(value == 0x3c){//F2
-                            running_term = 2;
+                            display_term = 2;
                         }
                         if(value == 0x3d){//F3
-                            running_term = 3;
+                            display_term = 3;
                         }
-                        if( running_term != last_terminal){
-                            last_terminal = running_term;
+                        if( display_term != last_term){
+                            last_term = display_term;
                             sti();
                             return;
                         }

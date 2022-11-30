@@ -15,10 +15,17 @@
 // 0x0 == empty black
 // 0x11 == blue screen
 
+// current display data and screen info
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+// cp5
+// these 3 arrays store display data for each terminal
+// change by switch_screen()
+static int screen_x_arr[3];
+static int screen_y_arr[3];
+static char** video_mem_arr[3][NUM_ROWS * NUM_COLS * 2];
 
 /* void update_cursor(x,y);
  * Author: Tony 10.20
@@ -340,6 +347,35 @@ void scroll_up(char* memory){
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
     }
+}
+
+// this function basically gets the index of the previous terminal and the index of the current terminal
+// store the current screen position to the previous terminal index
+// store all video memory into previous terminal index
+// clear the screen
+// move every data inside current terminal index into screen_x,y and video_mem variables
+void switch_screen(uint8_t prev_term, uint8_t current_term) {
+    uint8_t prev_idx = prev_term - 1;
+    uint8_t current_idx = current_term - 1;
+    int i;
+    screen_x_arr[prev_idx] = screen_x;
+    screen_y_arr[prev_idx] = screen_y;
+    int counter = 0;
+    for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(video_mem_arr[prev_idx] + (i << 1)) = *(uint8_t *)(video_mem + (i << 1));
+        *(uint8_t *)(video_mem_arr[prev_idx] + (i << 1) + 1) = *(uint8_t *)(video_mem + (i << 1) + 1);
+        counter = counter + 2;
+    }
+    clear();
+    screen_x = screen_x_arr[current_idx];
+    screen_y = screen_y_arr[current_idx];
+    for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(video_mem + (i << 1)) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1));
+        //*(uint8_t *)(video_mem + (i << 1) + 1) = *(uint8_t *)(video_mem_arr[current_idx] + (i << 1) + 1);     // this caused a bug
+        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+
+    }
+    update_cursor(screen_x,screen_y);
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
