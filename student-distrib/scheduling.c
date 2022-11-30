@@ -2,8 +2,7 @@
 
 
 void scheduler(){
-
-    // TODO get pcb of the current active process (need multi-terminal)
+    // TODO get pcb of the current active process (need multi-terminal) ***
 
     int32_t esp_saved, ebp_saved;
 
@@ -19,10 +18,27 @@ void scheduler(){
     // go to the next terminal using Round Robin
     running_term = running_term % 3 + 1;    // from terminal 1 to 3
 
-    pcb_t* next_pcb = ; // TODO get new pcb according to the next running terminal
+    pcb_t* next_pcb = ; // TODO get new pcb according to the next running terminal (need currently running proccess on every terminal)
 
-    /* Map to the correct video page */
-    page_directory[VIDMAP_PAGE_INDEX].pd_kb.val = ( (uint32_t)vid_page_table) | VIDMAP_MAGIC;    // VIDMAP_MAGIC == PD's present, R_W, U_S 
+
+    /* Map video memory to the current terminal's video page */
+    if (displaying_term == running_term)    // TODO check variable name
+        page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12 
+    else    // go to the correct video page according to currently running terminal
+        page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*running_term) >> PT_SHIFT);   // TODO check with teammate 
+
+    // flush TLB (OSdev)
+    asm volatile(
+        "movl %%cr3, %%eax;" 
+        "movl %%eax, %%cr3;"
+        : 
+        : 
+        : "eax", "cc"
+    );
+
+
+    /* Map the text-mode video memory to current terminal's video page */
+    page_directory[VIDMAP_PAGE_INDEX].pd_kb.val = ((uint32_t)vid_page_table) | VIDMAP_MAGIC;    // VIDMAP_MAGIC == PD's present, R_W, U_S 
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
