@@ -3,7 +3,7 @@
 
 void scheduler(){
 
-    // // TODO get pcb of the current active process (need multi-terminal)
+    // TODO get pcb of the current active process (need multi-terminal)
 
     // int32_t esp_saved, ebp_saved;
 
@@ -19,7 +19,7 @@ void scheduler(){
     // // go to the next terminal using Round Robin
     // running_term = running_term % 3 + 1;    // from terminal 1 to 3
 
-    // pcb_t* next_pcb = NULL; // TODO get new pcb according to the next running terminal
+    // pcb_t* next_pcb = ; // TODO get new pcb according to the next running terminal
 
     // /* Map to the correct video page */
     // page_directory[VIDMAP_PAGE_INDEX].pd_kb.val = ( (uint32_t)vid_page_table) | VIDMAP_MAGIC;    // VIDMAP_MAGIC == PD's present, R_W, U_S 

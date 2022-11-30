@@ -7,6 +7,7 @@
 #define _KEYBOARD_H
 
 #include "../types.h"
+#include "../paging.h"
 
 /* Ports that each PIC sits on */
 #define KEYBOARD_IRQ 1
