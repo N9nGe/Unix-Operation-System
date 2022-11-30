@@ -37,7 +37,21 @@ void paging_init() {
     page_table[VIDEO_MEMORY >> PT_SHIFT].read_write = 1;
     page_table[VIDEO_MEMORY >> PT_SHIFT].base_addr = (VIDEO_MEMORY >> PT_SHIFT);
 
-    mult_terminal_page();
+    // video pages for the multiple terminal
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].base_addr = (VIDEO_PAGE_1 >> PT_SHIFT);
+
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].base_addr = (VIDEO_PAGE_2 >> PT_SHIFT);
+
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].base_addr = (VIDEO_PAGE_3 >> PT_SHIFT);
 
     // enable the paging 
     asm volatile(

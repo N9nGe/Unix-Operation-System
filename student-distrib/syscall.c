@@ -462,6 +462,7 @@ int32_t sys_halt(uint8_t status){
     // jump to execute return
     // there is no program -> need to rerun shell
     sti();
+    // TODO: improve task counter into mult-terminal 
     if (task_counter == 0) {
         printf("Restart the Base shell...\n");
         sys_execute((uint8_t*)"shell");
@@ -645,7 +646,14 @@ int32_t sys_vidmap( uint8_t** screen_start){
     vid_page_table[0].present = 1;
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
-    vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12,
+
+    // vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT); 
+
+    // choose which video page should we map to (determined by the currently displaying terminal)
+    if (displaying_term == running_term)    // TODO check variable name
+        vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // TODO check understanding    B8000 >> 12 
+    else    // go to the correct video page according to currently running terminal
+        vid_page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*(running_term+1)) >> PT_SHIFT);   // TODO check with teammate     
 
     // flush the TLB (OSdev)
     asm volatile(
@@ -655,9 +663,9 @@ int32_t sys_vidmap( uint8_t** screen_start){
         : 
         : "eax", "cc"
     );
-    // memset(0x08800000, 't', 200); // TEST 
-    // Set in a new page location for user program to display video
-    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
+
+    // Set a new page location for user program to display video
+    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;  // TODO need to change?
 
     return SYSCALL_SUCCESS;
 }
