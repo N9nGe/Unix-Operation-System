@@ -151,15 +151,14 @@ void keyboard_interrupt_handler(){
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
-                    terminal[running_term].count = keybuf_count +1;
-                    if(terminal[running_term].count == KEY_BUF_SIZE - 2) {
+                    terminal[display_term].count = keybuf_count +1;
+                    if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
                     keybuf_count = 0;
-                    // kb_flag = 1;            // interrupt the terminal 
-                    terminal[running_term].read_flag = 1;
+                    terminal[display_term].read_flag = 1;            // interrupt the terminal 
                     putc_advanced(value);
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
                     sti();
