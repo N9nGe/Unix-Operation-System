@@ -16,7 +16,6 @@
 terminal_t terminal[4];
 int display_term = 1;
 int last_term = 1;
-int running_term = 2;
 
 /* 
  * terminal_init
@@ -38,6 +37,7 @@ void terminal_init(){
         terminal[i].cursor_x = 0;
         terminal[i].cursor_y = 0;
         terminal[i].task_counter = 0;
+        terminal[i].running_pcb = NULL;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
     }
     return;

@@ -1,7 +1,7 @@
 #include"pit.h"
 #include"../i8259.h"
 #include "../scheduling.h"
-static int i = 0;
+// static int i = 0;
 
 /*
 The PIT chip uses the following I/O ports:
@@ -53,10 +53,10 @@ void pit_interrupt_handler(){
 
     // 0.01s per interrupt.
     // test for functinality of pit
-    if (i == 1000) {
-        //printf("%u\n", i);
-    } 
-    i++;
+    // if (i == 1000) {
+    //     //printf("%u\n", i);
+    // } 
+    // i++;
 	//TODO: NEED TO add the multiterminal stuff to do the context switch(flag. global process...)
 
 	scheduler();

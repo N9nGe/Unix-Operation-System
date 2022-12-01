@@ -10,6 +10,7 @@
 #include"../lib.h"
 #include"../types.h"
 #include"keyboard.h"
+#include"../syscall.h"
 
 #define TERMINAL_BUF_SIZE 128
 typedef struct terminal_t
@@ -20,7 +21,7 @@ typedef struct terminal_t
     uint32_t count; // terminal count
     //CP5
     int task_counter; // Task counter for current terminal
-    pcb_t* running_pcb; // pcb pointer to current process of this terminal
+    struct pcb_t* running_pcb; // pcb pointer to current process of this terminal
     int read_flag;    // used for terminal_read syscall
     int cursor_x; 
     int cursor_y;

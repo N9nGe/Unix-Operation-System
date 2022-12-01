@@ -19,7 +19,9 @@ int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
-
+//CP5: flag for first opened terminal
+int flag_2 = 0;
+int flag_3 = 0;
 
 uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
 int keybuf_count_arr[3] = {0,0,0};
@@ -173,45 +175,12 @@ void keyboard_interrupt_handler(){
                     sti();
                     return;
                 }
-                    if (ctrl_buf == 1){ //TODO: replace back to Fn 
-                        switch (value)
-                        {
-                        case 49: // replace this key to f1
-                            display_term = 1;
-                            break;
-                        case 50: // replace this key to f2
-                            display_term = 2;
-                            break;
-                        case 51: // replace this key to f3
-                            display_term = 3;
-                            break;
-                        default:
-                        //BUG  default shouldn't change current terminal 
-                            // running term = 0 means that invalid terminal number 
-                            // display_term = 0; 
-                            break;
-                        }
-                        // if the terminal number is invalid, ignore the command
-                        if (display_term == 0) {
-                            sti();   // BUG: here if we should ignore 0,
-                            return;
-                        }
-                        if(display_term != last_term){
-                            //printf("current terminal: %u\n", display_term);
-                            switch_vid_page(last_term, display_term);
-                            switch_screen(last_term, display_term);
-                            //printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
+                int ret = terminal_switch(value);
+                if(ret == 1){
+                    sti();
+                    return;
+                }
 
-                            memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
-                            memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
-                            keybuf_count_arr[last_term-1] = keybuf_count;
-                            keybuf_count = keybuf_count_arr[display_term-1];
-
-                            last_term = display_term;
-                            sti();
-                            return;
-                        } 
-                    }
 
                 if( value ==  '\b' && keybuf_count >= 0){
                     if (keybuf_count == 0){
@@ -352,5 +321,57 @@ void reset_keyboard_buffer(){
     shift_buf = 0;
     caps_lock = 0;
     alt_buf = 0;
+
+}
+
+int terminal_switch(unsigned int value){
+    int ret = 0;
+                 if (ctrl_buf == 1){ //TODO: replace back to Fn 
+                        switch (value)
+                        {
+                        case 49: // replace this key to f1
+    //  Second routine to establish the shell_init                        
+                            display_term = 1;
+                            ret = 1;
+                            break;
+                        case 50: // replace this key to f2
+                            if(flag_2 == 0){
+                                // sys_execute("shell");
+                                flag_2 = 1;
+                            }
+                            ret = 1;
+                            display_term = 2;
+                            break;
+                        case 51: // replace this key to f3
+                            if(flag_3 == 0){
+                                // sys_execute("shell");
+                                flag_3 = 1;
+                            }
+                            ret = 1;
+                            display_term = 3;
+                            break;
+                        default:
+                        //BUG  default shouldn't change current terminal 
+                            // running term = 0 means that invalid terminal number 
+                            // display_term = 0; 
+                            return ret;
+                            //break;
+                        }
+                        if(display_term != last_term){
+                            //printf("current terminal: %u\n", display_term);
+                            switch_vid_page(last_term, display_term);
+                            switch_screen(last_term, display_term);
+                            //printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
+
+                            memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
+                            memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
+                            keybuf_count_arr[last_term-1] = keybuf_count;
+                            keybuf_count = keybuf_count_arr[display_term-1];
+
+                            last_term = display_term;
+                            return ret;
+                        } 
+                    }
+    return ret;
 }
 

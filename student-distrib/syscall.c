@@ -6,11 +6,11 @@
 #define FD_MIN      2 // For read, write, open and close, stdin and stdout is check seperately
 #define FD_MAX      7
 //CP3: linear increase method to construct new pcb
-static uint32_t task_counter = 0;
+// static uint32_t task_counter = 0;
 pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE);
 pcb_t * parent_pcb = NULL;
 //CP4: add a length-6 bitmap for pcb, ensure the tasks are fixed in 6 places
-static uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
+uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
 //CP5: terminal-specific task_counter
 //TODO: how to choose each terminal's counter when operating the execute?
 // terminal[display_term].task_counter 
@@ -356,6 +356,7 @@ int32_t sys_execute (const uint8_t* command){
     cli();
     // paging the new memory
     paging_execute(find_pid());
+    terminal[running_term].task_counter++;
     // load the file into USER_PROGRAM_IMAGE_START(virtual memory)
     if (read_data(execute_file.inode_num, 0, (uint8_t*) USER_PROGRAM_IMAGE_START, inode_ptr[execute_file.inode_num].length) == 0) {
         return SYSCALL_FAIL;
@@ -363,32 +364,26 @@ int32_t sys_execute (const uint8_t* command){
     
     // create new pcb
     int32_t parent_id = 0;
-    if (task_counter > 1) {
+    uint32_t new_pid = find_pid();
+    if (terminal[running_term].task_counter > 1) {
         parent_id = current_pcb_pointer->pid;
     }
     parent_pcb = current_pcb_pointer;
     pcb_t* new_pcb = pcb_initilize();
-    // if (new_pcb == NULL) {
-    //     printf("No position for new pcb!\n");
-    //     return SYSCALL_FAIL;
-    // }
     current_pcb_pointer = new_pcb;
     // CP5
     terminal[running_term].running_pcb = new_pcb;
-    terminal[running_term].task_counter++;
-
+    
     // update pid and parent_id
-    new_pcb->pid = find_pid();
+    new_pcb->pid = new_pid;
     new_pcb->parent_id = parent_id;
     new_pcb->parent_pcb = parent_pcb;
     strcpy_unsigned(new_pcb->cmd, tmp_cmd);
     pcb_counter[new_pcb->pid - 1] = 1;
     
-    // save old ebp & esp (from review slides)
+    // save old(prev) ebp & esp (from review slides) in new pcb
     register uint32_t saved_ebp asm("ebp");
     register uint32_t saved_esp asm("esp");
-
-    // store ebp && esp in the pcb
     new_pcb->saved_ebp = saved_ebp;
     new_pcb->saved_esp = saved_esp;
     
@@ -445,11 +440,7 @@ int32_t sys_halt(uint8_t status){
     pcb_counter[pcb->pid - 1] = 0;
     current_pcb_pointer = pcb->parent_pcb;
     // CP5
-    terminal[running_term].running_pcb = current_pcb_pointer->parent_pcb;// ???
-    if (terminal[running_term].task_counter > 0){
-        terminal[running_term].task_counter--   ;   
-    }// TODO: will there be negative case for counter?
-    
+    terminal[running_term].running_pcb = pcb->parent_pcb;
     
     // point to the parent kernel stack
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - AVOID_PAGE_FAULT); 
@@ -458,7 +449,7 @@ int32_t sys_halt(uint8_t status){
     for (i = FD_MIN; i < FD_MAX+1; i++) {
         // need file close
         sys_close(i);
-        current_pcb_pointer -> fd_entry[i].flag = 0;
+        pcb -> fd_entry[i].flag = 0;
     }
     // close stdin and stdout
     pcb->fd_entry[0].flag = 0;
@@ -473,12 +464,13 @@ int32_t sys_halt(uint8_t status){
     memset(pcb->cmd, 0, sizeof(pcb->cmd));
     // restore parent paging
     page_halt(pcb->parent_id);
+    terminal[running_term].task_counter--;
     
     // jump to execute return
     // there is no program -> need to rerun shell
     sti();
     // TODO: improve task counter into mult-terminal 
-    if (task_counter == 0) {
+    if (terminal[running_term].task_counter == 0) {
         printf("Restart the Base shell...\n");
         sys_execute((uint8_t*)"shell");
     } else {
@@ -530,7 +522,6 @@ void paging_execute(uint32_t pid) {
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + pid); // give the address of the process
-    task_counter++; // increment the counter
     // flush the TLB (OSdev)
     asm volatile(
         "movl %%cr3, %%eax;" 
@@ -555,7 +546,7 @@ void page_halt(int32_t parent_id) {
     page_directory[index].pd_mb.user_supervisor = 1;
     page_directory[index].pd_mb.page_size = 1;  // change to 4mb page 
     page_directory[index].pd_mb.base_addr = ((KERNEL_POSITION) + parent_id); // give the address of the process
-    task_counter--; // decrement the counter
+    // task_counter--; // decrement the counter
 
     //CP 4: remove the vid page table
     vid_page_table[0].present = 0;

@@ -80,12 +80,16 @@ typedef struct pcb_t {
     uint8_t cmd[128];
     fd_entry_t fd_entry[8];// file descriptor entry for current pcb
     struct pcb_t * parent_pcb;
+    uint32_t current_esp;    // stack pointer save
+    uint32_t current_ebp;    // Base pointer save
 } pcb_t;
 /*Other CP3 structure location*/
 // fd entry is in filesystem 
 // fop: also in filesystem
 /*Local varialbe*/
 extern pcb_t* current_pcb_pointer;
+
+extern uint32_t pcb_counter[6];
 
 uint32_t find_pid();
 
