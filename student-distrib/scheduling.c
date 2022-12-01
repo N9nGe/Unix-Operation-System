@@ -22,7 +22,7 @@ void scheduler(){
 
 
     /* Map video memory to the current terminal's video page */
-    if (displaying_term == running_term)    // TODO check variable name
+    if (display_term == running_term)    // TODO check variable name
         page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12 
     else    // go to the correct video page according to currently running terminal
         page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*running_term) >> PT_SHIFT);   // TODO check with teammate 
@@ -43,7 +43,7 @@ void scheduler(){
     vid_page_table[0].read_write = 1;
     vid_page_table[0].user_supervisor = 1;  
     // choose which video page should we map to (determined by the currently displaying terminal)
-    if (displaying_term == running_term)    // TODO check variable name
+    if (display_term == running_term)    // TODO check variable name
         vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // TODO check understanding    B8000 >> 12 
     else    // go to the correct video page according to currently running terminal
         vid_page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*running_term) >> PT_SHIFT);   // TODO check with teammate     
