@@ -9,6 +9,7 @@
 #include "devices/RTC.h"
 #include "devices/terminal.h"
 #include "idt.h"
+#include "scheduling.h"
 
 /*CP3*/
 #define USER_PROGRAM_IMAGE_START     0x08048000

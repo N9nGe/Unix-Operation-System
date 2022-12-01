@@ -1,5 +1,6 @@
 #include "scheduling.h"
 
+uint32_t running_term = 0;
 
 void scheduler(){
     // TODO get pcb of the current active process (need multi-terminal) ***
