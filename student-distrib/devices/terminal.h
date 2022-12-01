@@ -33,7 +33,6 @@ typedef struct terminal_t
 
 extern terminal_t terminal[4];
 extern int display_term;
-
 extern int last_term;
 
 extern int running_term; // TODO: delete it and go back to schedule's

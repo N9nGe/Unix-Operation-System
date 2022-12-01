@@ -54,10 +54,10 @@ void paging_init() {
     page_table[VIDEO_PAGE_3 >> PT_SHIFT].user_supervisor = 1;
     page_table[VIDEO_PAGE_3 >> PT_SHIFT].base_addr = (VIDEO_PAGE_3 >> PT_SHIFT);
 
-    vid_pages[0] = VIDEO_MEMORY;
-    vid_pages[1] = VIDEO_PAGE_1;
-    vid_pages[2] = VIDEO_PAGE_2;
-    vid_pages[3] = VIDEO_PAGE_3;
+    vid_pages[0] = (int*) VIDEO_MEMORY;
+    vid_pages[1] = (int*) VIDEO_PAGE_1;
+    vid_pages[2] = (int*) VIDEO_PAGE_2;
+    vid_pages[3] = (int*) VIDEO_PAGE_3;
 
     // enable the paging 
     asm volatile(
