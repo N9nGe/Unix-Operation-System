@@ -1,6 +1,7 @@
 #include "RTC.h"
 #include "../i8259.h"
 #include "../lib.h"
+#include "../scheduling.h"
 
 static uint32_t log_2(uint32_t freq);
 extern void test_interrupts(void);

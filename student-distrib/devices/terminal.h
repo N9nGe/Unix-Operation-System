@@ -19,6 +19,7 @@ typedef struct terminal_t
     unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
     uint32_t count; // terminal count
     int task_counter; // Task counter for current terminal
+    pcb_t* running_pcb;//
     int read_flag; // used for terminal_read syscall
     int cursor_x; 
     int cursor_y;
@@ -31,7 +32,6 @@ typedef struct terminal_t
 
 extern terminal_t terminal[4];
 extern int display_term;
-
 extern int last_term;
 
 // initalize the terminals

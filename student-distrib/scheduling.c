@@ -8,33 +8,33 @@ void scheduler(){
 
     // save current esp and ebp
     asm volatile(
-        "movl %%esp, %0"
-        "movl %%ebp, %1"
+        "movl %%esp, %0;"
+        "movl %%ebp, %1;"
         :
         : "r" (esp_saved), "r" (ebp_saved)
-        :
+        : "esp", "ebp"
     );
 
     // go to the next terminal using Round Robin
     running_term = running_term % 3 + 1;    // from terminal 1 to 3
 
-    pcb_t* next_pcb = ; // TODO get new pcb according to the next running terminal (need currently running proccess on every terminal)
+    pcb_t* next_pcb = terminal[running_term].running_pcb; // TODO get new pcb according to the next running terminal (need currently running proccess on every terminal)
 
 
-    /* Map video memory to the current terminal's video page */
-    if (display_term == running_term)    // TODO check variable name
-        page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12 
-    else    // go to the correct video page according to currently running terminal
-        page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*running_term) >> PT_SHIFT);   // TODO check with teammate 
+    // /* Map video memory to the current terminal's video page */
+    // if (display_term == running_term)    // TODO check variable name
+    //     page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12 
+    // else    // go to the correct video page according to currently running terminal
+    //     page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*running_term) >> PT_SHIFT);   // TODO check with teammate 
 
-    // flush TLB (OSdev)
-    asm volatile(
-        "movl %%cr3, %%eax;" 
-        "movl %%eax, %%cr3;"
-        : 
-        : 
-        : "eax", "cc"
-    );
+    // // flush TLB (OSdev)
+    // asm volatile(
+    //     "movl %%cr3, %%eax;" 
+    //     "movl %%eax, %%cr3;"
+    //     : 
+    //     : 
+    //     : "eax", "cc"
+    // );
 
 
     /* Map the text-mode video memory to current terminal's video page */
@@ -63,15 +63,15 @@ void scheduler(){
     page_directory[32].pd_mb.present = 1;    
     page_directory[32].pd_mb.read_write = 1;
     page_directory[32].pd_mb.page_size = 1;  // initialize 4mb page 
-    page_directory[32].pd_mb.base_addr = KERNEL_POSITION + (next_pcb->pid + 1) * 0x400000; // provide the address of the next program
+    page_directory[32].pd_mb.base_addr = (KERNEL_POSITION) + (next_pcb->pid + 1) * 0x400000; // provide the address of the next program
 
     // switch to the next process' esp & ebp
     asm volatile(
-        "movl %0, %%esp"
-        "movl %1, %%ebp"
+        "movl %0, %%esp;"
+        "movl %1, %%ebp;"
         :
         : "r" (next_pcb->saved_esp), "r" (next_pcb->saved_ebp)
-        :
+        : "esp", "ebp"
     );
     
     // restore TSS of the next process

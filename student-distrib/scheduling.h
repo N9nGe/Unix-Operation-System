@@ -8,7 +8,7 @@
 #include "devices/keyboard.h"
 #include "devices/terminal.h"
 
-static uint32_t running_term;
+extern uint32_t running_term;
 
 void scheduler();
 
