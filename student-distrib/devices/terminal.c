@@ -10,11 +10,14 @@
 #include"../types.h"
 #include"keyboard.h"
 #include"terminal.h"
+#include "../scheduling.h"
 
 //CP5: allocate 4 terminal array, 1 2 3 for specific F1 F2 F3, and 0 is for error terminal signal 
 terminal_t terminal[4];
 int display_term = 1;
 int last_term = 1;
+int running_term = 2;
+
 /* 
  * terminal_init
  *  DESCRIPTION: Initialize terminal display
@@ -111,6 +114,13 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     if(buf == NULL){
         return -1;
     }
+    // 1 if the terminal running is in the background
+    int background_running = 0;
+    if (display_term != running_term) {
+        background_running = 1;
+    }
+    // check if running terminal is display, if yes,
+    // else call lib.c: swtich to background
     // the variable used for return
     int32_t copy_byte;
     // loop index for copy
@@ -123,9 +133,12 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
-            putc_advanced(c);
+            if (background_running) {
+                putc_background(c, running_term);
+            } else {
+                putc_advanced(c);
+            }
     }
-    
     // memset(buf,NULL,sizeof(buf));
     // choose the return n bytes  
     if (nbytes <= buf_length) {

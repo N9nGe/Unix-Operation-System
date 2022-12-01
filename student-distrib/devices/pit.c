@@ -1,7 +1,7 @@
 #include"pit.h"
 #include"../i8259.h"
-#include "scheduling.h"
-static i = 0;
+#include "../scheduling.h"
+static int i = 0;
 
 /*
 The PIT chip uses the following I/O ports:
@@ -23,14 +23,17 @@ void pit_init(){
     // Reference link: https://wiki.osdev.org/Programmable_Interval_Timer
     // Turn on the IRQ0 for PIT
     uint32_t flags;
+	uint32_t data;
     cli_and_save(flags);    // CLI and save EFLAGS
 
 	// set the squared wave mode
 	outb(PIT_MODE_3, PIT_MODE_PORT);
 
 	// set the devisor frequency(16 bit)  (0.01s per interrupt.)
-	outb(PIT_OSCILLATOR_FREQ & PIT_LOW_MASK, PIT_DATA_PORT); // get the low 8 bit of the frequency
-	outb(PIT_OSCILLATOR_FREQ >> 8, PIT_DATA_PORT);  // get the high 8 bit of the frequency
+	data = (PIT_OSCILLATOR_FREQ & PIT_LOW_MASK);
+	outb(data, PIT_DATA_PORT); // get the low 8 bit of the frequency
+	data = (PIT_OSCILLATOR_FREQ >> 8);
+	outb(data, PIT_DATA_PORT);  // get the high 8 bit of the frequency
 
     sti(); // set interrupt flags
     restore_flags(flags);   // restore flags 
@@ -46,16 +49,17 @@ void pit_init(){
  */
 void pit_interrupt_handler(){
     cli();
+    send_eoi(PIT_IRQ_NUM);
+
     // 0.01s per interrupt.
     // test for functinality of pit
     if (i == 1000) {
-        printf("%u\n", i);
+        //printf("%u\n", i);
     } 
     i++;
 	//TODO: NEED TO add the multiterminal stuff to do the context switch(flag. global process...)
 
-	// scheduler();
-    // send_eoi(PIT_IRQ_NUM);
+	scheduler();
     
     sti();
 }
