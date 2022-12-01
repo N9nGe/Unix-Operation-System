@@ -133,7 +133,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
-            if (background_running) {
+            if (background_running) { // CP5 background writing
                 putc_background(c, running_term);
             } else {
                 putc_advanced(c);
