@@ -18,9 +18,10 @@ typedef struct terminal_t
     int index; // line buffer index&counter
     unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
     uint32_t count; // terminal count
+    //CP5
     int task_counter; // Task counter for current terminal
-    pcb_t* running_pcb;//
-    int read_flag; // used for terminal_read syscall
+    pcb_t* running_pcb; // pcb pointer to current process of this terminal
+    int read_flag;    // used for terminal_read syscall
     int cursor_x; 
     int cursor_y;
 } terminal_t;
@@ -34,6 +35,7 @@ extern terminal_t terminal[4];
 extern int display_term;
 extern int last_term;
 
+extern int running_term; // TODO: delete it and go back to schedule's
 // initalize the terminals
 void terminal_init();
 // reset the specific terminal structure 

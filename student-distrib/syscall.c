@@ -5,11 +5,16 @@
 #define SYSCALL_SUCCESS     0
 #define FD_MIN      2 // For read, write, open and close, stdin and stdout is check seperately
 #define FD_MAX      7
-
+//CP3: linear increase method to construct new pcb
 static uint32_t task_counter = 0;
 pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE);
 pcb_t * parent_pcb = NULL;
+//CP4: add a length-6 bitmap for pcb, ensure the tasks are fixed in 6 places
 static uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
+//CP5: terminal-specific task_counter
+//TODO: how to choose each terminal's counter when operating the execute?
+// terminal[display_term].task_counter 
+
 
 /*file operation table pointer */
 /*The following are a series of device-speific
@@ -305,10 +310,10 @@ int32_t sys_write (int32_t fd, const void* buf, int32_t nbytes){
     return ret;
 }
 
-/* execute (const uint8_t* command)
+/* sys_execute (const uint8_t* command)
  * Description: system call execute
  * Inputs: const uint8_t* command
- * Return Value: 0 succeff; -1 fail
+ * Return Value: 0 succeed; -1 fail
  * Function: do the execute based on the command
  */
 int32_t sys_execute (const uint8_t* command){
@@ -368,6 +373,10 @@ int32_t sys_execute (const uint8_t* command){
     //     return SYSCALL_FAIL;
     // }
     current_pcb_pointer = new_pcb;
+    // CP5
+    terminal[running_term].running_pcb = new_pcb;
+    terminal[running_term].task_counter++;
+
     // update pid and parent_id
     new_pcb->pid = find_pid();
     new_pcb->parent_id = parent_id;
@@ -435,6 +444,12 @@ int32_t sys_halt(uint8_t status){
     pcb_t* pcb = current_pcb_pointer;
     pcb_counter[pcb->pid - 1] = 0;
     current_pcb_pointer = pcb->parent_pcb;
+    // CP5
+    terminal[running_term].running_pcb = current_pcb_pointer->parent_pcb;// ???
+    if (terminal[running_term].task_counter > 0){
+        terminal[running_term].task_counter--   ;   
+    }// TODO: will there be negative case for counter?
+    
     
     // point to the parent kernel stack
     tss.esp0 = (KERNEL_BOTTOM - PROCESS_SIZE * (pcb->parent_id - 1) - AVOID_PAGE_FAULT); 
