@@ -28,11 +28,15 @@ void putc_advanced(uint8_t c);
 void scroll_up(char* memory);
 void backspace();
 //CP5
+void backspace_background(uint8_t term_idx);
+void scroll_up_background(char* memory, uint8_t term_idx);
 void printf_color(int8_t* str,int color);
 void putc_color(uint8_t str,int color);
 // those functions achieves save functionalities but for different terminals
 void switch_screen(uint8_t prev_term, uint8_t current_term);
-
+void putc_background (uint8_t c, uint8_t term_idx);
+void to_background(uint8_t term_idx);
+void to_display(uint8_t idx);
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
 void* memset_dword(void* s, int32_t c, uint32_t n);

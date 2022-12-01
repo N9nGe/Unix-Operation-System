@@ -54,7 +54,7 @@ void pit_interrupt_handler(){
     // 0.01s per interrupt.
     // test for functinality of pit
     if (i == 1000) {
-        printf("%u\n", i);
+        //printf("%u\n", i);
     } 
     i++;
 	//TODO: NEED TO add the multiterminal stuff to do the context switch(flag. global process...)
