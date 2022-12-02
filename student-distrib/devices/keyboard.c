@@ -19,17 +19,12 @@ int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
-//CP5: flag for first opened terminal
-int flag_2 = 0;
-int flag_3 = 0;
 
 uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
 int keybuf_count_arr[3] = {0,0,0};
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
-// TOOD How to change this
-volatile int  kb_flag = 0;                // flag used to open the terminal read 
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -122,7 +117,7 @@ void keyboard_init(void){
  *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: none
- *  SIDE EFFECTS: set kb_flag on when \n is entered
+ *  SIDE EFFECTS: set terminal's read_flag on when \n is entered, invoking the terminal_read
  */
 void keyboard_interrupt_handler(){
     cli(); // Clear all the interrupt first
@@ -137,6 +132,13 @@ void keyboard_interrupt_handler(){
         sti();
         return;
     }
+    //CP5: Alt + F1, F2, F3 to switch between the terminals
+    int ret = terminal_switch(value);
+        if(ret == 1){
+            sti();
+            return;
+        }
+
     if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) ){ // leave the last bit for \n or \b
         if( value == '\n' || value == '\b'){
             // printf("\nfirst count is %d\n",keybuf_count); // TEST
@@ -152,17 +154,21 @@ void keyboard_interrupt_handler(){
         }
             // Clear the screen when necessary
                 if ( value == '\n' ){
-                    // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
+                    putc_advanced(value); // Why should be there ?
+
                     terminal[display_term].count = keybuf_count +1;
                     if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
-                    keybuf_count = 0;
                     terminal[display_term].read_flag = 1;            // interrupt the terminal 
-                    putc_advanced(value);
+                    keybuf_count = 0;
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
+                    if(terminal[display_term].read_flag == 0){
+                        memset(terminal[display_term].buf,NULL,KEY_BUF_SIZE);
+                        terminal[display_term].count = 0;
+                    }
                     sti();
                     return;
                 }
@@ -171,12 +177,7 @@ void keyboard_interrupt_handler(){
                     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
                     terminal_reset(terminal[running_term]);
                     keybuf_count = 0;
-                    // printf("Cleared the screen: "); // TEST
-                    sti();
-                    return;
-                }
-                int ret = terminal_switch(value);
-                if(ret == 1){
+                    printf("Current Terminal:%d \n",display_term); // TEST
                     sti();
                     return;
                 }
@@ -330,30 +331,18 @@ int terminal_switch(unsigned int value){
                         switch (value)
                         {
                         case 49: // replace this key to f1
-    //  Second routine to establish the shell_init                        
                             display_term = 1;
                             ret = 1;
                             break;
                         case 50: // replace this key to f2
-                            if(flag_2 == 0){
-                                // sys_execute("shell");
-                                flag_2 = 1;
-                            }
                             ret = 1;
                             display_term = 2;
                             break;
                         case 51: // replace this key to f3
-                            if(flag_3 == 0){
-                                // sys_execute("shell");
-                                flag_3 = 1;
-                            }
                             ret = 1;
                             display_term = 3;
                             break;
                         default:
-                        //BUG  default shouldn't change current terminal 
-                            // running term = 0 means that invalid terminal number 
-                            // display_term = 0; 
                             return ret;
                             //break;
                         }
@@ -365,6 +354,11 @@ int terminal_switch(unsigned int value){
 
                             memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
                             memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
+
+                            memcpy(terminal[display_term].buf, keyboard_buf, KEY_BUF_SIZE);
+
+
+
                             keybuf_count_arr[last_term-1] = keybuf_count;
                             keybuf_count = keybuf_count_arr[display_term-1];
 

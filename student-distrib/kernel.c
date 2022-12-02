@@ -15,6 +15,7 @@
 #include "file_system.h"
 #include "syscall.h"
 #include "devices/pit.h"
+#include "game/MentOS.h"
 
 #define RUN_TESTS
 
@@ -163,6 +164,9 @@ void entry(unsigned long magic, unsigned long addr) {
     //rtc_set_freq(2);
 
     pit_init();
+    clear();
+    UI_START();
+    
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your

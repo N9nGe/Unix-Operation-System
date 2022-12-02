@@ -77,9 +77,13 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     //CP5 : terminal sepecific read flag
     terminal[display_term].read_flag = 0;
     while (terminal[display_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
-// TODO: currently useless because there are no scheduling here.
+    
     memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard buffer
+    if(running_term != display_term){
+        return 0;
+    }
+
     for (index = 0; index < nbytes; index++) {
         // Only copy the required part 
         if (index <= terminal[display_term].count) {
@@ -95,7 +99,6 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     } else {
         copy_byte = terminal[display_term].count;
     }
-
     return copy_byte;// return number of bytes successfully copied
 }
 
@@ -113,6 +116,8 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
  *  SIDE EFFECTS: none
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
+    cli();
+
     // check whether the buffer is invalid
     if(buf == NULL){
         return -1;
@@ -149,6 +154,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     } else {
         copy_byte = buf_length;
     }
+    sti();
     return copy_byte;// return number of bytes successfully copied
 }
 
