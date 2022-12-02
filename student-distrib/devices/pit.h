@@ -12,7 +12,7 @@
 #define PIT_MODE_PORT		  0x43
 /* Mode: Channel 0, mode 3 */
 #define PIT_MODE_3      	  0x36 	// Square wave, to seperate the mode evenly with 3 terminals      
-#define PIT_FREQ			  100 	// Slowest freq, but how to judge? 
+#define PIT_FREQ			  100 	// required freq is 100Hz 
 #define PIT_OSCILLATOR_FREQ   ((1193180 / PIT_FREQ) + 1)  
 #define PIT_LOW_MASK          0xFF  
 

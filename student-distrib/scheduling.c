@@ -1,4 +1,5 @@
 #include "scheduling.h"
+/*Global variable*/
 
 uint32_t running_term = 0; // Term: F1, F2, F3
 uint32_t schedule_counter = 1;

@@ -162,6 +162,7 @@ void keyboard_interrupt_handler(){
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
+                    // running_term = display_term;
                     terminal[display_term].read_flag = 1;            // interrupt the terminal 
                     keybuf_count = 0;
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
@@ -172,8 +173,10 @@ void keyboard_interrupt_handler(){
                     sti();
                     return;
                 }
+            /*Ctrl + L to clean the terminal's screen*/
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
+                    reset_keyboard_buffer();
                     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
                     terminal_reset(terminal[running_term]);
                     keybuf_count = 0;
@@ -322,9 +325,19 @@ void reset_keyboard_buffer(){
     shift_buf = 0;
     caps_lock = 0;
     alt_buf = 0;
-
+    memset(keyboard_buf,NULL,sizeof(keyboard_buf));
+    keybuf_count = 0;
 }
 
+/* 
+ * terminal_switch
+ *  DESCRIPTION: a helper function to reset the 
+ *  keyboard buffer 
+ *  INPUTS: none
+ *  OUTPUTS: none
+ *  RETURN VALUE: none
+ *  SIDE EFFECTS: reset two global variable 
+ */
 int terminal_switch(unsigned int value){
     int ret = 0;
                  if (alt_buf == 1){ //TODO: replace back to Fn 
