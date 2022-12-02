@@ -15,6 +15,19 @@ void scheduler(){
         return;
     }
     
+    /* Map the text-mode video memory to current terminal's video page */
+    page_directory[VIDMAP_PAGE_INDEX].pd_kb.val = ((uint32_t)vid_page_table) | VIDMAP_MAGIC;    // VIDMAP_MAGIC == PD's present, R_W, U_S 
+    vid_page_table[0].present = 1;
+    vid_page_table[0].read_write = 1;
+    vid_page_table[0].user_supervisor = 1;  
+    // choose which video page should we map to (determined by the currently displaying terminal)
+    if (display_term == running_term)    // TODO check variable name
+        vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // TODO check understanding    B8000 >> 12 
+    else    // go to the correct video page according to currently running terminal
+        vid_page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*running_term) >> PT_SHIFT);   // TODO check with teammate     
+
+
+
     // go to the next terminal using Round Robin
     register uint32_t current_ebp_tmp asm("ebp");
     register uint32_t current_esp_tmp asm("esp");
