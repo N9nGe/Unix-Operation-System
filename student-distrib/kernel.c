@@ -153,15 +153,16 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     paging_init();
     /*Initialize timer chip*/
-    pit_init();
 
     /*Initialize stdin and std */
     keyboard_init();
 	terminal_init();
+
     /*RTC init*/
     rtc_init();
-    rtc_set_freq(2);
+    //rtc_set_freq(2);
 
+    pit_init();
 
     /* Enable interrupts */
     /* Do not enable the following until after you have set up your
@@ -172,7 +173,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    //launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 
