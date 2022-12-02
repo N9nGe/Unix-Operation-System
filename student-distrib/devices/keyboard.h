@@ -7,6 +7,7 @@
 #define _KEYBOARD_H
 
 #include "../types.h"
+#include "../paging.h"
 
 /* Ports that each PIC sits on */
 #define KEYBOARD_IRQ 1
@@ -26,7 +27,8 @@
 // For checkpoint 2
 #define SINGLE_QUATE      39 
 #define DOUBLE_QUATE      34
-
+/*Reference to any scancode of linux*/
+/*op: showkey -s, and test by yourself*/
 #define LEFT_SHIFT_PRESSED 0x2A
 #define LEFT_SHIFT_RELEASED 0xAA
 #define RIGHT_SHIFT_PRESSED 0x36
@@ -38,11 +40,16 @@
 #define ALT_RELEASED     (ALT_PRESSED + 0x80)
 #define CAPSLOCK_PRESSED 0x3A
 #define CAPSLOCK_RELEASED 0xBA
+//CP5
+#define F1      0x3b
+#define F2      0x3c
+#define F3      0x3d
+
 /* Externally-visible functions */
 
 extern uint8_t keyboard_buf[KEY_BUF_SIZE];
 extern int     keybuf_count;
-extern volatile int   kb_flag;
+extern volatile int   kb_flag; // TODO : delete it!
 
 /* Initialize keyboard input device */
 void keyboard_init(void);
@@ -56,6 +63,10 @@ int function_key_handle(unsigned int key);
 void reset_keyboard_buffer(void);
 /*Handle backspace, modify corresponding keyboard buffer*/
 void backspace_handler();
+//CP5
+int terminal_switch(unsigned int value;);
+
+
 //CP4: Tony delete the open and close for keyboard driver,
 // because in fact they are established through terminal driver
 // in our MentOS

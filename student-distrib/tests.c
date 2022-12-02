@@ -531,123 +531,123 @@ void filesys_file_read_half_test(){
  * Return Value: test result
  * Function: test the open, read, close for rtc
  */
-int rtc_open_read_close_test() {
-	TEST_HEADER;
-	int result = PASS;
-	// give the test value
-	int test = RTC_TEST_VALUS;
-	uint8_t filename = RTC_TEST_VALUS;
-	uint32_t fd = RTC_TEST_VALUS;
-	uint32_t buf = RTC_TEST_VALUS;
-	clear();
-	rtc_init();
-	// test open
-	printf("Wait for RTC opens......\n");
-	test = rtc_open(&filename);
-	if (test != RTC_SUCCESS) {
-		return FAIL;
-	}
-	// test read
-	printf("RTC_read begins\n");
-	printf("Wait for RTC interrupt occurs......\n");
-	rtc_read(fd, &buf, RTC_DATA_BYTES);
-	// test close
-	printf("Wait for RTC closes......\n");
-	test = rtc_close(fd);
-	if (test != RTC_SUCCESS) {
-		return FAIL;
-	}
+// int rtc_open_read_close_test() {
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	// give the test value
+// 	int test = RTC_TEST_VALUS;
+// 	uint8_t filename = RTC_TEST_VALUS;
+// 	uint32_t fd = RTC_TEST_VALUS;
+// 	uint32_t buf = RTC_TEST_VALUS;
+// 	clear();
+// 	rtc_init();
+// 	// test open
+// 	printf("Wait for RTC opens......\n");
+// 	test = rtc_open(&filename);
+// 	if (test != RTC_SUCCESS) {
+// 		return FAIL;
+// 	}
+// 	// test read
+// 	printf("RTC_read begins\n");
+// 	printf("Wait for RTC interrupt occurs......\n");
+// 	rtc_read(fd, &buf, RTC_DATA_BYTES);
+// 	// test close
+// 	printf("Wait for RTC closes......\n");
+// 	test = rtc_close(fd);
+// 	if (test != RTC_SUCCESS) {
+// 		return FAIL;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 /* rtc_write_test()
  * Inputs: none
  * Return Value: test result
  * Function: test the write for rtc
  */
-int rtc_write_test() {
-	TEST_HEADER;
-	int result = PASS;
-	int test = RTC_TEST_VALUS;
-	uint8_t filename = RTC_TEST_VALUS;
-	uint32_t fd = RTC_TEST_VALUS;
-	uint32_t frequency = RTC_OPEN_DEFAULT_FREQ;
-	clear();
-	rtc_init();
-	// the parameters of the open,read and close are not used in the function during the CP2
-	printf("Wait for RTC opens......\n");
-	test = rtc_open(&filename);
-	if (test != RTC_SUCCESS) {
-		return FAIL;
-	}
-	printf("current frequency is %d Hz\n", frequency);
-	// using a counter to change the rate
-	while (frequency <= RTC_INIT_DEFAULT_FREQ) { // <= 1024 //TODO: the range of rtc frequency?
-		// for each frequency, there are total 32 times rtc interrupt
-		if (rtc_counter >= RTC_TEST_COUNTER) {
-			// change to the next ferquency
-			clear();
-			// go to the next reasonable frequency
-			frequency *= 2;
-			if (frequency <= RTC_INIT_DEFAULT_FREQ) {
-				printf("current frequency is %d Hz\n", frequency);
-			}
-			// pass the new frequency into the rtc
-			rtc_write(fd, &frequency, RTC_DATA_BYTES);
-			// reset the counter
-			rtc_counter = 0;
-		}
-	}
-	// after test, reset the frequency back to the 2 Hz
-	frequency = RTC_OPEN_DEFAULT_FREQ;
-	rtc_write(fd, &frequency, RTC_DATA_BYTES);
+// int rtc_write_test() {
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	int test = RTC_TEST_VALUS;
+// 	uint8_t filename = RTC_TEST_VALUS;
+// 	uint32_t fd = RTC_TEST_VALUS;
+// 	uint32_t frequency = RTC_OPEN_DEFAULT_FREQ;
+// 	clear();
+// 	rtc_init();
+// 	// the parameters of the open,read and close are not used in the function during the CP2
+// 	printf("Wait for RTC opens......\n");
+// 	test = rtc_open(&filename);
+// 	if (test != RTC_SUCCESS) {
+// 		return FAIL;
+// 	}
+// 	printf("current frequency is %d Hz\n", frequency);
+// 	// using a counter to change the rate
+// 	while (frequency <= RTC_INIT_DEFAULT_FREQ) { // <= 1024 //TODO: the range of rtc frequency?
+// 		// for each frequency, there are total 32 times rtc interrupt
+// 		if (rtc_counter >= RTC_TEST_COUNTER) {
+// 			// change to the next ferquency
+// 			clear();
+// 			// go to the next reasonable frequency
+// 			frequency *= 2;
+// 			if (frequency <= RTC_INIT_DEFAULT_FREQ) {
+// 				printf("current frequency is %d Hz\n", frequency);
+// 			}
+// 			// pass the new frequency into the rtc
+// 			rtc_write(fd, &frequency, RTC_DATA_BYTES);
+// 			// reset the counter
+// 			rtc_counter = 0;
+// 		}
+// 	}
+// 	// after test, reset the frequency back to the 2 Hz
+// 	frequency = RTC_OPEN_DEFAULT_FREQ;
+// 	rtc_write(fd, &frequency, RTC_DATA_BYTES);
 
-	printf("Wait for RTC closes......\n");
-	rtc_close(fd);
-	test = rtc_close(fd);
-	if (test != RTC_SUCCESS) {
-		return FAIL;
-	}
+// 	printf("Wait for RTC closes......\n");
+// 	rtc_close(fd);
+// 	test = rtc_close(fd);
+// 	if (test != RTC_SUCCESS) {
+// 		return FAIL;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 
 /* rtc_valid_input_frequency_test(uint32_t freq)
  * Inputs: uint32_t freq -- the input frequency
  * Return Value: test result
  * Function: test the invalid input frequency for rtc
  */
-int rtc_invalid_input_frequency_test(uint32_t freq) {
-	TEST_HEADER;
-	int result = PASS;
-	// give the test values
-	int test = RTC_TEST_VALUS;
-	uint8_t filename = RTC_TEST_VALUS;
-	uint32_t fd = RTC_TEST_VALUS;
-	uint32_t current_freq = RTC_OPEN_DEFAULT_FREQ;
-	clear();
-	rtc_init();
-	// the parameters of the open,read and close are not used in the function during the CP2
-	printf("Wait for RTC opens......\n");
-	test = rtc_open(&filename);
-	if (test != RTC_SUCCESS) {
-		return FAIL;
-	}
+// int rtc_invalid_input_frequency_test(uint32_t freq) {
+// 	TEST_HEADER;
+// 	int result = PASS;
+// 	// give the test values
+// 	int test = RTC_TEST_VALUS;
+// 	uint8_t filename = RTC_TEST_VALUS;
+// 	uint32_t fd = RTC_TEST_VALUS;
+// 	uint32_t current_freq = RTC_OPEN_DEFAULT_FREQ;
+// 	clear();
+// 	rtc_init();
+// 	// the parameters of the open,read and close are not used in the function during the CP2
+// 	printf("Wait for RTC opens......\n");
+// 	test = rtc_open(&filename);
+// 	if (test != RTC_SUCCESS) {
+// 		return FAIL;
+// 	}
 
-	printf("current frequency is %d Hz\n", current_freq);
-	// write the invalid frequency into the rtc
-	rtc_write(fd, &freq, RTC_DATA_BYTES);
+// 	printf("current frequency is %d Hz\n", current_freq);
+// 	// write the invalid frequency into the rtc
+// 	rtc_write(fd, &freq, RTC_DATA_BYTES);
 
-	printf("Wait for RTC closes......\n");
-	rtc_close(fd);
-	test = rtc_close(fd);
-	if (test != RTC_SUCCESS) {
-		return FAIL;
-	}
+// 	printf("Wait for RTC closes......\n");
+// 	rtc_close(fd);
+// 	test = rtc_close(fd);
+// 	if (test != RTC_SUCCESS) {
+// 		return FAIL;
+// 	}
 
-	return result;
-}
+// 	return result;
+// }
 /* Checkpoint 3 tests */
 
 /* test_syscall_linkage
@@ -689,7 +689,7 @@ void test_sys_open() {
  */
 void execute_test() {
 	clear();
-	UI_START();
+	//UI_START();
 	printf("Welcome to MentOS!\n");
 	sys_execute((uint8_t*)"shell");
 	/*Inidivitual test*/
@@ -735,16 +735,31 @@ void execute_test() {
 */
 /* Checkpoint 5 tests */
 
+/* CP5: 
+ * - main program for checkpoint 5
+ */
+void CP5() {
+	clear();
+	//UI_START();
+	printf("Welcome to MentOS!\n");
+	terminal_init();
+
+	sys_execute((uint8_t*)"shell");
+
+
+
+}
 
 /* Test suite entry point */
 // launch your tests here
 void launch_tests(){
-	/***** CP3 TESTS *****/
-	//printf("---------------TEST CP3 START--------------\n");
+	// Let us start MentOS
+	CP5();
+	/***** CP3,4 TESTS *****/
+	//printf("---------------TEST CP3,4 START--------------\n");
 	// Here we delete those out of used test, leaving the excute along
-	execute_test();
 	// vidmap_test();
-	// printf("---------------TEST CP3 END--------------\n");
+	// printf("---------------TEST CP3,4 END--------------\n");
 
 
 	/***** CP2 TESTS *****/

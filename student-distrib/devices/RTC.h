@@ -21,14 +21,14 @@
 // The frecquency used for RTC
 #define RTC_INIT_DEFAULT_FREQ    1024
 #define RTC_OPEN_DEFAULT_FREQ    2
+#define RTC_MAX_FREQ             1024
+#define RTC_MIN_FREQ             2
 
 // The offset used for CMOS RAM
 #define NMI_MASK        0X80
 #define RTC_A_OFFSET    0x0A
 #define RTC_B_OFFSET    0x0B
 #define RTC_C_OFFSET    0x0C
-
-extern uint32_t rtc_counter;
 
 uint8_t rtc_init();
 uint8_t rtc_set_freq();

@@ -1,6 +1,7 @@
 /* terminal.h - Defines used in interactions with the terminal 
  * 
  * Tony  1  10.20.2022   initialize the terminal 
+ * Tony  2  11.26.2022   Improve the structure into multi_terminal case
  */
 
 #ifndef _TERMINAL_H
@@ -9,19 +10,28 @@
 #include"../lib.h"
 #include"../types.h"
 #include"keyboard.h"
+#include"../syscall.h"
 
 #define TERMINAL_BUF_SIZE 128
 typedef struct terminal_t
 {
-    int id;
-    int index; // line buffer index&counter
-    unsigned int buf[TERMINAL_BUF_SIZE];
-
+    int id;    // ID: 1, 2, 3 for F1 F2 F3
+    unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
+    uint32_t count; // terminal count, record the number of ascii in terminal buffer
+    //CP5
+    int task_counter; // Task counter for current terminal
+    struct pcb_t* running_pcb; // pcb pointer to current process of this terminal
+    int read_flag;    // used for terminal_read syscall
+    int cursor_x;      // TODO: turn outside structure into this
+    int cursor_y;
 } terminal_t;
 
-extern terminal_t main_terminal;
-extern uint32_t terminal_count;
-// initalize the terminal
+/*Global variable shared between scheduled functions*/
+extern terminal_t terminal[4];
+extern int display_term;
+extern int last_term;
+
+// initalize the terminals
 void terminal_init();
 // reset the specific terminal structure 
 void terminal_reset(terminal_t terminal);

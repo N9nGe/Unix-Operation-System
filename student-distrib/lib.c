@@ -10,15 +10,22 @@
 // [Font color]  
 // 0x1 == dark blue 0x2 == green 0x3 == light blue 0x4 == red 0x5 == purple 
 // 0x6 ~= orange 0x7 == black (but font is white), 0x8 == grey 0x9 ~= light purple
-
-#define ATTRIB      0x2
+#define COLOR       0x2
+#define ATTRIB      COLOR
 // 0x0 == empty black
 // 0x11 == blue screen
 
+// current display data and screen info
 static int screen_x;
 static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
+// cp5
+// these 3 arrays store display data for each terminal
+// change by switch_screen()
+static int screen_x_arr[4];
+static int screen_y_arr[4];
+//static char** video_mem_arr[3][NUM_ROWS * NUM_COLS * 2];
 
 /* void update_cursor(x,y);
  * Author: Tony 10.20
@@ -257,6 +264,68 @@ void putc_advanced(uint8_t c) {
     update_cursor(screen_x,screen_y);
 }
 
+void putc_background (uint8_t c, uint8_t term_idx) {
+    char* video_mem_tmp = (char *)VIDEO;
+    if (term_idx == 1) {
+        video_mem_tmp = (char *)0xB9000;
+    } else if (term_idx == 2) {
+        video_mem_tmp = (char *)0xBA000;
+    } else {
+        video_mem_tmp = (char *)0xBB000;
+    }
+    if(c == '\n' || c == '\r') { 
+        screen_y_arr[term_idx]++;
+        screen_x_arr[term_idx] = 0;
+    } else{// First detect backspace 
+            *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = c;
+            *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;
+            screen_x_arr[term_idx]++;
+            if(screen_x_arr[term_idx] == NUM_COLS){ // RIGHT edge check
+                screen_y_arr[term_idx]++;
+            }
+            screen_x_arr[term_idx] %= NUM_COLS;
+    }
+    // When the cursor is at the bottom of terminal
+    if (screen_y_arr[term_idx] == NUM_ROWS){
+        scroll_up_background(video_mem_tmp, term_idx);
+        // now screen_x is retained, shift up screen_y by one
+    }
+}
+
+void printf_color(int8_t* format,int color){
+
+    /* Pointer to the format string */
+    int8_t* buf = format;
+
+    while (*buf != '\0') {
+        putc_color(*buf,color);
+        buf++;
+    }
+
+}
+
+void putc_color(uint8_t c,int color){
+    if(c == '\n' || c == '\r') { 
+        screen_y++;
+        screen_x = 0;
+    } else{// First detect backspace 
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
+            *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = color;
+            screen_x++;
+            if(screen_x == NUM_COLS){ // RIGHT edge check
+                screen_y++;
+            }
+            screen_x %= NUM_COLS;
+    }
+
+
+    // When the cursor is at the bottom of terminal
+    if (screen_y == NUM_ROWS){
+        scroll_up(video_mem);
+        // now screen_x is retained, shift up screen_y by one
+    }
+    update_cursor(screen_x,screen_y);
+}
 /* void backspace();
  * Author : Tony 1 10.22.2022
  * Inputs: none
@@ -283,6 +352,34 @@ void backspace(){
     
 }
 
+void backspace_background(uint8_t term_idx){
+    char* video_mem_tmp = (char *)VIDEO;
+    if (term_idx == 1) {
+        video_mem_tmp = (char *)0xB9000;
+    } else if (term_idx == 2) {
+        video_mem_tmp = (char *)0xBA000;
+    } else {
+        video_mem_tmp = (char *)0xBB000;
+    }
+    if(screen_x_arr[term_idx] == 0 && screen_y_arr[term_idx] == 0){ 
+        return;// if it is at the (0,0), can't backspace
+    }
+    if (screen_x_arr[term_idx] == 0){ // At the left end
+        screen_y_arr[term_idx]--;
+        screen_x_arr[term_idx] = NUM_COLS - 1;
+        *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
+        *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;
+        //update_cursor(screen_x, screen_y);
+        return;
+    }
+// Else in the middle 
+    screen_x_arr[term_idx]--;
+    *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
+    *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;// seems like color ?
+    //update_cursor(screen_x,screen_y);
+    //return;
+}
+
 /* void scroll_up(char* memory);
  * Author : Tony 1 10.22.2022          Create the scroll up without debugging
             Jerry&Gabriel 2 10.22.2022 Debug  
@@ -306,6 +403,64 @@ void scroll_up(char* memory){
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
         *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
     }
+}
+
+void scroll_up_background(char* memory, uint8_t term_idx){
+    uint32_t x,y;
+    uint32_t origin,update;
+    for ( y = 1; y < NUM_ROWS; y++){
+        for (x = 0; x < NUM_COLS; x++){
+        // Here, the first line is naturally deleted
+            origin = NUM_COLS*y + x;
+            update = NUM_COLS*(y-1) + x;
+            *(uint8_t *)(memory + (update<<1)) = *(uint8_t *)(memory + (origin<<1)); 
+        }
+    }
+    screen_y_arr[term_idx] = NUM_ROWS - 1; // now screen_x is retained, shift up screen_y by one
+    /*Clear the last line*/
+    for(x = 0; x < NUM_COLS; x++){ //  
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1)) = ' ';
+        *(uint8_t *)(memory + (((NUM_ROWS-1) * NUM_COLS + x) << 1) + 1) = ATTRIB;
+    }
+}
+
+// this function basically gets the index of the previous terminal and the index of the current terminal
+// store the current screen position to the previous terminal index
+// store all video memory into previous terminal index
+// clear the screen
+// move every data inside current terminal index into screen_x,y and video_mem variables
+void switch_screen(uint8_t prev_term, uint8_t current_term) {
+    uint8_t prev_idx = prev_term;
+    uint8_t current_idx = current_term;
+    int i;
+    screen_x_arr[prev_idx] = screen_x;
+    screen_y_arr[prev_idx] = screen_y;
+    screen_x = screen_x_arr[current_idx];
+    screen_y = screen_y_arr[current_idx];
+    for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
+        *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+    }
+    update_cursor(screen_x,screen_y);
+}
+
+void to_background(uint8_t idx) {
+    if (idx == 1) {
+        video_mem = (char *)0xB9000;
+    } else if (idx == 2) {
+        video_mem = (char *)0xBA000;
+    } else {
+        video_mem = (char *)0xBB000;
+    }
+    screen_x = screen_x_arr[idx];
+    screen_y = screen_y_arr[idx];
+}
+
+void to_display(uint8_t idx) {
+    screen_x_arr[idx] = screen_x;
+    screen_y_arr[idx] = screen_y;
+    video_mem = (char *)VIDEO;
+    screen_x = screen_x_arr[0];
+    screen_y = screen_y_arr[0];
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);

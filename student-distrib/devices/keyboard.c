@@ -20,13 +20,11 @@ int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
 
-// CP2: initialize these 2 as 0, prepare for future cp5
-// int present_terminal = 0;
-// int last_terminal = 0; 
+uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
+int keybuf_count_arr[3] = {0,0,0};
 
 uint8_t keyboard_buf[KEY_BUF_SIZE];
 int     keybuf_count = 0;
-volatile int  kb_flag = 0;                // flag used to open the terminal read 
 
 /*The CP2 edition scancode list*/
 // CP1 : we only use a limited set 1
@@ -119,7 +117,7 @@ void keyboard_init(void){
  *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: none
- *  SIDE EFFECTS: set kb_flag on when \n is entered
+ *  SIDE EFFECTS: set terminal's read_flag on when \n is entered, invoking the terminal_read
  */
 void keyboard_interrupt_handler(){
     cli(); // Clear all the interrupt first
@@ -134,6 +132,13 @@ void keyboard_interrupt_handler(){
         sti();
         return;
     }
+    //CP5: Alt + F1, F2, F3 to switch between the terminals
+    int ret = terminal_switch(key);
+        if(ret == 1){
+            sti();
+            return;
+        }
+
     if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) ){ // leave the last bit for \n or \b
         if( value == '\n' || value == '\b'){
             // printf("\nfirst count is %d\n",keybuf_count); // TEST
@@ -147,35 +152,36 @@ void keyboard_interrupt_handler(){
         if( shift_buf == 1){// decide the scancode
             value = scancode[key][1];
         }
-            
             // Clear the screen when necessary
                 if ( value == '\n' ){
-                    // memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // TODO: MOVE TO TERMINA
-                    terminal_count = keybuf_count +1;
-                    if(terminal_count == KEY_BUF_SIZE - 2) {
+                    putc_advanced(value); // Why should be there ?
+            //BUG
+                    terminal[display_term].count = keybuf_count +1;
+                    if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
                     } else {
                         keyboard_buf[keybuf_count] = '\n';
                     }
+                    terminal[display_term].read_flag = 1;            // interrupt the terminal 
                     keybuf_count = 0;
-                    kb_flag = 1;            // interrupt the terminal 
-                    putc_advanced(value);
                     // printf("\nsecond count is %d\n",keybuf_count); // TEST
+                    if(terminal[display_term].read_flag == 0){
+                        memset(terminal[display_term].buf,NULL,KEY_BUF_SIZE);
+                        terminal[display_term].count = 0;
+                    }
                     sti();
                     return;
                 }
                 if (ctrl_buf == 1 && (value == 'l' || value == 'L')){
                     clear();
                     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
-                    
+                    terminal_reset(terminal[running_term]);
                     keybuf_count = 0;
-                    // printf("Cleared the screen: "); // TEST
+                    printf("Current Terminal:%d \n",display_term); // TEST
                     sti();
                     return;
                 }
-                if ( alt_buf == 1){
-                    // TODO do nothing for now
-                }
+
 
                 if( value ==  '\b' && keybuf_count >= 0){
                     if (keybuf_count == 0){
@@ -226,14 +232,9 @@ void backspace_handler(){
         backspace();
         backspace();
         backspace();
-        // keyboard_buf[keybuf_count] = '\b';
-
-        // keybuf_count++;
     }else{
         backspace();
     }
-    // keyboard_buf[keybuf_count] = '\b';
-    // keybuf_count--;
 }
 
 
@@ -321,5 +322,47 @@ void reset_keyboard_buffer(){
     shift_buf = 0;
     caps_lock = 0;
     alt_buf = 0;
+
+}
+
+int terminal_switch(unsigned int value){
+    int ret = 0;
+                 if (alt_buf == 1){ //TODO: replace back to Fn 
+                        switch (value)
+                        {
+                        case F1: // replace this key to f1
+                            display_term = 1;
+                            ret = 1;
+                            break;
+                        case F2: // replace this key to f2
+                            ret = 1;
+                            display_term = 2;
+                            break;
+                        case F3: // replace this key to f3
+                            ret = 1;
+                            display_term = 3;
+                            break;
+                        default:
+                            return ret;
+                            //break;
+                        }
+                        if(display_term != last_term){
+                            switch_vid_page(last_term, display_term);
+                            switch_screen(last_term, display_term);
+                            //printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
+
+                            memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
+                            memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
+
+                            // memcpy(terminal[display_term].buf, keyboard_buf, KEY_BUF_SIZE);
+
+                            keybuf_count_arr[last_term-1] = keybuf_count;
+                            keybuf_count = keybuf_count_arr[display_term-1];
+
+                            last_term = display_term;
+                            return ret;
+                        } 
+                    }
+    return ret;
 }
 

@@ -1,14 +1,16 @@
 #include "RTC.h"
 #include "../i8259.h"
 #include "../lib.h"
+#include "../scheduling.h"
 
 static uint32_t log_2(uint32_t freq);
 extern void test_interrupts(void);
 // the current frequency of the rtc (if the input freq is invalid, use the current freq)
 static uint32_t current_freq;
-// the flag to represent the rtc flag (Appendix B: last paragraph Use simple volatile flag variables to do this synchronization)
-static volatile int rtc_interrupt_occurred; 
-uint32_t rtc_counter = 0;
+
+// used for virtualize rtc
+static volatile uint32_t rtc_interrupt_counter[4]; 
+static volatile uint32_t rtc_counter_upperbound[4]; 
 
 /* uint8_t rtc_init()
  * Inputs: none
@@ -19,7 +21,7 @@ uint8_t rtc_init() {
     // Reference link: https://wiki.osdev.org/RTC
     // Turn on the IRQ8 for RTC
     uint32_t flags;
-
+    int i;
     cli_and_save(flags);    // CLI and save EFLAGS
     outb(NMI_MASK | RTC_B_OFFSET, RTC_PORT_INDEX); // select register B, and disable NMI
     uint8_t prev = inb(RTC_PORT_CMOS);  // read the current value of register B
@@ -28,7 +30,12 @@ uint8_t rtc_init() {
 
     // by the osdev, the initial rtc frequency is 1024Hz
     current_freq = RTC_INIT_DEFAULT_FREQ;
-    rtc_counter = 0;
+    rtc_set_freq(RTC_INIT_DEFAULT_FREQ);
+    for (i = 0; i < 4; i++) {
+        rtc_interrupt_counter[i] = 0;
+        rtc_counter_upperbound[i] = RTC_MAX_FREQ / RTC_MIN_FREQ;
+    }
+
     sti(); // set interrupt flags
     restore_flags(flags);   // restore flags 
 
@@ -40,7 +47,7 @@ uint8_t rtc_init() {
 /* uint8_t rtc_set_freq()
  * Inputs: none
  * Return Value: 0 for success
- * Function: Set the RTC frequency to (power of 2) Hz
+ * Function: Set the RTC physical frequency to (power of 2) Hz
  *           frequency = 2^15(32768) Hz -> rate = 1      by function: freq = 2^16 / 2^(rate - 1)
  *                       2^14(16384) Hz -> rate = 2
  *                       2^13(8192)  Hz -> rate = 3
@@ -89,25 +96,15 @@ uint8_t rtc_set_freq(uint32_t freq) {
  */
 void rtc_interrupt() {
     cli();
-    // test IRQ
-    // test_interrupts();
-    rtc_counter += 1;
-    // rtc interrupt occurs -> set the flag to 1
-    rtc_interrupt_occurred = 1;
-    // used for rtc test 
-    // if (rtc_counter == 1) {
-    //     printf("RTC interrupt occured: %d\n", rtc_interrupt_occurred);
-    // }
+    int i ;
+    // rtc interrupt occurs -> set the flag to 1 (for virtualizeing rtc interrupt)
+    for (i = 1; i < 4; i++) {
+        rtc_interrupt_counter[i]++; 
+    }
     // read register C to ensure interrupt happen again
     outb(RTC_C_OFFSET, RTC_PORT_INDEX); // select register C
-    inb(RTC_PORT_CMOS);                 // just throw away contents
+    inb(RTC_PORT_CMOS);                 // just throw away contents    
     send_eoi(RTC_IRQ);
-    
-    // used for rtc test 
-    // printf("%d", rtc_counter);
-    // if (rtc_counter == RTC_TEST_COUNTER){
-    //     printf("\n");
-    // }
     sti();
 }
 
@@ -142,11 +139,14 @@ uint32_t log_2(uint32_t freq) {
 int32_t rtc_open(const uint8_t * filename) {
     // check the whether the input is valid
     if (filename == NULL) {
-        // printf("RTC fails to open\n");
         return RTC_FAIL;
     }
     // pass the default freq = 2Hz into the rtc
-    rtc_set_freq(RTC_OPEN_DEFAULT_FREQ);
+    // physical version:
+    // rtc_set_freq(RTC_OPEN_DEFAULT_FREQ);
+    // virtualize version:
+    rtc_counter_upperbound[running_term] = RTC_MAX_FREQ / RTC_MIN_FREQ;
+    rtc_interrupt_counter[running_term] = 0;
     // printf("RTC Successfully opens\n");
     return RTC_SUCCESS;
 }
@@ -170,11 +170,9 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
         // printf("fd is invalid! RTC fails to close\n");
         return RTC_FAIL;
     }
-    // set the rtc flag become 0(rtc interrupt not occur -> do not return)
-    rtc_interrupt_occurred = 0;
-    //printf("Set RTC interrupt to %d\n", rtc_interrupt_occurred);
-    while(rtc_interrupt_occurred == 0); // if rtc interrupt occur, the flag will be set to one and then break the while loop. 
-    //printf("RTC interrupt occurs\n");
+    // using virtualize form
+    while(rtc_interrupt_counter[running_term] < rtc_counter_upperbound[running_term]); // if rtc interrupt occur, the flag will be set to one and then break the while loop.
+    rtc_interrupt_counter[running_term] = 0; 
     return RTC_SUCCESS;
 }
 
@@ -197,9 +195,22 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
     }
     // write the frequency into the rtc(Appendix B: should block interrupts to interact with the device, last paragraph)
     uint32_t flags;
-    cli_and_save(flags);
+    
     // change to the uint32 pointer first and then get the value
-    rtc_set_freq(*((uint32_t*) buf));
+    // physical virsion:
+    // rtc_set_freq(*((uint32_t*) buf));
+    // virtualization virsion:
+    uint32_t freq = * (uint32_t *)  buf;
+    if ((freq & (freq - 1)) != 0) {
+        return RTC_FAIL;
+    }
+
+    if (freq < RTC_MIN_FREQ || freq > RTC_MAX_FREQ) {
+        return RTC_FAIL;
+    }
+
+    cli_and_save(flags);
+    rtc_counter_upperbound[running_term] = RTC_MAX_FREQ / freq;
     sti();
     restore_flags(flags);
     return RTC_SUCCESS;

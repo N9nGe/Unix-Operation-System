@@ -2,6 +2,7 @@
 #include "types.h"
 #include "lib.h"
 
+int * vid_pages[4];
 
 /* paging_init()
  * Description: initialize the paging
@@ -21,15 +22,9 @@ void paging_init() {
         page_table[index].val = 0;
     }
 
-    // for (index = 0; index < PAGE_ENTRY_NUMBER; index++) {
-    //     vid_page_table[index].val = 0;
-    // }
-
     // set up the read_write, present signal for the first page directory (split to 4kb)
     // and give the corresponding page table base address
     page_directory[0].pd_kb.val = ((uint32_t) page_table) | R_W_PRESENT;    // TODO
-
-    // page_directory[33].pd_kb.val = ((uint32_t) vid_page_table) | R_W_PRESENT;
 
     // set up the read_write, present signal for the second page directory (kernel-4mb page)
     // and give the corresponding page table base address
@@ -43,10 +38,26 @@ void paging_init() {
     page_table[VIDEO_MEMORY >> PT_SHIFT].read_write = 1;
     page_table[VIDEO_MEMORY >> PT_SHIFT].base_addr = (VIDEO_MEMORY >> PT_SHIFT);
 
-    // vid_page_table[0].present = 1;
-    // vid_page_table[0].read_write = 1;
-    // vid_page_table[0].user_supervisor = 1;  
-    // vid_page_table[0].base_addr = 0;        // Sure?
+    // video pages for the multiple terminal
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_1 >> PT_SHIFT].base_addr = (VIDEO_PAGE_1 >> PT_SHIFT);
+
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_2 >> PT_SHIFT].base_addr = (VIDEO_PAGE_2 >> PT_SHIFT);
+
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].present = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].read_write = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].user_supervisor = 1;
+    page_table[VIDEO_PAGE_3 >> PT_SHIFT].base_addr = (VIDEO_PAGE_3 >> PT_SHIFT);
+
+    vid_pages[0] = (int*) VIDEO_MEMORY;
+    vid_pages[1] = (int*) VIDEO_PAGE_1;
+    vid_pages[2] = (int*) VIDEO_PAGE_2;
+    vid_pages[3] = (int*) VIDEO_PAGE_3;
 
     // enable the paging 
     asm volatile(
@@ -70,3 +81,10 @@ void paging_init() {
 
 }
 
+void switch_vid_page(uint8_t current, uint8_t next) {
+    cli();
+    memcpy(vid_pages[current], vid_pages[0], 4096);
+    //clear();
+    memcpy(vid_pages[0], vid_pages[next], 4096);
+    sti();
+}
