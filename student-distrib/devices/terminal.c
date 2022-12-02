@@ -31,7 +31,6 @@ void terminal_init(){
     for ( i = 0; i < 4; i++)
     {
         terminal[i].id = i;
-        terminal[i].index = 0;
         terminal[i].count = 0;
         terminal[i].read_flag = 0;
         terminal[i].cursor_x = 0;
@@ -48,7 +47,6 @@ void terminal_init(){
  */
 void terminal_reset(terminal_t terminal_tmp){
     // TODO: reset or halt the running
-    terminal_tmp.index = 0;
     terminal_tmp.count = 0;
     terminal_tmp.cursor_x = 0;
     terminal_tmp.cursor_y = 0;
@@ -69,6 +67,9 @@ void terminal_reset(terminal_t terminal_tmp){
  *     number of bytes successfully copied
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
+    // if(buf == NULL || nbytes == 0){
+    //     return 0;
+    // }
     // the variable used for return
     int32_t copy_byte;
     // loop index for copy
@@ -118,7 +119,6 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
  */
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     cli();
-
     // check whether the buffer is invalid
     if(buf == NULL){
         return -1;

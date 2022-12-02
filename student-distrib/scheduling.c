@@ -2,7 +2,16 @@
 
 uint32_t running_term = 0; // Term: F1, F2, F3
 uint32_t schedule_counter = 1;
-
+/* 
+ *  void scheduler())
+ *  DESCRIPTION: 
+ *  INPUTS: 
+ *     fd     -- file descripter buffer 
+ *     buf    -- the terminal buffer to read 
+ *     nbytes -- the bytes numbers need to be read
+ *  RETURN VALUE:
+ *     number of bytes successfully copied
+ */
 void scheduler(){
     running_term = running_term % 3 + 1;    // from terminal 1 to 3
     

@@ -16,22 +16,17 @@
 typedef struct terminal_t
 {
     int id;    // ID: 1, 2, 3 for F1 F2 F3
-    int index; // line buffer index&counter
     unsigned int buf[TERMINAL_BUF_SIZE]; // TERMINAL buffer
-    uint32_t count; // terminal count
+    uint32_t count; // terminal count, record the number of ascii in terminal buffer
     //CP5
     int task_counter; // Task counter for current terminal
     struct pcb_t* running_pcb; // pcb pointer to current process of this terminal
     int read_flag;    // used for terminal_read syscall
-    int cursor_x; 
+    int cursor_x;      // TODO: turn outside structure into this
     int cursor_y;
 } terminal_t;
 
-// terminal[display_term].id
-// terminal[display_term].task_counter
-// if( display_term ==   )
-
-
+/*Global variable shared between scheduled functions*/
 extern terminal_t terminal[4];
 extern int display_term;
 extern int last_term;
