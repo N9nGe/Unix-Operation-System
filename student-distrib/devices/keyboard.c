@@ -133,7 +133,7 @@ void keyboard_interrupt_handler(){
         return;
     }
     //CP5: Alt + F1, F2, F3 to switch between the terminals
-    int ret = terminal_switch(value);
+    int ret = terminal_switch(key);
         if(ret == 1){
             sti();
             return;
@@ -155,7 +155,7 @@ void keyboard_interrupt_handler(){
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     putc_advanced(value); // Why should be there ?
-
+            //BUG
                     terminal[display_term].count = keybuf_count +1;
                     if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
@@ -327,18 +327,18 @@ void reset_keyboard_buffer(){
 
 int terminal_switch(unsigned int value){
     int ret = 0;
-                 if (ctrl_buf == 1){ //TODO: replace back to Fn 
+                 if (alt_buf == 1){ //TODO: replace back to Fn 
                         switch (value)
                         {
-                        case 49: // replace this key to f1
+                        case F1: // replace this key to f1
                             display_term = 1;
                             ret = 1;
                             break;
-                        case 50: // replace this key to f2
+                        case F2: // replace this key to f2
                             ret = 1;
                             display_term = 2;
                             break;
-                        case 51: // replace this key to f3
+                        case F3: // replace this key to f3
                             ret = 1;
                             display_term = 3;
                             break;
@@ -347,7 +347,6 @@ int terminal_switch(unsigned int value){
                             //break;
                         }
                         if(display_term != last_term){
-                            //printf("current terminal: %u\n", display_term);
                             switch_vid_page(last_term, display_term);
                             switch_screen(last_term, display_term);
                             //printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
@@ -355,9 +354,7 @@ int terminal_switch(unsigned int value){
                             memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
                             memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
 
-                            memcpy(terminal[display_term].buf, keyboard_buf, KEY_BUF_SIZE);
-
-
+                            // memcpy(terminal[display_term].buf, keyboard_buf, KEY_BUF_SIZE);
 
                             keybuf_count_arr[last_term-1] = keybuf_count;
                             keybuf_count = keybuf_count_arr[display_term-1];

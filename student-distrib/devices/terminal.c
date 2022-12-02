@@ -77,9 +77,10 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     //CP5 : terminal sepecific read flag
     terminal[display_term].read_flag = 0;
     while (terminal[display_term].read_flag == 0); // lock the terminal until the keyboard flag is set 1
-    
+
     memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard buffer
+    //CP5
     if(running_term != display_term){
         return 0;
     }
