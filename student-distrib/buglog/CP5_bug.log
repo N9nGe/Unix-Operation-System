@@ -28,3 +28,45 @@ Solution:
     TODO: Add a new scoll and printf function, to intergrate the color 
 
 
+
+<--------------------------------------------------------->
+                          BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.11.27.
+Creator:
+    Tony Wang && Tim Zhao && Gabriel Gao && Jerry Wang.
+Description:
+    Succesfully realize multi_terminal without scheduling.
+    But when intergrate with scheduling, it will be page fault
+Solution:
+    The scheduling's new_pcb go to 0 with no reason, after changing
+    it to current_pcb_counter, there are no more page fault
+
+<--------------------------------------------------------->
+                          BUG 2                          
+<--------------------------------------------------------->
+Time:
+    2022.12.01.
+Creator:
+    Tony Wang && Tim Zhao && Gabriel Gao && Jerry Wang.
+Description:
+    The multi_terminal works, but the display items fails, 
+    they lost and the stuff in terminal 1 will be displayed 
+    on terminal 2
+Solution:
+    TODO
+
+<--------------------------------------------------------->
+                          BUG 3                          
+<--------------------------------------------------------->
+Time:
+    2022.12.01.
+Creator:
+    Tony Wang.
+Description:
+    Can't clear the standard screen of kernel .
+Solution:
+    
+
+
