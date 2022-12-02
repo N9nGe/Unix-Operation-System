@@ -84,7 +84,7 @@ void paging_init() {
 void switch_vid_page(uint8_t current, uint8_t next) {
     cli();
     memcpy(vid_pages[current], vid_pages[0], 4096);
-    //clear();
+    memset(vid_pages[0], NULL, 4096);
     memcpy(vid_pages[0], vid_pages[next], 4096);
     sti();
 }

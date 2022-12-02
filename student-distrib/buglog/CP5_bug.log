@@ -68,7 +68,32 @@ Description:
     Can't clear the standard screen of kernel .
 Solution:
     
+<--------------------------------------------------------->
+                          BUG 4                          
+<--------------------------------------------------------->
+Time:
+    2022.12.02.
+Creator:
+    Gabriel Gao
+Description:
+    The pingpong do not print the stuff as given frequency
+Solution:
+    When start the kernel, because of the previous checkpoint, I initilize the the rtc physical frequency into 2Hz.
+    However, in CP5, I implement RTC virtualization and initialize the RTC frequency into 1024Hz which is the acceptable 
+    highest frequency. I should delete the initialization of RTC to 2Hz in kernel.c 
 
+<--------------------------------------------------------->
+                          BUG 5                          
+<--------------------------------------------------------->
+Time:
+    2022.12.02.
+Creator:
+    Gabriel Gao
+Description:
+    PCB initialization method cannot support the multi_terminal.
+Solution:
+    Creating a member variable inside the terminal struct called task counter to replace the original global task counter.
+    Therefore, I can split the task into each terminal.
 
 
 

@@ -32,7 +32,7 @@ void pit_init(){
 	// set the devisor frequency(16 bit)  (0.01s per interrupt.)
 	data = (PIT_OSCILLATOR_FREQ & PIT_LOW_MASK);
 	outb(data, PIT_DATA_PORT); // get the low 8 bit of the frequency
-	data = (PIT_OSCILLATOR_FREQ >> 8);
+	data = (PIT_OSCILLATOR_FREQ >> EIGHT_BIT_SHIFT);
 	outb(data, PIT_DATA_PORT);  // get the high 8 bit of the frequency
 
     sti(); // set interrupt flags
