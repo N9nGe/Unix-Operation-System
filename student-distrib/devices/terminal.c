@@ -115,10 +115,10 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
         return -1;
     }
     // 1 if the terminal running is in the background
-    int background_running = 0;
-    if (display_term != running_term) {
-        background_running = 1;
-    }
+    // int background_running = 0;
+    // if (display_term != running_term) {
+    //     background_running = 1;
+    // }
     // check if running terminal is display, if yes,
     // else call lib.c: swtich to background
     // the variable used for return
@@ -133,7 +133,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
-            if (background_running) { // CP5 background writing
+            if (display_term != running_term) { // CP5 background writing
                 putc_background(c, running_term);
             } else {
                 putc_advanced(c);
