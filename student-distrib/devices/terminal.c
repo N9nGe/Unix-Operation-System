@@ -89,7 +89,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
         return 0;
     }
 
-    if (strncmp(keyboard_buf, "exit", sizeof("exit")) == 0) {
+    if (strncmp((int8_t*) keyboard_buf, "exit", sizeof("exit")) == 0) {
         terminal[running_term].terminal_shell_counter--;
     }
 
