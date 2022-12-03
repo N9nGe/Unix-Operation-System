@@ -69,7 +69,9 @@ void terminal_reset(terminal_t terminal_tmp){
  *     number of bytes successfully copied
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
-
+    // if(buf == NULL || nbytes == 0){
+    //     return 0;
+    // }
     // the variable used for return
     int32_t copy_byte;
     // loop index for copy
@@ -78,7 +80,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     //CP5 : terminal sepecific read flag
     terminal[display_term].read_flag = 0;
     while (terminal[display_term].read_flag == 0 || running_term != display_term); // lock the terminal until the keyboard flag is set 1
-    cli();
+
     memset(buf,NULL,sizeof(buf));
     // copy nbytes from the keyboard buffer
     //CP5
@@ -101,12 +103,11 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     } else {
         copy_byte = terminal[display_term].count;
     }
-    sti();
     return copy_byte;// return number of bytes successfully copied
 }
 
 /* 
- * int32_t terminal_write
+ * terminal_write
  *  DESCRIPTION: output the content in the buffer into terminal
  *  INPUTS: 
  *      fd      -- file descriptor 

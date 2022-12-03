@@ -67,7 +67,6 @@ Creator:
 Description:
     Can't clear the standard screen of kernel .
 Solution:
-    The initialization sequence of all devices in kernel.c 
     
 <--------------------------------------------------------->
                           BUG 4                          
@@ -96,48 +95,8 @@ Solution:
     Creating a member variable inside the terminal struct called task counter to replace the original global task counter.
     Therefore, I can split the task into each terminal.
 
-<--------------------------------------------------------->
-                          BUG 6                          
-<--------------------------------------------------------->
-Time:
-    2022.12.01.
-Creator:
-    Tony Wang.
-Description:
-    The schedule works, but the buffer will print to different place on the screen.
-Solution:
-    Tim add one line to fix this bug:
-    while (terminal[display_term].read_flag == 0 || running_term != display_term); // lock the terminal until the keyboard flag is set 1
-    then we can ignore the ansychronsis error
 
 
-<--------------------------------------------------------->
-                          BUG 7                          
-<--------------------------------------------------------->
-Time:
-    2022.12.02.
-Creator:
-    Tony Wang && Tim Zhao && Gabriel Gao.
-Description:
-    When switching from user program needs to use rtc, i.e. pingpong, fish, counter,
-    The screen after switched will generate another extra 391OS>
-    Like this:
-391OS>391OS>
-    It may because the terminal_write meet problem in the scheduling
-    
-Solution:
-    Tim hard code the 391OS to ignore this case
 
-<--------------------------------------------------------->
-                          BUG 8                          
-<--------------------------------------------------------->
-Time:
-    2022.12.02.
-Creator:
-    Jerry Wang.
-Description:
-    Some buggy behavior of multiterminal.It appears every time a program runs through a background terminal.
-    Like counter and pingpong.
-    Will not happen after finishing at the current terminal
-Solution:
-    TBD.
+TODO:
+- CTRL flag 

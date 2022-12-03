@@ -14,7 +14,7 @@
 /* File Scope Variable*/
 
 /* Set to avoid release repetition*/
-int caps_lock_counter = 0;            // caps_lock counter 
+int i = 0;            // caps_lock counter 
 int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
@@ -181,7 +181,6 @@ void keyboard_interrupt_handler(){
                     terminal_reset(terminal[running_term]);
                     keybuf_count = 0;
                     printf("Current Terminal:%d \n",display_term); // TEST
-                    terminal[display_term].read_flag = 1;
                     sti();
                     return;
                 }
@@ -283,11 +282,11 @@ int function_key_handle(unsigned int key){
         break;    
     case CAPSLOCK_PRESSED:
         ret = INVALID_RET;
-        caps_lock_counter++;
+        i++;
         caps_lock = 1;
         break;
     case CAPSLOCK_RELEASED:
-        caps_lock = (caps_lock_counter%2); // Use module to decide whether the lock should be changed
+        caps_lock = (i%2); // Use module to decide whether the lock should be changed
         ret = INVALID_RET;
 
         break;
@@ -305,7 +304,7 @@ int function_key_handle(unsigned int key){
     
         break;
     }
-   if(caps_lock_counter > MAX_INPUT_COUNT){
+   if(i > MAX_INPUT_COUNT){
     reset_keyboard_buffer();
    }
     
@@ -318,10 +317,10 @@ int function_key_handle(unsigned int key){
  *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: none
- *  SIDE EFFECTS: reset 5 global variable 
+ *  SIDE EFFECTS: reset two global variable 
  */
 void reset_keyboard_buffer(){
-    caps_lock_counter = 0;
+    i = 0;
     ctrl_buf = 0;
     shift_buf = 0;
     caps_lock = 0;
@@ -329,20 +328,20 @@ void reset_keyboard_buffer(){
     memset(keyboard_buf,NULL,sizeof(keyboard_buf));
     keybuf_count = 0;
 }
-int is_terminal_switch = 0; // useless for now, a bug fixer helper suggested by TA
+
 /* 
- * int terminal_switch(unsigned int value)
- *  DESCRIPTION: switch between each terminal, will copy the whole screen and cursor location 
- *  INPUTS: 
- *     key -- the key pressed, if it 
+ * terminal_switch
+ *  DESCRIPTION: a helper function to reset the 
+ *  keyboard buffer 
+ *  INPUTS: none
  *  OUTPUTS: none
  *  RETURN VALUE: none
  *  SIDE EFFECTS: reset two global variable 
  */
-int terminal_switch(unsigned int key){
+int terminal_switch(unsigned int value){
     int ret = 0;
-                 if (alt_buf == 1){ 
-                        switch (key)
+                 if (alt_buf == 1){ //TODO: replace back to Fn 
+                        switch (value)
                         {
                         case F1: // replace this key to f1
                             display_term = 1;
@@ -357,26 +356,25 @@ int terminal_switch(unsigned int key){
                             display_term = 3;
                             break;
                         default:
-                            return ret; // ignore all other useless Alt + key inside the terminal switch 
+                            return ret;
                             //break;
                         }
-                        if(display_term != last_term){ // if switch terminal, then we need to switch context
+                        if(display_term != last_term){
                             switch_vid_page(last_term, display_term);
                             switch_screen(last_term, display_term);
                             //printf("changinng to terminal %d",display_term); // TEST: current at 3 2 but not 1
-                            //TODO: add a terminal index show 
+
                             memcpy(keyboard_buf_arr[last_term-1], keyboard_buf, KEY_BUF_SIZE);
                             memcpy(keyboard_buf, keyboard_buf_arr[display_term-1], KEY_BUF_SIZE);
+
+                            // memcpy(terminal[display_term].buf, keyboard_buf, KEY_BUF_SIZE);
 
                             keybuf_count_arr[last_term-1] = keybuf_count;
                             keybuf_count = keybuf_count_arr[display_term-1];
 
                             last_term = display_term;
-                            is_terminal_switch = 1;
                             return ret;
-                        } else{// the terminal stays at the same term
-                            is_terminal_switch = 0;
-                        }
+                        } 
                     }
     return ret;
 }

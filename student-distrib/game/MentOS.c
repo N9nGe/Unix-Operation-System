@@ -13,9 +13,8 @@ printf("###       ### ########## ###    ####     ###     ########   ######## \n"
 }
 
 void UI_author(){
-    printf("\n- Author: Gabriel Gao, Tim Zhao, Tony Wang, Jerry Wang\n");
-    
-    printf("- Created Time: 15 October - 4th December\n");
+    printf_color("\n- Author: Gabriel Gao, Tim Zhao, Tony Wang, Jerry Wang\n",0x3);
+    printf_color("- Created Time: 15 October - 4th December\n",0x6);
 }
 
 
@@ -33,11 +32,9 @@ void UI_time(){
 void UI_START(){
 
     UI_Aligater();
-    UI_author();
+    // UI_author();
     // UI_time();
     printf("\n\n Starting the MentOS...");
-	printf("Welcome to MentOS!\n\n");
-
 
 }
 
