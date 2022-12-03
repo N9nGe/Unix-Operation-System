@@ -11,6 +11,7 @@
 #include"keyboard.h"
 #include"terminal.h"
 #include "../scheduling.h"
+#include "../syscall.h"
 
 //CP5: allocate 4 terminal array, 1 2 3 for specific F1 F2 F3, and 0 is for error terminal signal 
 terminal_t terminal[4];
@@ -39,6 +40,7 @@ void terminal_init(){
         terminal[i].running_pcb = NULL;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
     }
+    terminal[1].read_flag = 1;
     return;
 };
 /* Helper function
@@ -138,6 +140,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     uint8_t  c;
     int32_t buf_length = strlen(buf);
     const uint8_t* char_buf = buf; 
+    //printf("%u", fd);
     // copy nbytes from the buffer to the terminal 
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
@@ -145,7 +148,13 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
             if (display_term != running_term) { // CP5 background writing
                 putc_background(c, running_term);
             } else {
-                putc_advanced(c);
+                if (strncmp((char *)buf, "391OS> ", sizeof(buf)) == 0) {
+                    if (terminal[display_term].read_flag == 1) {
+                        putc_advanced(c);
+                    }                
+                } else {
+                    putc_advanced(c);
+                }
             }
     }
     // memset(buf,NULL,sizeof(buf));
