@@ -49,9 +49,7 @@
 
 extern uint8_t keyboard_buf[KEY_BUF_SIZE];
 extern int     keybuf_count;
-
-extern  int   is_terminal_switch; // the bit to judge whether the terminal changes
-
+extern volatile int   kb_flag; // TODO : delete it!
 
 /* Initialize keyboard input device */
 void keyboard_init(void);
@@ -66,8 +64,7 @@ void reset_keyboard_buffer(void);
 /*Handle backspace, modify corresponding keyboard buffer*/
 void backspace_handler();
 //CP5
-/*Switch the context of terminals*/
-int terminal_switch(unsigned int key);
+int terminal_switch(unsigned int value;);
 
 
 //CP4: Tony delete the open and close for keyboard driver,
