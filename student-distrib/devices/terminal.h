@@ -24,6 +24,7 @@ typedef struct terminal_t
     int read_flag;    // used for terminal_read syscall
     int cursor_x;      // TODO: turn outside structure into this
     int cursor_y;
+    int terminal_process_running;
 } terminal_t;
 
 /*Global variable shared between scheduled functions*/

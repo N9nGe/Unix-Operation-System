@@ -37,6 +37,7 @@ void terminal_init(){
         terminal[i].cursor_x = 0;
         terminal[i].cursor_y = 0;
         terminal[i].task_counter = 0;
+        terminal[i].terminal_process_running = 0;
         terminal[i].running_pcb = NULL;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
     }
@@ -69,9 +70,6 @@ void terminal_reset(terminal_t terminal_tmp){
  *     number of bytes successfully copied
  */
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
-    // if(buf == NULL || nbytes == 0){
-    //     return 0;
-    // }
     // the variable used for return
     int32_t copy_byte;
     // loop index for copy
@@ -148,12 +146,12 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
             if (display_term != running_term) { // CP5 background writing
                 putc_background(c, running_term);
             } else {
-                if (strncmp((char *)buf, "391OS> ", sizeof(buf)) == 0) {
-                    if (terminal[display_term].read_flag == 1) {
-                        putc_advanced(c);
-                    }                
-                } else {
+                if (terminal[display_term].terminal_process_running == 2) {
                     putc_advanced(c);
+                } else {
+                    if (write_flag == 1) {
+                        putc_advanced(c);
+                    }
                 }
             }
     }

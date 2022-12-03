@@ -18,8 +18,6 @@ void UI_author(){
 }
 
 
-
-
 void UI_time(){
     //TODO : is real time 
     int year = 2022;
@@ -34,7 +32,9 @@ void UI_START(){
     UI_Aligater();
     // UI_author();
     // UI_time();
-    printf("\n\n Starting the MentOS...");
+    printf("\n\n Starting the MentOS...\n");
+    printf("Starting 391 Shell\n");
+    printf("391OS> ");
 
 }
 

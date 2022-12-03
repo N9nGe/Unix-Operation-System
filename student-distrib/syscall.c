@@ -320,7 +320,7 @@ int32_t sys_execute (const uint8_t* command){
     if (command == NULL) {
         return SYSCALL_FAIL;
     }
-    
+
     // filename buffer used by parse the command
     uint8_t filename[FILENAME_LEN];
     uint8_t tmp_cmd[strlen_unsigned(command)];
@@ -365,8 +365,14 @@ int32_t sys_execute (const uint8_t* command){
     // create new pcb
     int32_t parent_id = 0;
     uint32_t new_pid = find_pid();
+    terminal[running_term].terminal_process_running = 1; // 1 for shell
     if (terminal[running_term].task_counter > 1) {
         parent_id = current_pcb_pointer->pid;
+        if (strncmp(filename, "shell", sizeof(filename)) != 0) {
+            terminal[running_term].terminal_process_running = 2; // 2 for others
+        } else {
+            terminal[running_term].terminal_process_running = 1;
+        }
     }
     parent_pcb = current_pcb_pointer;
     pcb_t* new_pcb = pcb_initilize();
@@ -465,13 +471,16 @@ int32_t sys_halt(uint8_t status){
     // restore parent paging
     page_halt(pcb->parent_id);
     terminal[running_term].task_counter--;
-    
+    if (terminal[running_term].task_counter < 2) {
+        terminal[running_term].terminal_process_running = 1;
+    }
     // jump to execute return
     // there is no program -> need to rerun shell
     sti();
     // TODO: improve task counter into mult-terminal 
     if (terminal[running_term].task_counter == 0) {
         printf("Restart the Base shell...\n");
+        terminal[running_term].terminal_process_running = 1;
         sys_execute((uint8_t*)"shell");
     } else {
         asm volatile (

@@ -19,6 +19,7 @@ int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
+volatile int write_flag = 0;
 
 uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
 int keybuf_count_arr[3] = {0,0,0};
@@ -126,6 +127,8 @@ void keyboard_interrupt_handler(){
     unsigned int key;
     unsigned int value;
     // Get key interrupt from the pic port 0x60
+    
+    write_flag = 1;
     key = inb(KEYBOARD_PORT) & 0xff; // & with 0b1111 1111 to control as char
     value = scancode[key][0];        // default as smaller
     if (function_key_handle(key) == 1){
@@ -373,6 +376,7 @@ int terminal_switch(unsigned int value){
                             keybuf_count = keybuf_count_arr[display_term-1];
 
                             last_term = display_term;
+                            write_flag = 0;
                             return ret;
                         } 
                     }

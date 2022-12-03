@@ -430,6 +430,7 @@ void scroll_up_background(char* memory, uint8_t term_idx){
 // clear the screen
 // move every data inside current terminal index into screen_x,y and video_mem variables
 void switch_screen(uint8_t prev_term, uint8_t current_term) {
+    cli();
     uint8_t prev_idx = prev_term;
     uint8_t current_idx = current_term;
     int i;
@@ -441,6 +442,7 @@ void switch_screen(uint8_t prev_term, uint8_t current_term) {
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
     update_cursor(screen_x,screen_y);
+    sti();
 }
 
 void to_background(uint8_t idx) {
