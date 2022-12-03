@@ -172,7 +172,9 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     }
     // using virtualize form
     while(rtc_interrupt_counter[running_term] < rtc_counter_upperbound[running_term]); // if rtc interrupt occur, the flag will be set to one and then break the while loop.
+    cli();
     rtc_interrupt_counter[running_term] = 0; 
+    sti();
     return RTC_SUCCESS;
 }
 
