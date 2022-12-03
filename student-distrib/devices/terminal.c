@@ -38,6 +38,7 @@ void terminal_init(){
         terminal[i].cursor_y = 0;
         terminal[i].task_counter = 0;
         terminal[i].terminal_process_running = 0;
+        terminal[i].terminal_shell_counter = 1;
         terminal[i].running_pcb = NULL;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
     }
@@ -84,6 +85,10 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     //CP5
     if(running_term != display_term){
         return 0;
+    }
+
+    if (strncmp(keyboard_buf, "exit", sizeof("exit")) == 0) {
+        terminal[running_term].terminal_shell_counter--;
     }
 
     for (index = 0; index < nbytes; index++) {

@@ -372,6 +372,7 @@ int32_t sys_execute (const uint8_t* command){
             terminal[running_term].terminal_process_running = 2; // 2 for others
         } else {
             terminal[running_term].terminal_process_running = 1;
+            terminal[running_term].terminal_shell_counter++;
         }
     }
     parent_pcb = current_pcb_pointer;
@@ -472,6 +473,10 @@ int32_t sys_halt(uint8_t status){
     page_halt(pcb->parent_id);
     terminal[running_term].task_counter--;
     if (terminal[running_term].task_counter < 2) {
+        terminal[running_term].terminal_process_running = 1;
+    }
+    
+    if (terminal[running_term].terminal_shell_counter == terminal[running_term].task_counter) {
         terminal[running_term].terminal_process_running = 1;
     }
     // jump to execute return
