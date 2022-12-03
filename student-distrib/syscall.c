@@ -671,17 +671,15 @@ int32_t sys_vidmap( uint8_t** screen_start){
     // VIDMAP_MAGIC == PD's present, R_W, U_S 
     page_directory[VIDMAP_PAGE_INDEX].pd_kb.val = ( (uint32_t)vid_page_table) | VIDMAP_MAGIC;
 
-    vid_page_table[0].present = 1;
-    vid_page_table[0].read_write = 1;
-    vid_page_table[0].user_supervisor = 1;  
-
-    // vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT); 
+    vid_page_table[VIDPAGE_IDX].present = 1;
+    vid_page_table[VIDPAGE_IDX].read_write = 1;
+    vid_page_table[VIDPAGE_IDX].user_supervisor = 1;  
 
     // choose which video page should we map to (determined by the currently displaying terminal)
-    if (display_term == running_term)    // TODO check variable name
-        vid_page_table[0].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // TODO check understanding    B8000 >> 12 
-    else    // go to the correct video page according to currently running terminal
-        vid_page_table[0].base_addr = ((VIDEO_MEMORY + 0x1000*(running_term+1)) >> PT_SHIFT);   // TODO check with teammate     
+    if (display_term == running_term)
+        vid_page_table[VIDPAGE_IDX].base_addr = (VIDEO_MEMORY >> PT_SHIFT);        // B8000 >> 12 
+    else    // map to the correct video page according to currently running terminal
+        vid_page_table[VIDPAGE_IDX].base_addr = ((VIDEO_MEMORY + VIDPAGE_SIZE*running_term) >> PT_SHIFT);
 
 
     // flush the TLB (OSdev)
@@ -694,7 +692,7 @@ int32_t sys_vidmap( uint8_t** screen_start){
     );
 
     // Set a new page location for user program to display video
-    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;  // TODO need to change?
+    *screen_start = (uint8_t*) VIDMAP_NEW_ADDRESS;
 
     return SYSCALL_SUCCESS;
 }

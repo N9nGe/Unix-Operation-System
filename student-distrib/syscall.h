@@ -35,6 +35,8 @@
 
 #define VIDMAP_PAGE_INDEX           33
 #define VIDMAP_MAGIC                7
+#define VIDPAGE_IDX                 0
+
 /*MentOS System Calls*/
 // Return value:
 //     -  Success -- 0

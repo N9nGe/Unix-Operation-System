@@ -95,8 +95,32 @@ Solution:
     Creating a member variable inside the terminal struct called task counter to replace the original global task counter.
     Therefore, I can split the task into each terminal.
 
+<--------------------------------------------------------->
+                          BUG 6                          
+<--------------------------------------------------------->
+Time:
+    2022.12.01.
+Creator:
+    Jerry Wang && Gabriel Gao
+Description:
+    Possible cause of page fault due to not turning on user_supervisor mode
+Solution:
+    Turned on user_supervisor mode for both the video vidmap video page and the program image page. This 
+    ensures that both pages are set to user page so the user has the right to access it
 
-
+<--------------------------------------------------------->
+                          BUG 7                          
+<--------------------------------------------------------->
+Time:
+    2022.12.01.
+Creator:
+    Jerry Wang && Gabriel Gao
+Description:
+    - Wrong base address when mapping the program image
+    - I accidentally added the next pid * 4_MB to the kernel position (which was already shifted by 22)
+Solution:
+    - we can add the pid to the shifted kernel position directly, which is the same as adding pid * 4_MB 
+    shifted by 22
 
 TODO:
 - CTRL flag 

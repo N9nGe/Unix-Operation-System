@@ -8,6 +8,10 @@
 #include "devices/keyboard.h"
 #include "devices/terminal.h"
 
+#define VIDPAGE_SIZE    0x1000
+#define TERM_NUM        3
+#define PROG_IMG        32
+
 extern uint32_t running_term;
 
 void scheduler();
