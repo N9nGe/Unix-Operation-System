@@ -370,6 +370,12 @@ int32_t sys_execute (const uint8_t* command){
         parent_id = current_pcb_pointer->pid;
         if (strncmp(filename, "shell", sizeof(filename)) != 0) {
             terminal[running_term].terminal_process_running = 2; // 2 for others
+            if (strncmp(filename, "pingpong", sizeof(filename)) == 0) {
+                terminal[running_term].pingping_flag = 1;
+            }
+            if (strncmp(filename, "fish", sizeof(filename)) == 0) {
+                terminal[running_term].fish_flag = 1;
+            }
         } else {
             terminal[running_term].terminal_process_running = 1;
             terminal[running_term].terminal_shell_counter++;
@@ -479,6 +485,8 @@ int32_t sys_halt(uint8_t status){
     if (terminal[running_term].terminal_shell_counter == terminal[running_term].task_counter) {
         terminal[running_term].terminal_process_running = 1;
     }
+
+    terminal[running_term].fish_flag = 0;
     // jump to execute return
     // there is no program -> need to rerun shell
     sti();

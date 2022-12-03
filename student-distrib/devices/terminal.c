@@ -38,6 +38,8 @@ void terminal_init(){
         terminal[i].cursor_y = 0;
         terminal[i].task_counter = 0;
         terminal[i].terminal_process_running = 0;
+        terminal[i].fish_flag = 0;
+        terminal[i].pingping_flag = 0;
         terminal[i].terminal_shell_counter = 1;
         terminal[i].running_pcb = NULL;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));

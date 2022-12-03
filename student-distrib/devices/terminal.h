@@ -26,6 +26,8 @@ typedef struct terminal_t
     int cursor_y;
     int terminal_process_running;
     int terminal_shell_counter;
+    int pingping_flag;
+    int fish_flag;
 } terminal_t;
 
 /*Global variable shared between scheduled functions*/

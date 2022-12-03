@@ -141,7 +141,17 @@ void keyboard_interrupt_handler(){
             sti();
             return;
         }
+    
+    if (terminal[display_term].pingping_flag == 1) {
+        sti();
+        return;
+    }
 
+    if (terminal[display_term].fish_flag == 1) {
+        sti();
+        return;
+    }
+    
     if ( (keybuf_count ==  (KEY_BUF_SIZE -1)) ){ // leave the last bit for \n or \b
         if( value == '\n' || value == '\b'){
             // printf("\nfirst count is %d\n",keybuf_count); // TEST
