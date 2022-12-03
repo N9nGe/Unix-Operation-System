@@ -130,13 +130,6 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     if(buf == NULL){
         return -1;
     }
-    // 1 if the terminal running is in the background
-    // int background_running = 0;
-    // if (display_term != running_term) {
-    //     background_running = 1;
-    // }
-    // check if running terminal is display, if yes,
-    // else call lib.c: swtich to background
     // the variable used for return
     int32_t copy_byte;
     // loop index for copy
@@ -150,9 +143,12 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     for (index = 0; index < nbytes; index++) {
         // the buf still have character
             c = char_buf[index];
+            // if the running terminal is not displaying terminal
             if (display_term != running_term) { // CP5 background writing
+            // write data to background terminal's video page
                 putc_background(c, running_term);
             } else {
+                // otherwise, write to the displaying video page
                 if (terminal[display_term].terminal_process_running == 2) {
                     putc_advanced(c);
                 } else {

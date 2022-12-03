@@ -264,8 +264,19 @@ void putc_advanced(uint8_t c) {
     update_cursor(screen_x,screen_y);
 }
 
+/* void putc_background (uint8_t c, uint8_t term_idx);
+ * Inputs: uint8_t c = ascii of the character to print
+ *         uint8_t term_idx = the terminal number that is currently running
+ * Return Value: void
+ * Function: This function does the exactly same thing to putc_advanced except
+ * it decides which video page to print according to the term_idx, also, it
+ * updates different different screen_x and y of the running terminal
+ */
+
 void putc_background (uint8_t c, uint8_t term_idx) {
-    char* video_mem_tmp = (char *)VIDEO;
+    char* video_mem_tmp = (char *)0xB9000;
+    // change the pointer of video_mem_temp according to
+    // the term_idx
     if (term_idx == 1) {
         video_mem_tmp = (char *)0xB9000;
     } else if (term_idx == 2) {
@@ -326,6 +337,7 @@ void putc_color(uint8_t c,int color){
     }
     update_cursor(screen_x,screen_y);
 }
+
 /* void backspace();
  * Author : Tony 1 10.22.2022
  * Inputs: none
@@ -352,33 +364,33 @@ void backspace(){
     
 }
 
-void backspace_background(uint8_t term_idx){
-    char* video_mem_tmp = (char *)VIDEO;
-    if (term_idx == 1) {
-        video_mem_tmp = (char *)0xB9000;
-    } else if (term_idx == 2) {
-        video_mem_tmp = (char *)0xBA000;
-    } else {
-        video_mem_tmp = (char *)0xBB000;
-    }
-    if(screen_x_arr[term_idx] == 0 && screen_y_arr[term_idx] == 0){ 
-        return;// if it is at the (0,0), can't backspace
-    }
-    if (screen_x_arr[term_idx] == 0){ // At the left end
-        screen_y_arr[term_idx]--;
-        screen_x_arr[term_idx] = NUM_COLS - 1;
-        *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
-        *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;
-        //update_cursor(screen_x, screen_y);
-        return;
-    }
-// Else in the middle 
-    screen_x_arr[term_idx]--;
-    *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
-    *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;// seems like color ?
-    //update_cursor(screen_x,screen_y);
-    //return;
-}
+// void backspace_background(uint8_t term_idx){
+//     char* video_mem_tmp = (char *)VIDEO;
+//     if (term_idx == 1) {
+//         video_mem_tmp = (char *)0xB9000;
+//     } else if (term_idx == 2) {
+//         video_mem_tmp = (char *)0xBA000;
+//     } else {
+//         video_mem_tmp = (char *)0xBB000;
+//     }
+//     if(screen_x_arr[term_idx] == 0 && screen_y_arr[term_idx] == 0){ 
+//         return;// if it is at the (0,0), can't backspace
+//     }
+//     if (screen_x_arr[term_idx] == 0){ // At the left end
+//         screen_y_arr[term_idx]--;
+//         screen_x_arr[term_idx] = NUM_COLS - 1;
+//         *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
+//         *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;
+//         //update_cursor(screen_x, screen_y);
+//         return;
+//     }
+// // Else in the middle 
+//     screen_x_arr[term_idx]--;
+//     *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
+//     *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;// seems like color ?
+//     //update_cursor(screen_x,screen_y);
+//     //return;
+// }
 
 /* void scroll_up(char* memory);
  * Author : Tony 1 10.22.2022          Create the scroll up without debugging
@@ -405,7 +417,14 @@ void scroll_up(char* memory){
     }
 }
 
-void scroll_up_background(char* memory, uint8_t term_idx){
+/* void scroll_up_background(char* memory, uint8_t term_idx);
+ * Inputs: char* memory = the pointer of the video memory (video page starting address) to scroll up
+ *         uint8_t term_idx = the terminal number that is currently running
+ * Return Value: void
+ * Function: This function does the same thing to scroll_up
+ */
+
+void scroll_up_background(char* memory, uint8_t term_idx) {
     uint32_t x,y;
     uint32_t origin,update;
     for ( y = 1; y < NUM_ROWS; y++){
@@ -424,11 +443,18 @@ void scroll_up_background(char* memory, uint8_t term_idx){
     }
 }
 
-// this function basically gets the index of the previous terminal and the index of the current terminal
-// store the current screen position to the previous terminal index
-// store all video memory into previous terminal index
-// clear the screen
-// move every data inside current terminal index into screen_x,y and video_mem variables
+
+/* void switch_screen(uint8_t prev_term, uint8_t current_term)
+ * Inputs: uint8_t prev_term = terminal number of the previous terminal
+ *         uint8_t current_term = terminal number of the current terminal
+ * Return Value: void
+ * Function: This function basically gets the index of the previous terminal and the index of the current terminal
+ * store the current screen position to the previous terminal index
+ * store all video memory into previous terminal index
+ * clear the screen
+ * move every data inside current terminal index into screen_x,y and video_mem variables
+ */
+
 void switch_screen(uint8_t prev_term, uint8_t current_term) {
     cli();
     uint8_t prev_idx = prev_term;
@@ -445,25 +471,25 @@ void switch_screen(uint8_t prev_term, uint8_t current_term) {
     sti();
 }
 
-void to_background(uint8_t idx) {
-    if (idx == 1) {
-        video_mem = (char *)0xB9000;
-    } else if (idx == 2) {
-        video_mem = (char *)0xBA000;
-    } else {
-        video_mem = (char *)0xBB000;
-    }
-    screen_x = screen_x_arr[idx];
-    screen_y = screen_y_arr[idx];
-}
+// void to_background(uint8_t idx) {
+//     if (idx == 1) {
+//         video_mem = (char *)0xB9000;
+//     } else if (idx == 2) {
+//         video_mem = (char *)0xBA000;
+//     } else {
+//         video_mem = (char *)0xBB000;
+//     }
+//     screen_x = screen_x_arr[idx];
+//     screen_y = screen_y_arr[idx];
+// }
 
-void to_display(uint8_t idx) {
-    screen_x_arr[idx] = screen_x;
-    screen_y_arr[idx] = screen_y;
-    video_mem = (char *)VIDEO;
-    screen_x = screen_x_arr[0];
-    screen_y = screen_y_arr[0];
-}
+// void to_display(uint8_t idx) {
+//     screen_x_arr[idx] = screen_x;
+//     screen_y_arr[idx] = screen_y;
+//     video_mem = (char *)VIDEO;
+//     screen_x = screen_x_arr[0];
+//     screen_y = screen_y_arr[0];
+// }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

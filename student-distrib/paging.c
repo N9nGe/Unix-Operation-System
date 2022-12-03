@@ -81,6 +81,15 @@ void paging_init() {
 
 }
 
+
+/* void switch_vid_page(uint8_t current, uint8_t next)
+ * Inputs: uint8_t current = terminal number of the current terminal (before switch)
+ *         uint8_t next = terminal number of the next terminal (after switch)
+ * Return Value: void
+ * Function: memcopy data in displaying video page to the video page of the old terminal's
+ * video page. Then memcopy data from the next terminal's video page to display video page.
+ */
+
 void switch_vid_page(uint8_t current, uint8_t next) {
     cli();
     memcpy(vid_pages[current], vid_pages[0], 4096);

@@ -346,8 +346,8 @@ void reset_keyboard_buffer(){
  * terminal_switch
  *  DESCRIPTION: a helper function to reset the 
  *  keyboard buffer 
- *  INPUTS: none
- *  OUTPUTS: none
+ *  INPUTS: unsigned int value = key currently pressed
+ *  OUTPUTS: int success or not
  *  RETURN VALUE: none
  *  SIDE EFFECTS: reset two global variable 
  */
