@@ -7,6 +7,10 @@
 
 #include "types.h"
 
+#define VIDEO_PAGE_LIB_1        0xB9000
+#define VIDEO_PAGE_LIB_2        0xBA000
+#define VIDEO_PAGE_LIB_3        0xBB000
+
 typedef struct screen_t
 {
     int screen_pos_x;

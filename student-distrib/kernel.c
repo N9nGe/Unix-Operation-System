@@ -153,10 +153,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     paging_init();
-    /*Initialize timer chip*/
-
     
-
     /*RTC init*/
     rtc_init();
     /*Initialize stdin and std */
@@ -164,6 +161,7 @@ void entry(unsigned long magic, unsigned long addr) {
 	terminal_init();
     clear();
     UI_START();
+    /*Initialize timer chip*/
     pit_init();
     
 

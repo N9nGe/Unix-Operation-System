@@ -274,15 +274,15 @@ void putc_advanced(uint8_t c) {
  */
 
 void putc_background (uint8_t c, uint8_t term_idx) {
-    char* video_mem_tmp = (char *)0xB9000;
+    char* video_mem_tmp = (char *)VIDEO_PAGE_LIB_1;
     // change the pointer of video_mem_temp according to
     // the term_idx
     if (term_idx == 1) {
-        video_mem_tmp = (char *)0xB9000;
+        video_mem_tmp = (char *)VIDEO_PAGE_LIB_1;
     } else if (term_idx == 2) {
-        video_mem_tmp = (char *)0xBA000;
+        video_mem_tmp = (char *)VIDEO_PAGE_LIB_2;
     } else {
-        video_mem_tmp = (char *)0xBB000;
+        video_mem_tmp = (char *)VIDEO_PAGE_LIB_3;
     }
     if(c == '\n' || c == '\r') { 
         screen_y_arr[term_idx]++;
@@ -364,34 +364,6 @@ void backspace(){
     
 }
 
-// void backspace_background(uint8_t term_idx){
-//     char* video_mem_tmp = (char *)VIDEO;
-//     if (term_idx == 1) {
-//         video_mem_tmp = (char *)0xB9000;
-//     } else if (term_idx == 2) {
-//         video_mem_tmp = (char *)0xBA000;
-//     } else {
-//         video_mem_tmp = (char *)0xBB000;
-//     }
-//     if(screen_x_arr[term_idx] == 0 && screen_y_arr[term_idx] == 0){ 
-//         return;// if it is at the (0,0), can't backspace
-//     }
-//     if (screen_x_arr[term_idx] == 0){ // At the left end
-//         screen_y_arr[term_idx]--;
-//         screen_x_arr[term_idx] = NUM_COLS - 1;
-//         *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
-//         *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;
-//         //update_cursor(screen_x, screen_y);
-//         return;
-//     }
-// // Else in the middle 
-//     screen_x_arr[term_idx]--;
-//     *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1)) = ' ';
-//     *(uint8_t *)(video_mem_tmp + ((NUM_COLS * screen_y_arr[term_idx] + screen_x_arr[term_idx]) << 1) + 1) = ATTRIB;// seems like color ?
-//     //update_cursor(screen_x,screen_y);
-//     //return;
-// }
-
 /* void scroll_up(char* memory);
  * Author : Tony 1 10.22.2022          Create the scroll up without debugging
             Jerry&Gabriel 2 10.22.2022 Debug  
@@ -470,26 +442,6 @@ void switch_screen(uint8_t prev_term, uint8_t current_term) {
     update_cursor(screen_x,screen_y);
     sti();
 }
-
-// void to_background(uint8_t idx) {
-//     if (idx == 1) {
-//         video_mem = (char *)0xB9000;
-//     } else if (idx == 2) {
-//         video_mem = (char *)0xBA000;
-//     } else {
-//         video_mem = (char *)0xBB000;
-//     }
-//     screen_x = screen_x_arr[idx];
-//     screen_y = screen_y_arr[idx];
-// }
-
-// void to_display(uint8_t idx) {
-//     screen_x_arr[idx] = screen_x;
-//     screen_y_arr[idx] = screen_y;
-//     video_mem = (char *)VIDEO;
-//     screen_x = screen_x_arr[0];
-//     screen_y = screen_y_arr[0];
-// }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
  * Inputs: uint32_t value = number to convert

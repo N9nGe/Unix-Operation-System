@@ -201,6 +201,7 @@ void keyboard_interrupt_handler(){
                     terminal_reset(terminal[running_term]);
                     keybuf_count = 0;
                     printf("Current Terminal:%d \n",display_term); // TEST
+                    printf("391OS> "); // after clean the screen we need to show the terminal name
                     sti();
                     return;
                 }
