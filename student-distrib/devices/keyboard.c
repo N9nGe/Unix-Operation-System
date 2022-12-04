@@ -393,6 +393,8 @@ int terminal_switch(unsigned int key){
                             keybuf_count_arr[last_term-1] = keybuf_count;
                             keybuf_count = keybuf_count_arr[display_term-1];
 
+                            terminal[last_term].read_flag = 0;
+
                             last_term = display_term;
                             write_flag = 0;
                             return ret;
