@@ -159,14 +159,12 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /*RTC init*/
     rtc_init();
-    //rtc_set_freq(2);
-
-    pit_init();
     /*Initialize stdin and std */
     keyboard_init();
 	terminal_init();
     clear();
     UI_START();
+    pit_init();
     
 
     /* Enable interrupts */
