@@ -1,5 +1,12 @@
 #include"MentOS.h"
-
+/*MentOS UI
+ * Here is a series of extra function we developped for fun
+ * All the stuff in it are not connected to the MP3 grading criterion
+ *  
+ * Please ignore the comment loss and function header loss in it, because we are still 
+ * developping GUI in another branch
+ * :-) 
+*/
 
 void UI_Aligater(){
 printf("        :::   :::   :::::::::: ::::    ::: ::::::::::: ::::::::   ::::::::\n");
@@ -36,7 +43,7 @@ void UI_START(){
     printf("Welcome to MentOS!\n\n");
     // This two lines are left to fix the bug of first shell being clear()
     printf("Starting 391 Shell\n");
-    printf("391OS>"); 
+    printf("391OS> "); 
 
 }
 
