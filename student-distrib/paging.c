@@ -24,7 +24,7 @@ void paging_init() {
 
     // set up the read_write, present signal for the first page directory (split to 4kb)
     // and give the corresponding page table base address
-    page_directory[0].pd_kb.val = ((uint32_t) page_table) | R_W_PRESENT;    // TODO
+    page_directory[0].pd_kb.val = ((uint32_t) page_table) | R_W_PRESENT;   
 
     // set up the read_write, present signal for the second page directory (kernel-4mb page)
     // and give the corresponding page table base address

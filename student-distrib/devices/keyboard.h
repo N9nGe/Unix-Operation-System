@@ -49,23 +49,21 @@
 
 extern uint8_t keyboard_buf[KEY_BUF_SIZE];
 extern int     keybuf_count;
-extern volatile int   kb_flag; // TODO : delete it!
 extern volatile int   write_flag;
 
 /* Initialize keyboard input device */
 void keyboard_init(void);
 
-
 /* Keyboard Handler */
 void keyboard_interrupt_handler(void);
 /* Function key handler*/
 int function_key_handle(unsigned int key);
-/*set the key buffer to initial state*/
+/*reset the key buffer and function key state bit to initial state*/
 void reset_keyboard_buffer(void);
 /*Handle backspace, modify corresponding keyboard buffer*/
 void backspace_handler();
-//CP5
-int terminal_switch(unsigned int value);
+//CP5: terminal context switch 
+int terminal_switch(unsigned int key);
 
 
 //CP4: Tony delete the open and close for keyboard driver,

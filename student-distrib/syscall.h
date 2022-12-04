@@ -70,8 +70,6 @@ void parse_arg(const uint8_t* command, uint8_t* filename);
 void paging_execute(uint32_t pid);
 void page_halt(int32_t parent_id);
 
-    // TODO place pcb struct at somewhere else
-
 // Program Control Block
 typedef struct pcb_t {
     uint32_t pid;          // Current Process id

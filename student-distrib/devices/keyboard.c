@@ -4,6 +4,8 @@
  * Tony  2  10.16.2022    reconstuct the keyboard.c
  * Tony  3  10.20.2022    Add Capslock and Shift
  * Tony  4  10.22.2022    Add Backspace
+ * Tony&&Tim  5  11.26.2022    Realized mulit-terminal
+ * Gabriel  1  12.2.2022   Debug multi-terminal completely
  */
 #include "../lib.h"
 #include "../types.h"
@@ -13,8 +15,9 @@
 #include "terminal.h"
 /* File Scope Variable*/
 
-/* Set to avoid release repetition*/
-int i = 0;            // caps_lock counter 
+/* Function Key status bit --
+ * Set to avoid release repetition*/
+int caps_lock_counter = 0;            // caps_lock_counter 
 int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
@@ -91,7 +94,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
     {'/', '?'},
     {0x0, 0x0}, // Right Shift
     {0x0, 0x0}, // Left Control
-    {0x0, 0x0}, // left alt?  I wonder where is the Fn
+    {0x0, 0x0}, // left alt?  I wonder where is the Fn 
     {' ', ' '}, // SPACE
 };
 
@@ -109,7 +112,7 @@ unsigned char scancode[MAX_SCAN_SIZE][2] =
 void keyboard_init(void){
     // printf("initialize keyboard...");
     enable_irq( KEYBOARD_IRQ_NUM );
-    memset(keyboard_buf,NULL,sizeof(keyboard_buf)); // CP4 add
+    reset_keyboard_buffer();
     return;
 };
 /* 
@@ -141,19 +144,17 @@ void keyboard_interrupt_handler(){
             sti();
             return;
         }
-    
     // the display terminal is running pingpong, we can not type
     if (terminal[display_term].pingping_flag == 1) {
         sti();
         return;
     }
-
     // the display terminal is running fish, we can not type
     if (terminal[display_term].fish_flag == 1) {
         sti();
         return;
     }
-
+    // the display terminal is running grep, we can not type
     if (terminal[display_term].grep_flag == 1) {
         sti();
         return;
@@ -175,7 +176,6 @@ void keyboard_interrupt_handler(){
             // Clear the screen when necessary
                 if ( value == '\n' ){
                     putc_advanced(value); // Why should be there ?
-            //BUG
                     terminal[display_term].count = keybuf_count +1;
                     if(terminal[display_term].count == KEY_BUF_SIZE - 2) {
                         keyboard_buf[keybuf_count +1] = '\n';
@@ -274,7 +274,7 @@ void backspace_handler(){
 int function_key_handle(unsigned int key){
     int ret = VALID_RET; 
     switch (key)
-    {// NOTICE: These function keys are left for cp2
+    {
     case LEFT_SHIFT_PRESSED:
         shift_buf = 1;
         ret = INVALID_RET;
@@ -302,11 +302,11 @@ int function_key_handle(unsigned int key){
         break;    
     case CAPSLOCK_PRESSED:
         ret = INVALID_RET;
-        i++;
+        caps_lock_counter++;
         caps_lock = 1;
         break;
     case CAPSLOCK_RELEASED:
-        caps_lock = (i%2); // Use module to decide whether the lock should be changed
+        caps_lock = (caps_lock_counter%2); // Use module to decide whether the lock should be changed
         ret = INVALID_RET;
 
         break;
@@ -324,7 +324,7 @@ int function_key_handle(unsigned int key){
     
         break;
     }
-   if(i > MAX_INPUT_COUNT){
+   if(caps_lock_counter > MAX_INPUT_COUNT){
     reset_keyboard_buffer();
    }
     
@@ -340,7 +340,7 @@ int function_key_handle(unsigned int key){
  *  SIDE EFFECTS: reset two global variable 
  */
 void reset_keyboard_buffer(){
-    i = 0;
+    caps_lock_counter = 0;
     ctrl_buf = 0;
     shift_buf = 0;
     caps_lock = 0;
@@ -358,10 +358,10 @@ void reset_keyboard_buffer(){
  *  RETURN VALUE: none
  *  SIDE EFFECTS: reset two global variable 
  */
-int terminal_switch(unsigned int value){
+int terminal_switch(unsigned int key){
     int ret = 0;
-                 if (alt_buf == 1){ //TODO: replace back to Fn 
-                        switch (value)
+                 if (alt_buf == 1){ 
+                        switch (key)
                         {
                         case F1: // replace this key to f1
                             display_term = 1;

@@ -50,16 +50,12 @@ void pit_init(){
 void pit_interrupt_handler(){
     cli();
     send_eoi(PIT_IRQ_NUM);
-
     // 0.01s per interrupt.
     // test for functinality of pit
     // if (i == 1000) {
     //     //printf("%u\n", i);
     // } 
     // i++;
-	//TODO: NEED TO add the multiterminal stuff to do the context switch(flag. global process...)
-
 	scheduler();
-    
     sti();
 }

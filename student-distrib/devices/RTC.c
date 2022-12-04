@@ -161,7 +161,6 @@ int32_t rtc_open(const uint8_t * filename) {
  *           occurred (set a flag and wait until the interrupt handler clears it, then return 0). (Appendix B: read system call)
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
-    //TODO: in the document it says always return success(what should be return if buf is a null)
     if (buf == NULL) {  
         return 0;
     }

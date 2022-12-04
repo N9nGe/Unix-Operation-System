@@ -118,7 +118,6 @@ int32_t read_data (uint32_t inode, uint32_t offset, uint8_t* buf, uint32_t lengt
     if (inode < 0 || inode >= DENTRY_SIZE || buf == NULL || boot_block_ptr == NULL) return -1;
 
     uint32_t inode_startblk_idx = offset / DATA_BLOCK_ENTRY_SIZE;     // calculate which block to start with
-    //TODO: unused
     // uint32_t startblk_idx = offset % DATA_BLOCK_ENTRY_SIZE;           // calculate the start byte within the start block
     uint32_t inode_endblk_idx;  // the block to end with
     uint32_t endblk_idx;        // the end byte within the end block

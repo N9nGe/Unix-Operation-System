@@ -27,7 +27,6 @@ int last_term = 1;
  *  SIDE EFFECTS: none
  */
 void terminal_init(){
-    // TODO: how to execute 3 shell at the very begining?
     int i; // loop index
     for ( i = 0; i < 4; i++)
     {
@@ -53,12 +52,10 @@ void terminal_init(){
  * - TODO: modify it to be used for reset current terminal 
  */
 void terminal_reset(terminal_t terminal_tmp){
-    // TODO: reset or halt the running
     terminal_tmp.count = 0;
     terminal_tmp.cursor_x = 0;
     terminal_tmp.cursor_y = 0;
     terminal_tmp.read_flag = 0;
-    
     memset(terminal_tmp.buf, NULL, sizeof(terminal_tmp.buf));
 }
 
