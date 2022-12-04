@@ -55,7 +55,10 @@ Description:
     they lost and the stuff in terminal 1 will be displayed 
     on terminal 2
 Solution:
-    TODO
+    Tim add one line to fix this bug:
+    while (terminal[display_term].read_flag == 0 || running_term != display_term); // lock the terminal until the keyboard flag is set 1
+    then we can ignore the ansychronsis error
+
 
 <--------------------------------------------------------->
                           BUG 3                          
@@ -67,6 +70,9 @@ Creator:
 Description:
     Can't clear the standard screen of kernel .
 Solution:
+    The initialization sequence of all devices in kernel.c makes this trouble.
+    After choosing the correct sequence, it's fine
+
     
 <--------------------------------------------------------->
                           BUG 4                          
@@ -128,8 +134,27 @@ Solution:
 Time:
     2022.12.01.
 Creator:
-    Gabriel Gao
+    Gabriel Gao && Tony Wang
 Description:
-    Type when running pingpong fish and grep
+    When switching from user program needs to use rtc, i.e. pingpong, fish, counter,
+    The screen after switched will generate another extra 391OS>
+    Like this:
+391OS>391OS>
+    It may because the terminal_write meet problem in the scheduling
 Solution:
     - Just adding a flag to constrain typing.
+
+
+<--------------------------------------------------------->
+                          BUG 9                      
+<--------------------------------------------------------->
+Time:
+    2022.12.02.
+Creator:
+    Jerry Wang.
+Description:
+    Some buggy behavior of multiterminal.It appears every time a program runs through a background terminal.
+    Like counter and pingpong.
+    Will not happen after finishing at the current terminal
+Solution:
+    Do  more condition check to avoid this problem

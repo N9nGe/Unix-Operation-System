@@ -141,18 +141,9 @@ Description:
     'name' attached with nextline 391OS>
 Solution:
     it is a mix problem with sys_execute, terminal_Read and terminal_write
-    We spent a long time but 
+    Finally, we found it is because the keyboard handler didn't add \n to the 
+    end of terminal_buf, after add a condition at terminal[BUF_SIZE -1], it works correctly
     
 
-<--------------------------------------------------------->
-                          BUG 9                          
-<--------------------------------------------------------->
-Time:
-    2022.11.07.
-Creator:
-    Tony Wang.
-Description:
-    When checking the .
-Solution:
-    ....
+
 
