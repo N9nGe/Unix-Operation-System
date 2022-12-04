@@ -34,6 +34,7 @@ void UI_START(){
     // UI_time();
     printf("\n\n Starting the MentOS...\n");
     printf("Welcome to MentOS!\n\n");
+    printf("391OS>"); // This is left to fix the bug of first shell being clear()
 
 }
 
