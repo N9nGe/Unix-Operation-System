@@ -122,5 +122,14 @@ Solution:
     - we can add the pid to the shifted kernel position directly, which is the same as adding pid * 4_MB 
     shifted by 22
 
-TODO:
-- CTRL flag 
+<--------------------------------------------------------->
+                          BUG 8                          
+<--------------------------------------------------------->
+Time:
+    2022.12.01.
+Creator:
+    Gabriel Gao
+Description:
+    Type when running pingpong fish and grep
+Solution:
+    - Just adding a flag to constrain typing.

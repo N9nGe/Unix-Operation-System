@@ -19,7 +19,7 @@ int ctrl_buf = 0;     // Ctrl buf, used to clear up the screen
 int shift_buf = 0;    // shift buf, when it is pressed, cap & symbols
 int caps_lock = 0;    // Capitalize the charcter
 int alt_buf = 0;      // Alt buf, do nothing now
-volatile int write_flag = 0;
+volatile int write_flag = 0; // write flag for typing and print
 
 uint8_t keyboard_buf_arr[3][KEY_BUF_SIZE];
 int keybuf_count_arr[3] = {0,0,0};
@@ -127,7 +127,7 @@ void keyboard_interrupt_handler(){
     unsigned int key;
     unsigned int value;
     // Get key interrupt from the pic port 0x60
-    
+    // allow to write
     write_flag = 1;
     key = inb(KEYBOARD_PORT) & 0xff; // & with 0b1111 1111 to control as char
     value = scancode[key][0];        // default as smaller
@@ -142,12 +142,19 @@ void keyboard_interrupt_handler(){
             return;
         }
     
+    // the display terminal is running pingpong, we can not type
     if (terminal[display_term].pingping_flag == 1) {
         sti();
         return;
     }
 
+    // the display terminal is running fish, we can not type
     if (terminal[display_term].fish_flag == 1) {
+        sti();
+        return;
+    }
+
+    if (terminal[display_term].grep_flag == 1) {
         sti();
         return;
     }

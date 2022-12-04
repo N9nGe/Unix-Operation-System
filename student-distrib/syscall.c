@@ -5,16 +5,11 @@
 #define SYSCALL_SUCCESS     0
 #define FD_MIN      2 // For read, write, open and close, stdin and stdout is check seperately
 #define FD_MAX      7
-//CP3: linear increase method to construct new pcb
-// static uint32_t task_counter = 0;
+
 pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE);
 pcb_t * parent_pcb = NULL;
 //CP4: add a length-6 bitmap for pcb, ensure the tasks are fixed in 6 places
 uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
-//CP5: terminal-specific task_counter
-//TODO: how to choose each terminal's counter when operating the execute?
-// terminal[display_term].task_counter 
-
 
 /*file operation table pointer */
 /*The following are a series of device-speific
@@ -365,16 +360,25 @@ int32_t sys_execute (const uint8_t* command){
     // create new pcb
     int32_t parent_id = 0;
     uint32_t new_pid = find_pid();
+
+    // track the current terminal running process
     terminal[running_term].terminal_process_running = 1; // 1 for shell
+    // more than one process in the current terminal
     if (terminal[running_term].task_counter > 1) {
         parent_id = current_pcb_pointer->pid;
+        // check whether the current terminal running process is shell
         if (strncmp((int8_t*) filename, "shell", sizeof(filename)) != 0) {
-            terminal[running_term].terminal_process_running = 2; // 2 for others
+            terminal[running_term].terminal_process_running = 2; // 2 for other running process
+            // flag for mask type when running pingpong
             if (strncmp((int8_t*) filename, "pingpong", sizeof(filename)) == 0) {
                 terminal[running_term].pingping_flag = 1;
             }
+            // flag for mask type when running fish
             if (strncmp((int8_t*) filename, "fish", sizeof(filename)) == 0) {
                 terminal[running_term].fish_flag = 1;
+            }
+            if (strncmp((int8_t*) filename, "grep", sizeof(filename)) == 0) {
+                terminal[running_term].grep_flag = 1;
             }
         } else {
             terminal[running_term].terminal_process_running = 1;
@@ -478,19 +482,20 @@ int32_t sys_halt(uint8_t status){
     // restore parent paging
     page_halt(pcb->parent_id);
     terminal[running_term].task_counter--;
+    
+    // check the parent whether is shell
     if (terminal[running_term].task_counter < 2) {
         terminal[running_term].terminal_process_running = 1;
     }
-    
     if (terminal[running_term].terminal_shell_counter == terminal[running_term].task_counter) {
         terminal[running_term].terminal_process_running = 1;
     }
 
+    // when fish end, reset the flag
     terminal[running_term].fish_flag = 0;
-    // jump to execute return
-    // there is no program -> need to rerun shell
+    terminal[running_term].grep_flag = 0;
     sti();
-    // TODO: improve task counter into mult-terminal 
+    // determine whether we exit the base shell of the current terminal
     if (terminal[running_term].task_counter == 0) {
         printf("Restart the Base shell...\n");
         terminal[running_term].terminal_process_running = 1;

@@ -37,9 +37,10 @@ void terminal_init(){
         terminal[i].cursor_x = 0;
         terminal[i].cursor_y = 0;
         terminal[i].task_counter = 0;
-        terminal[i].terminal_process_running = 0;
+        terminal[i].terminal_process_running = 0;  
         terminal[i].fish_flag = 0;
         terminal[i].pingping_flag = 0;
+        terminal[i].grep_flag = 0;
         terminal[i].terminal_shell_counter = 1;
         terminal[i].running_pcb = NULL;
         memset(terminal[i].buf, NULL,sizeof(terminal[i].buf));
@@ -89,6 +90,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
         return 0;
     }
 
+    // close shell should update shell counter
     if (strncmp((int8_t*) keyboard_buf, "exit", sizeof("exit")) == 0) {
         terminal[running_term].terminal_shell_counter--;
     }
@@ -149,6 +151,7 @@ int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes){
                 putc_background(c, running_term);
             } else {
                 // otherwise, write to the displaying video page
+                // running the long term process
                 if (terminal[display_term].terminal_process_running == 2) {
                     putc_advanced(c);
                 } else {

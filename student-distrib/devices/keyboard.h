@@ -65,7 +65,7 @@ void reset_keyboard_buffer(void);
 /*Handle backspace, modify corresponding keyboard buffer*/
 void backspace_handler();
 //CP5
-int terminal_switch(unsigned int value;);
+int terminal_switch(unsigned int value);
 
 
 //CP4: Tony delete the open and close for keyboard driver,
