@@ -6,8 +6,8 @@
 #define FD_MIN      2 // For read, write, open and close, stdin and stdout is check seperately
 #define FD_MAX      7
 
-pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE);
-pcb_t * parent_pcb = NULL;
+pcb_t * current_pcb_pointer = (pcb_t*) (KERNEL_BOTTOM - PROCESS_SIZE); // initialize as the 0 pcb location 
+pcb_t * parent_pcb = NULL;  // modified after execute any program
 //CP4: add a length-6 bitmap for pcb, ensure the tasks are fixed in 6 places
 uint32_t pcb_counter[6] = {0, 0, 0, 0, 0, 0};
 

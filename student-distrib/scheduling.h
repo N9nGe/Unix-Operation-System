@@ -15,9 +15,6 @@
 extern uint32_t running_term;
 
 void scheduler();
-void shell_init();
-void vidmap_schedule();
-void prog_img_schedule();
 
 #endif /* SCHEDULING_H */
 
